@@ -1,15 +1,17 @@
- import React, { useState } from 'react';
- import { useParams, Link } from 'react-router-dom';
- import { ArrowLeft, ShoppingCart, Star, AlertCircle, Minus, Plus, Check, Package } from 'lucide-react';
- import { MainLayout } from '@/components/layout/MainLayout';
- import { Button } from '@/components/ui/button';
- import { Badge } from '@/components/ui/badge';
- import { Skeleton } from '@/components/ui/skeleton';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useCart } from '@/contexts/CartContext';
- import { useProduct } from '@/hooks/useProducts';
- import { useToast } from '@/hooks/use-toast';
- import { cn } from '@/lib/utils';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, ShoppingCart, Star, AlertCircle, Minus, Plus, Check, Package } from 'lucide-react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { useProduct } from '@/hooks/useProducts';
+import { useToast } from '@/hooks/use-toast';
+import { ProductReviews } from '@/components/store/ProductReviews';
+import { cn } from '@/lib/utils';
  
  export default function ProductDetail() {
    const { slug } = useParams<{ slug: string }>();
