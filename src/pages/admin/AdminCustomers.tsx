@@ -501,8 +501,8 @@ export default function AdminCustomers() {
                 <TableHead>{language === 'ar' ? 'الهاتف' : 'Phone'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'الطلبات' : 'Orders'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'إجمالي الإنفاق' : 'Total Spent'}</TableHead>
+                <TableHead className="text-center">{language === 'ar' ? 'قيمة العميل' : 'CLV'}</TableHead>
                 <TableHead>{language === 'ar' ? 'آخر طلب' : 'Last Order'}</TableHead>
-                <TableHead>{language === 'ar' ? 'تاريخ التسجيل' : 'Joined'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
