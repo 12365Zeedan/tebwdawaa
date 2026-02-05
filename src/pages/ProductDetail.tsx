@@ -316,9 +316,12 @@ import { cn } from '@/lib/utils';
                   </p>
                 )}
 
-                <WishlistButton productId={product.id} variant="default" className="w-full" />
-            </div>
+                <div className="flex gap-2">
+                  <WishlistButton productId={product.id} variant="default" className="flex-1" />
+                  <CompareButton productId={product.id} variant="default" />
+                </div>
               </div>
+            </div>
             </div>
 
           {/* Reviews Section */}
