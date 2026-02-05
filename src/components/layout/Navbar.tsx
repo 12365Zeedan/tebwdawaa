@@ -60,11 +60,11 @@ import {
              <Link
                key={link.href}
                to={link.href}
-               className={cn(
-                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                 isActive(link.href)
-                   ? 'bg-primary text-primary-foreground'
-                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                className={cn(
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                  isActive(link.href)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-link hover:text-link-hover hover:bg-white/10'
                )}
              >
                {link.label}

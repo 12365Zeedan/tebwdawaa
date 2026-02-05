@@ -67,6 +67,9 @@ export default {
           DEFAULT: "hsl(var(--link))",
           hover: "hsl(var(--link-hover))",
         },
+        header: {
+          DEFAULT: "hsl(var(--header-background))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
