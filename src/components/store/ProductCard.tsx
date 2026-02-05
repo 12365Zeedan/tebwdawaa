@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
- import { Product as LegacyProduct } from '@/types';
- import { Product as DBProduct } from '@/hooks/useProducts';
+import { Product as LegacyProduct } from '@/types';
+import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { WishlistButton } from './WishlistButton';
 
 interface ProductCardProps {
-   product: LegacyProduct | DBProduct;
+  product: LegacyProduct | DBProduct;
 }
 
  function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
