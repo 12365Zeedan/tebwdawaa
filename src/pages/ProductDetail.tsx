@@ -304,10 +304,14 @@ import { cn } from '@/lib/utils';
                      : 'This product requires a prescription. Verification will be done upon delivery.'}
                  </p>
                )}
-             </div>
-           </div>
-         </div>
-       </div>
-     </MainLayout>
-   );
- }
+              </div>
+            </div>
+          </div>
+
+          {/* Reviews Section */}
+          <Separator className="my-12" />
+          <ProductReviews productId={product.id} />
+        </div>
+      </MainLayout>
+    );
+  }

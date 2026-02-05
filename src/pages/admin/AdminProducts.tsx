@@ -1,53 +1,60 @@
- import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History } from 'lucide-react';
- import { useQuery } from '@tanstack/react-query';
- import { AdminLayout } from '@/components/admin/AdminLayout';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { Badge } from '@/components/ui/badge';
- import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState } from 'react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
- import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
- } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useAuth } from '@/contexts/AuthContext';
- import { useToast } from '@/hooks/use-toast';
- import { supabase } from '@/integrations/supabase/client';
- import { Product } from '@/hooks/useProducts';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
- import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
- import { cn } from '@/lib/utils';
- 
- const AdminProducts = () => {
-   const { language, t, direction } = useLanguage();
-   const { isAdmin } = useAuth();
-   const { toast } = useToast();
- 
-   const [searchQuery, setSearchQuery] = useState('');
-   const [isFormOpen, setIsFormOpen] = useState(false);
-   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
+import { cn } from '@/lib/utils';
+
+const AdminProducts = () => {
+  const { language, t, direction } = useLanguage();
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [historyProductId, setHistoryProductId] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [bulkStockDialogOpen, setBulkStockDialogOpen] = useState(false);
+  const [bulkStockValue, setBulkStockValue] = useState('');
+  const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   const { data: stockHistory, isLoading: isHistoryLoading } = useStockHistory(historyProductId);
  
