@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Star, AlertCircle, Minus, Plus, Check, Package } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Star, AlertCircle, Minus, Plus, Check, Package, Sparkles, Flame, TrendingUp } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
