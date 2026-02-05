@@ -24,7 +24,8 @@ function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
 export function ProductCard({ product }: ProductCardProps) {
   const { language, t } = useLanguage();
   const { addToCart } = useCart();
-   const { toast } = useToast();
+  const { toast } = useToast();
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
  
    // Normalize product data for both legacy and DB formats
    const name = isDBProduct(product) 
