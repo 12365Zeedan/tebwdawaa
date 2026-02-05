@@ -44,6 +44,7 @@ interface CustomerWithStats {
   order_count: number;
   total_spent: number;
   last_order_date: string | null;
+  lifetime_value: number;
 }
 
 interface CustomerOrder {
