@@ -21,10 +21,15 @@ import {
    const [isOpen, setIsOpen] = useState(false);
    const [showSearch, setShowSearch] = useState(false);
    const { language, setLanguage, t, direction } = useLanguage();
-   const { totalItems } = useCart();
+    const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const { wishlistItems } = useWishlist();
   const location = useLocation();
+  const { data: settings } = useStoreSettings();
+
+  const storeName = language === 'ar' 
+    ? (settings?.storeNameAr || 'صيدلية') 
+    : (settings?.storeName || 'PharmaCare');
  
    const navLinks = [
      { href: '/', label: t('nav.home') },
