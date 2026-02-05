@@ -82,15 +82,15 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t('footer.contact')}</h3>
             <div className="space-y-3">
-              <a href="tel:+966500000000" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <a href="tel:+966500000000" className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
                 <Phone className="h-4 w-4 rtl-flip" />
                 <span dir="ltr">+966 50 000 0000</span>
               </a>
-              <a href="mailto:info@pharmacare.com" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:info@pharmacare.com" className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
                 <Mail className="h-4 w-4" />
                 <span>info@pharmacare.com</span>
               </a>
-              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <div className="flex items-start gap-3 text-sm text-link/80">
                 <MapPin className="h-4 w-4 mt-0.5" />
                 <span>{language === 'ar' ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}</span>
               </div>
