@@ -105,7 +105,10 @@ const AdminProducts = () => {
          .order('created_at', { ascending: false });
  
        if (searchQuery) {
-         query = query.or(`name.ilike.%${searchQuery}%,name_ar.ilike.%${searchQuery}%`);
+         const sanitized = sanitizeSearchInput(searchQuery);
+         if (sanitized) {
+           query = query.or(`name.ilike.%${sanitized}%,name_ar.ilike.%${sanitized}%`);
+         }
        }
 
        if (categoryFilter && categoryFilter !== 'all') {

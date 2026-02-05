@@ -171,15 +171,21 @@ export function useProductByBarcode(barcode: string | null) {
    return useQuery({
      queryKey: ['product', slug],
      queryFn: async () => {
-       // Try to find by slug first, then by id
-       const { data, error } = await supabase
-         .from('products')
-         .select(`
-           *,
-           category:categories(id, name, name_ar)
-         `)
-         .or(`slug.eq.${slug},id.eq.${slug}`)
-         .maybeSingle();
+        // Find by slug or id using proper type checking
+        let productQuery = supabase
+          .from('products')
+          .select(`
+            *,
+            category:categories(id, name, name_ar)
+          `);
+
+        if (isValidUUID(slug)) {
+          productQuery = productQuery.or(`slug.eq.${sanitizeSearchInput(slug)},id.eq.${slug}`);
+        } else {
+          productQuery = productQuery.eq('slug', sanitizeSearchInput(slug));
+        }
+
+        const { data, error } = await productQuery.maybeSingle();
  
        if (error) throw error;
        return data as Product | null;
