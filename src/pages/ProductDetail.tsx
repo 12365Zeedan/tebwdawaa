@@ -297,15 +297,16 @@ import { cn } from '@/lib/utils';
                  {quantity > 1 && ` (${quantity})`}
                </Button>
  
-               {product.requires_prescription && (
-                 <p className="text-sm text-muted-foreground flex items-start gap-2">
-                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                   {language === 'ar'
-                     ? 'هذا المنتج يتطلب وصفة طبية. سيتم التحقق من الوصفة عند الاستلام.'
-                     : 'This product requires a prescription. Verification will be done upon delivery.'}
-                 </p>
-               )}
-              </div>
+                {product.requires_prescription && (
+                  <p className="text-sm text-muted-foreground flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    {language === 'ar'
+                      ? 'هذا المنتج يتطلب وصفة طبية. سيتم التحقق من الوصفة عند الاستلام.'
+                      : 'This product requires a prescription. Verification will be done upon delivery.'}
+                  </p>
+                )}
+
+                <WishlistButton productId={product.id} variant="default" className="w-full" />
             </div>
           </div>
 
