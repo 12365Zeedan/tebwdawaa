@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateOrder } from '@/hooks/useOrders';
 import { useProfile } from '@/hooks/useProfile';
 import { useProcessPayment } from '@/hooks/usePayment';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  const checkoutSchema = z.object({
