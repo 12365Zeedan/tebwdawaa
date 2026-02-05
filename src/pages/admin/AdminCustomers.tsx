@@ -383,9 +383,12 @@ export default function AdminCustomers() {
           </Select>
         </div>
 
-        {/* Stats Summary */}
+        {/* Stats Summary - Clickable cards to filter */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+            onClick={() => setSegmentFilter('all')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Users className="h-5 w-5 text-primary" />
@@ -398,7 +401,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'vip' ? 'ring-2 ring-amber-500' : ''}`}
+            onClick={() => setSegmentFilter('vip')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-amber-500/10 rounded-lg">
                 <Crown className="h-5 w-5 text-amber-500" />
@@ -411,7 +417,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'regular' ? 'ring-2 ring-blue-500' : ''}`}
+            onClick={() => setSegmentFilter('regular')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Star className="h-5 w-5 text-blue-500" />
@@ -426,7 +435,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'new' ? 'ring-2 ring-emerald-500' : ''}`}
+            onClick={() => setSegmentFilter('new')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-500/10 rounded-lg">
                 <UserPlus className="h-5 w-5 text-emerald-500" />
@@ -441,7 +453,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'inactive' ? 'ring-2 ring-muted-foreground' : ''}`}
+            onClick={() => setSegmentFilter('inactive')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-muted rounded-lg">
                 <Users className="h-5 w-5 text-muted-foreground" />
@@ -459,14 +474,16 @@ export default function AdminCustomers() {
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <ShoppingBag className="h-5 w-5 text-primary" />
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'المبيعات' : 'Sales'}
+                  {language === 'ar' ? 'متوسط CLV' : 'Avg CLV'}
                 </p>
                 <p className="text-xl font-bold">
-                  {customers?.reduce((sum, c) => sum + c.total_spent, 0).toFixed(0) || '0'} <span className="text-sm font-normal">{language === 'ar' ? 'ر.س' : 'SAR'}</span>
+                  {customers && customers.length > 0 
+                    ? (customers.reduce((sum, c) => sum + c.lifetime_value, 0) / customers.length).toFixed(0) 
+                    : '0'} <span className="text-sm font-normal">{language === 'ar' ? 'ر.س' : 'SAR'}</span>
                 </p>
               </div>
             </div>
