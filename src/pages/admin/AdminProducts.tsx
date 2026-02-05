@@ -701,8 +701,85 @@ const AdminProducts = () => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-     </AdminLayout>
-   );
- };
+
+      {/* Bulk Stock Update Dialog */}
+      <Dialog open={bulkStockDialogOpen} onOpenChange={setBulkStockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? 'تحديث المخزون بالجملة' : 'Bulk Stock Update'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {language === 'ar' 
+                ? `سيتم تحديث ${selectedProducts.size} منتج`
+                : `This will update ${selectedProducts.size} products`}
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'نوع التحديث' : 'Update Type'}
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'set' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('set')}
+                >
+                  {language === 'ar' ? 'تعيين' : 'Set to'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'add' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('add')}
+                >
+                  {language === 'ar' ? 'إضافة' : 'Add'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'subtract' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('subtract')}
+                >
+                  {language === 'ar' ? 'خصم' : 'Subtract'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'الكمية' : 'Quantity'}
+              </label>
+              <Input
+                type="number"
+                min="0"
+                value={bulkStockValue}
+                onChange={(e) => setBulkStockValue(e.target.value)}
+                placeholder={language === 'ar' ? 'أدخل الكمية' : 'Enter quantity'}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkStockDialogOpen(false)}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button 
+              onClick={handleBulkStockUpdate}
+              disabled={isBulkUpdating || !bulkStockValue}
+            >
+              {isBulkUpdating && <Loader2 className="h-4 w-4 animate-spin me-2" />}
+              {language === 'ar' ? 'تحديث' : 'Update'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
+  );
+};
  
  export default AdminProducts;
