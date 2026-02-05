@@ -45,11 +45,14 @@ const statusConfig: Record<string, { icon: React.ElementType; color: string; lab
 
 const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
+const paymentStatusOptions = ['pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled'];
+
 const AdminOrders = () => {
   const { language, t, direction } = useLanguage();
   const { isAdmin } = useAuth();
   const { data: orders, isLoading } = useAdminOrders();
   const updateStatus = useUpdateOrderStatus();
+  const updatePaymentStatus = useUpdatePaymentStatus();
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
