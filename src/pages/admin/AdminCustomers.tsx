@@ -578,13 +578,15 @@ export default function AdminCustomers() {
                     <TableCell className="text-center font-medium">
                       {customer.total_spent.toFixed(2)} {language === 'ar' ? 'ر.س' : 'SAR'}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-medium text-primary">
+                        {customer.lifetime_value.toFixed(0)} {language === 'ar' ? 'ر.س' : 'SAR'}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       {customer.last_order_date 
                         ? format(new Date(customer.last_order_date), 'MMM d, yyyy')
                         : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(customer.created_at), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
