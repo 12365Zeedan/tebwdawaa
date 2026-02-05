@@ -168,6 +168,7 @@ export default function AdminCustomers() {
         'Customer Name',
         'Customer Name (Arabic)',
         'Phone',
+        'Segment',
         'Total Orders',
         'Total Spent (SAR)',
         'Average Order (SAR)',
@@ -175,11 +176,23 @@ export default function AdminCustomers() {
         'Registration Date',
       ];
 
+      // Helper to get segment label
+      const getSegmentLabel = (customer: CustomerWithStats) => {
+        const type = getSegmentType(customer);
+        switch (type) {
+          case 'vip': return 'VIP';
+          case 'regular': return 'Regular';
+          case 'new': return 'New';
+          default: return 'Inactive';
+        }
+      };
+
       // CSV rows
       const rows = customers.map((customer) => [
         customer.full_name || '',
         customer.full_name_ar || '',
         customer.phone || '',
+        getSegmentLabel(customer),
         customer.order_count.toString(),
         customer.total_spent.toFixed(2),
         customer.order_count > 0 
