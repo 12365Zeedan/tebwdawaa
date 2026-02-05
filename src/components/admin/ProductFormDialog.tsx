@@ -34,22 +34,24 @@
  import { ImageUpload } from './ImageUpload';
  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  
- const productSchema = z.object({
-   name: z.string().min(1, 'Name is required'),
-   name_ar: z.string().min(1, 'Arabic name is required'),
-   slug: z.string().min(1, 'Slug is required'),
-   description: z.string().optional(),
-   description_ar: z.string().optional(),
-   price: z.coerce.number().min(0, 'Price must be positive'),
-   original_price: z.coerce.number().min(0).optional().nullable(),
-   category_id: z.string().optional().nullable(),
-   image_url: z.string().optional().or(z.literal('')),
-   in_stock: z.boolean(),
-   stock_quantity: z.coerce.number().min(0),
-   requires_prescription: z.boolean(),
-   is_featured: z.boolean(),
-   is_active: z.boolean(),
- });
+const productSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  name_ar: z.string().min(1, 'Arabic name is required'),
+  slug: z.string().min(1, 'Slug is required'),
+  description: z.string().optional(),
+  description_ar: z.string().optional(),
+  price: z.coerce.number().min(0, 'Price must be positive'),
+  original_price: z.coerce.number().min(0).optional().nullable(),
+  category_id: z.string().optional().nullable(),
+  image_url: z.string().optional().or(z.literal('')),
+  in_stock: z.boolean(),
+  stock_quantity: z.coerce.number().min(0),
+  requires_prescription: z.boolean(),
+  is_featured: z.boolean(),
+  is_new_arrival: z.boolean(),
+  is_best_seller: z.boolean(),
+  is_active: z.boolean(),
+});
  
  type ProductFormData = z.infer<typeof productSchema>;
  
