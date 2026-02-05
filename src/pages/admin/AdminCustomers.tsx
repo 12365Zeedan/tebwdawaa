@@ -127,6 +127,24 @@ export default function AdminCustomers() {
     enabled: !!selectedCustomer?.user_id,
   });
 
+  // Helper function to determine segment type for a customer
+  const getSegmentType = (customer: CustomerWithStats): string => {
+    const { order_count, total_spent, created_at } = customer;
+    const daysSinceJoined = Math.floor((Date.now() - new Date(created_at).getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (order_count >= 5 || total_spent >= 1000) return 'vip';
+    if (daysSinceJoined <= 30) return 'new';
+    if (order_count >= 1) return 'regular';
+    return 'inactive';
+  };
+
+  // Filter customers based on segment
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return [];
+    if (segmentFilter === 'all') return customers;
+    return customers.filter(customer => getSegmentType(customer) === segmentFilter);
+  }, [customers, segmentFilter]);
+
   const handleViewDetails = (customer: CustomerWithStats) => {
     setSelectedCustomer(customer);
     setDetailsOpen(true);
