@@ -74,13 +74,14 @@
    return useQuery({
      queryKey: ['product', slug],
      queryFn: async () => {
+       // Try to find by slug first, then by id
        const { data, error } = await supabase
          .from('products')
          .select(`
            *,
            category:categories(id, name, name_ar)
          `)
-         .eq('slug', slug)
+         .or(`slug.eq.${slug},id.eq.${slug}`)
          .maybeSingle();
  
        if (error) throw error;
