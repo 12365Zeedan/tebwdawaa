@@ -322,34 +322,66 @@ const AdminProducts = () => {
              onChange={(e) => setSearchQuery(e.target.value)}
              className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
            />
-         </div>
- 
-         {/* Products Table */}
-         <div className="bg-card rounded-xl border border-border/50 shadow-soft overflow-hidden">
-           <div className="overflow-x-auto">
-             <table className="w-full">
-               <thead>
-                 <tr className="border-b border-border bg-muted/30">
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'المنتج' : 'Product'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الفئة' : 'Category'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'السعر' : 'Price'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الكمية' : 'Stock'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الحالة' : 'Status'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                   </th>
-                 </tr>
-               </thead>
+          </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedProducts.size > 0 && (
+            <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
+              <span className="text-sm font-medium">
+                {language === 'ar' 
+                  ? `تم تحديد ${selectedProducts.size} منتج`
+                  : `${selectedProducts.size} products selected`}
+              </span>
+              <Button 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setBulkStockDialogOpen(true)}
+              >
+                <PackagePlus className="h-4 w-4" />
+                {language === 'ar' ? 'تحديث المخزون' : 'Update Stock'}
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setSelectedProducts(new Set())}
+              >
+                {language === 'ar' ? 'إلغاء التحديد' : 'Clear Selection'}
+              </Button>
+            </div>
+          )}
+
+          {/* Products Table */}
+          <div className="bg-card rounded-xl border border-border/50 shadow-soft overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-4 py-3 w-12">
+                      <Checkbox
+                        checked={products?.length ? selectedProducts.size === products.length : false}
+                        onCheckedChange={toggleAllProducts}
+                      />
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'المنتج' : 'Product'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الفئة' : 'Category'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'السعر' : 'Price'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الكمية' : 'Stock'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الحالة' : 'Status'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                    </th>
+                  </tr>
+                </thead>
                <tbody>
                  {isLoading ? (
                    [...Array(5)].map((_, i) => (
