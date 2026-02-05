@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import {
   DropdownMenu,
   DropdownMenuContent,
