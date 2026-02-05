@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useProduct } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { ProductReviews } from '@/components/store/ProductReviews';
+import { WishlistButton } from '@/components/store/WishlistButton';
 import { cn } from '@/lib/utils';
  
  export default function ProductDetail() {
