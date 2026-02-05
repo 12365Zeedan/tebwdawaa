@@ -206,6 +206,9 @@ export type Database = {
           id: string
           notes: string | null
           order_number: string
+          payment_method: string | null
+          payment_reference: string | null
+          payment_status: string | null
           shipping_address: Json | null
           shipping_cost: number | null
           status: string | null
@@ -222,6 +225,9 @@ export type Database = {
           id?: string
           notes?: string | null
           order_number: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string | null
@@ -238,6 +244,9 @@ export type Database = {
           id?: string
           notes?: string | null
           order_number?: string
+          payment_method?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
           shipping_address?: Json | null
           shipping_cost?: number | null
           status?: string | null
@@ -247,6 +256,59 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          error_message: string | null
+          gateway_reference: string | null
+          gateway_response: Json | null
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          payment_method: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          gateway_reference?: string | null
+          gateway_response?: Json | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payment_method: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          gateway_reference?: string | null
+          gateway_response?: Json | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          payment_method?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_reviews: {
         Row: {

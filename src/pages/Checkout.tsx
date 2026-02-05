@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from 'react';
- import { useNavigate, Link } from 'react-router-dom';
- import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2 } from 'lucide-react';
- import { z } from 'zod';
- import { useForm } from 'react-hook-form';
- import { zodResolver } from '@hookform/resolvers/zod';
- 
- import { MainLayout } from '@/components/layout/MainLayout';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { Textarea } from '@/components/ui/textarea';
- import { Separator } from '@/components/ui/separator';
- import {
-   Form,
-   FormControl,
-   FormField,
-   FormItem,
-   FormLabel,
-   FormMessage,
- } from '@/components/ui/form';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useCart } from '@/contexts/CartContext';
- import { useAuth } from '@/contexts/AuthContext';
- import { useCreateOrder } from '@/hooks/useOrders';
- import { useProfile } from '@/hooks/useProfile';
- 
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2, Wallet } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCreateOrder } from '@/hooks/useOrders';
+import { useProfile } from '@/hooks/useProfile';
+import { useProcessPayment } from '@/hooks/usePayment';
+import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
+import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  const checkoutSchema = z.object({
    customerName: z.string().min(2, 'Name must be at least 2 characters'),
    customerEmail: z.string().email('Invalid email address'),
@@ -37,15 +39,17 @@ import React, { useState, useEffect } from 'react';
  
  type CheckoutFormData = z.infer<typeof checkoutSchema>;
  
- const Checkout = () => {
-   const { language, t, direction } = useLanguage();
-   const { items, totalPrice, clearCart } = useCart();
-   const { user } = useAuth();
-   const navigate = useNavigate();
-   const createOrder = useCreateOrder();
-   const { data: profile } = useProfile();
-   const [orderComplete, setOrderComplete] = useState(false);
-   const [orderNumber, setOrderNumber] = useState('');
+const Checkout = () => {
+  const { language, t, direction } = useLanguage();
+  const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const createOrder = useCreateOrder();
+  const processPayment = useProcessPayment();
+  const { data: profile } = useProfile();
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
  
    const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
    const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
@@ -90,33 +94,46 @@ import React, { useState, useEffect } from 'react';
      }
    }, [profile, user, form]);
  
-   const onSubmit = async (data: CheckoutFormData) => {
-     try {
-       const order = await createOrder.mutateAsync({
-         customerName: data.customerName,
-         customerEmail: data.customerEmail,
-         customerPhone: data.customerPhone,
-         shippingAddress: {
-           street: data.street,
-           city: data.city,
-           country: data.country,
-           postalCode: data.postalCode,
-         },
-         items,
-         subtotal: totalPrice,
-         shippingCost,
-         total,
-         notes: data.notes,
-         userId: user?.id,
-       });
- 
-       setOrderNumber(order.order_number);
-       setOrderComplete(true);
-       clearCart();
-     } catch (error) {
-       // Error handled in mutation
-     }
-   };
+  const isProcessing = createOrder.isPending || processPayment.isPending;
+
+  const onSubmit = async (data: CheckoutFormData) => {
+    try {
+      // Step 1: Create the order
+      const order = await createOrder.mutateAsync({
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        shippingAddress: {
+          street: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+        items,
+        subtotal: totalPrice,
+        shippingCost,
+        total,
+        notes: data.notes,
+        userId: user?.id,
+      });
+
+      // Step 2: Process payment
+      await processPayment.mutateAsync({
+        orderId: order.id,
+        amount: total,
+        paymentMethod,
+        customerEmail: data.customerEmail,
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+      });
+
+      setOrderNumber(order.order_number);
+      setOrderComplete(true);
+      clearCart();
+    } catch (error) {
+      // Error handled in mutation
+    }
+  };
  
    // Empty cart redirect
    if (items.length === 0 && !orderComplete) {
@@ -147,46 +164,66 @@ import React, { useState, useEffect } from 'react';
      );
    }
  
-   // Order complete success screen
-   if (orderComplete) {
-     return (
-       <MainLayout>
-         <div className="container py-16 md:py-24">
-           <div className="max-w-md mx-auto text-center space-y-6">
-             <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-               <CreditCard className="h-12 w-12 text-primary" />
-             </div>
-             <h1 className="text-2xl font-bold text-foreground">
-               {language === 'ar' ? 'تم تأكيد طلبك!' : 'Order Confirmed!'}
-             </h1>
-             <p className="text-muted-foreground">
-               {language === 'ar'
-                 ? `رقم الطلب: ${orderNumber}`
-                 : `Order number: ${orderNumber}`}
-             </p>
-             <p className="text-muted-foreground">
-               {language === 'ar'
-                 ? 'شكراً لك! سنرسل لك تأكيد الطلب عبر البريد الإلكتروني.'
-                 : 'Thank you! We will send you an order confirmation email.'}
-             </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-               <Link to="/products">
-                 <Button variant="outline" className="gap-2 w-full">
-                   <BackArrow className="h-4 w-4" />
-                   {t('cart.continue')}
-                 </Button>
-               </Link>
-               <Link to="/">
-                 <Button className="gap-2 w-full">
-                   {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
-                 </Button>
-               </Link>
-             </div>
-           </div>
-         </div>
-       </MainLayout>
-     );
-   }
+  // Order complete success screen
+  if (orderComplete) {
+    const selectedMethod = PAYMENT_METHODS.find(m => m.id === paymentMethod);
+    
+    return (
+      <MainLayout>
+        <div className="container py-16 md:py-24">
+          <div className="max-w-md mx-auto text-center space-y-6">
+            <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+              {paymentMethod === 'cod' ? (
+                <Wallet className="h-12 w-12 text-primary" />
+              ) : (
+                <CreditCard className="h-12 w-12 text-primary" />
+              )}
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {language === 'ar' ? 'تم تأكيد طلبك!' : 'Order Confirmed!'}
+            </h1>
+            <p className="text-muted-foreground">
+              {language === 'ar'
+                ? `رقم الطلب: ${orderNumber}`
+                : `Order number: ${orderNumber}`}
+            </p>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                {language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}
+              </p>
+              <p className="font-medium text-foreground">
+                {language === 'ar' ? selectedMethod?.nameAr : selectedMethod?.name}
+              </p>
+              {paymentMethod === 'cod' && (
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  {language === 'ar' 
+                    ? 'سيتم تحصيل المبلغ عند الاستلام' 
+                    : 'Payment will be collected upon delivery'}
+                </p>
+              )}
+            </div>
+            <p className="text-muted-foreground">
+              {language === 'ar'
+                ? 'شكراً لك! سنرسل لك تأكيد الطلب عبر البريد الإلكتروني.'
+                : 'Thank you! We will send you an order confirmation email.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/orders">
+                <Button variant="outline" className="gap-2 w-full">
+                  {language === 'ar' ? 'متابعة الطلب' : 'Track Order'}
+                </Button>
+              </Link>
+              <Link to="/">
+                <Button className="gap-2 w-full">
+                  {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
  
    return (
      <MainLayout>
@@ -332,54 +369,67 @@ import React, { useState, useEffect } from 'react';
                    />
                  </div>
  
-                 {/* Order Notes */}
-                 <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
-                   <h2 className="text-xl font-semibold text-foreground">
-                     {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
-                   </h2>
-                   <FormField
-                     control={form.control}
-                     name="notes"
-                     render={({ field }) => (
-                       <FormItem>
-                         <FormControl>
-                           <Textarea
-                             placeholder={
-                               language === 'ar'
-                                 ? 'أي ملاحظات خاصة بالتوصيل...'
-                                 : 'Any special delivery instructions...'
-                             }
-                             className="min-h-[100px]"
-                             {...field}
-                           />
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
-                 </div>
- 
-                 {/* Submit Button - Mobile */}
-                 <div className="lg:hidden">
-                   <Button
-                     type="submit"
-                     className="w-full gap-2 shadow-glow"
-                     size="lg"
-                     disabled={createOrder.isPending}
-                   >
-                     {createOrder.isPending ? (
-                       <>
-                         <Loader2 className="h-4 w-4 animate-spin" />
-                         {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
-                       </>
-                     ) : (
-                       <>
-                         <CreditCard className="h-4 w-4" />
-                         {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
-                       </>
-                     )}
-                   </Button>
-                 </div>
+                {/* Order Notes */}
+                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
+                    </h2>
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder={
+                                language === 'ar'
+                                  ? 'أي ملاحظات خاصة بالتوصيل...'
+                                  : 'Any special delivery instructions...'
+                              }
+                              className="min-h-[100px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Payment Method Selection */}
+                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft">
+                    <PaymentMethodSelector
+                      value={paymentMethod}
+                      onChange={setPaymentMethod}
+                      disabled={isProcessing}
+                    />
+                  </div>
+
+                  {/* Submit Button - Mobile */}
+                  <div className="lg:hidden">
+                    <Button
+                      type="submit"
+                      className="w-full gap-2 shadow-glow"
+                      size="lg"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
+                        </>
+                      ) : (
+                        <>
+                          {paymentMethod === 'cod' ? (
+                            <Wallet className="h-4 w-4" />
+                          ) : (
+                            <CreditCard className="h-4 w-4" />
+                          )}
+                          {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                </form>
              </Form>
            </div>
@@ -443,28 +493,32 @@ import React, { useState, useEffect } from 'react';
                  </div>
                </div>
  
-               {/* Submit Button - Desktop */}
-               <div className="hidden lg:block">
-                 <Button
-                   type="submit"
-                   className="w-full gap-2 shadow-glow"
-                   size="lg"
-                   disabled={createOrder.isPending}
-                   onClick={form.handleSubmit(onSubmit)}
-                 >
-                   {createOrder.isPending ? (
-                     <>
-                       <Loader2 className="h-4 w-4 animate-spin" />
-                       {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
-                     </>
-                   ) : (
-                     <>
-                       <CreditCard className="h-4 w-4" />
-                       {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
-                     </>
-                   )}
-                 </Button>
-               </div>
+                {/* Submit Button - Desktop */}
+                <div className="hidden lg:block">
+                  <Button
+                    type="submit"
+                    className="w-full gap-2 shadow-glow"
+                    size="lg"
+                    disabled={isProcessing}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
+                      </>
+                    ) : (
+                      <>
+                        {paymentMethod === 'cod' ? (
+                          <Wallet className="h-4 w-4" />
+                        ) : (
+                          <CreditCard className="h-4 w-4" />
+                        )}
+                        {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
+                      </>
+                    )}
+                  </Button>
+                </div>
  
                {/* Security Note */}
                <p className="text-xs text-muted-foreground text-center">
