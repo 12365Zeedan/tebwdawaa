@@ -2,10 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 
 export function Footer() {
   const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useStoreSettings();
+
+  const storeName = language === 'ar' 
+    ? (settings?.storeNameAr || 'صيدلية') 
+    : (settings?.storeName || 'PharmaCare');
 
   return (
     <footer className="bg-foreground text-background">
