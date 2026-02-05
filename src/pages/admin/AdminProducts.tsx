@@ -98,7 +98,7 @@ const AdminProducts = () => {
  
    // Fetch all products (including inactive) for admin
    const { data: products, isLoading } = useQuery({
-     queryKey: ['admin-products', searchQuery],
+     queryKey: ['admin-products', searchQuery, categoryFilter],
      queryFn: async () => {
        let query = supabase
          .from('products')
@@ -110,6 +110,10 @@ const AdminProducts = () => {
  
        if (searchQuery) {
          query = query.or(`name.ilike.%${searchQuery}%,name_ar.ilike.%${searchQuery}%`);
+       }
+
+       if (categoryFilter && categoryFilter !== 'all') {
+         query = query.eq('category_id', categoryFilter);
        }
  
        const { data, error } = await query;
