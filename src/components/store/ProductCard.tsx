@@ -106,6 +106,20 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex gap-1">
             <WishlistButton productId={product.id} />
             <CompareButton productId={product.id} />
+            {dbProduct && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuickViewOpen(true);
+                }}
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
+              >
+                <Eye className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            )}
           </div>
         </div>
 
