@@ -147,24 +147,27 @@ import { TransactionHistory } from '@/components/orders/TransactionHistory';
                </div>
              ) : orderDetails ? (
                <div className="space-y-6">
-                 {/* Order Info */}
-                 <div className="flex flex-wrap items-center gap-3">
-                   <span className="font-semibold text-foreground">
-                     {orderDetails.order_number}
-                   </span>
-                   {(() => {
-                     const config = getStatusConfig(orderDetails.status || 'pending');
-                     const StatusIcon = config.icon;
-                     return (
-                       <Badge variant="outline" className={config.color}>
-                         <StatusIcon className="h-3 w-3 mr-1" />
-                         {language === 'ar' ? config.labelAr : config.labelEn}
-                       </Badge>
-                     );
-                   })()}
-                   <span className="text-sm text-muted-foreground">
-                     {format(new Date(orderDetails.created_at), 'PPP p')}
-                   </span>
+                  {/* Order Info */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="font-semibold text-foreground">
+                      {orderDetails.order_number}
+                    </span>
+                    {(() => {
+                      const config = getStatusConfig(orderDetails.status || 'pending');
+                      const StatusIcon = config.icon;
+                      return (
+                        <Badge variant="outline" className={config.color}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {language === 'ar' ? config.labelAr : config.labelEn}
+                        </Badge>
+                      );
+                    })()}
+                    <PaymentStatusBadge status={orderDetails.payment_status} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{format(new Date(orderDetails.created_at), 'PPP p')}</span>
+                    <span>•</span>
+                    <PaymentMethodBadge method={orderDetails.payment_method} />
                  </div>
  
                  <Separator />
