@@ -126,10 +126,10 @@ import {
            {/* Auth / User Menu */}
            {user ? (
              <div className="hidden md:flex items-center gap-2">
-               <DropdownMenu>
-                 <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" size="icon">
-                     <UserCircle className="h-5 w-5" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10">
+                      <UserCircle className="h-5 w-5" />
                    </Button>
                  </DropdownMenuTrigger>
                  <DropdownMenuContent align="end" className="w-48">
