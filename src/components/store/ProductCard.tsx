@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Star, AlertCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,19 +11,21 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { WishlistButton } from './WishlistButton';
 import { CompareButton } from './CompareButton';
+import { QuickViewModal } from './QuickViewModal';
 
 interface ProductCardProps {
   product: LegacyProduct | DBProduct;
 }
 
- function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
-   return 'name_ar' in product;
- }
+function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
+  return 'name_ar' in product;
+}
  
 export function ProductCard({ product }: ProductCardProps) {
   const { language, t } = useLanguage();
   const { addToCart } = useCart();
-   const { toast } = useToast();
+  const { toast } = useToast();
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
  
    // Normalize product data for both legacy and DB formats
    const name = isDBProduct(product) 
@@ -72,7 +74,11 @@ export function ProductCard({ product }: ProductCardProps) {
      });
   };
 
+  // For quick view, we need the full DBProduct format
+  const dbProduct = isDBProduct(product) ? product : null;
+
   return (
+    <>
     <div className="product-card group bg-card rounded-2xl overflow-hidden border border-border/50 shadow-soft">
       {/* Image */}
        <Link to={`/products/${slug}`} className="block relative aspect-square overflow-hidden">
@@ -100,6 +106,20 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex gap-1">
             <WishlistButton productId={product.id} />
             <CompareButton productId={product.id} />
+            {dbProduct && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuickViewOpen(true);
+                }}
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
+              >
+                <Eye className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -165,5 +185,14 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
     </div>
+    
+    {dbProduct && (
+      <QuickViewModal 
+        product={dbProduct} 
+        open={quickViewOpen} 
+        onOpenChange={setQuickViewOpen} 
+      />
+    )}
+    </>
   );
 }
