@@ -21,8 +21,9 @@ import {
    const [showSearch, setShowSearch] = useState(false);
    const { language, setLanguage, t, direction } = useLanguage();
    const { totalItems } = useCart();
-   const { user, isAdmin, signOut } = useAuth();
-   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
+  const { wishlistItems } = useWishlist();
+  const location = useLocation();
  
    const navLinks = [
      { href: '/', label: t('nav.home') },
