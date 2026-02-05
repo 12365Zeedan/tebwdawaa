@@ -170,7 +170,7 @@ export function Navbar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-link text-link hover:bg-transparent hover:text-link"
+                    className="gap-2 border-link text-link bg-transparent hover:bg-transparent hover:text-link"
                   >
                     <User className="h-4 w-4" />
                     {t("nav.admin")}
