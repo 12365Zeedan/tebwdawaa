@@ -66,13 +66,13 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t('footer.support')}</h3>
             <nav className="flex flex-col gap-2">
-              <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/contact" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('footer.contact')}
               </Link>
-              <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/privacy" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('footer.privacy')}
               </Link>
-              <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/terms" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('footer.terms')}
               </Link>
             </nav>
