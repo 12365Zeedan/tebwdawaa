@@ -402,21 +402,30 @@ const AdminProducts = () => {
                        <td className="px-6 py-4"><Skeleton className="h-8 w-20" /></td>
                      </tr>
                    ))
-                 ) : products?.length === 0 ? (
-                   <tr>
-                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                       {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
-                     </td>
-                   </tr>
-                 ) : products?.map((product) => {
-                   const name = language === 'ar' ? product.name_ar : product.name;
-                   const category = product.category 
-                     ? (language === 'ar' ? product.category.name_ar : product.category.name)
-                     : '-';
- 
-                   return (
-                     <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/20">
-                       <td className="px-6 py-4">
+                  ) : products?.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                        {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
+                      </td>
+                    </tr>
+                  ) : products?.map((product) => {
+                    const name = language === 'ar' ? product.name_ar : product.name;
+                    const category = product.category 
+                      ? (language === 'ar' ? product.category.name_ar : product.category.name)
+                      : '-';
+
+                    return (
+                      <tr key={product.id} className={cn(
+                        "border-b border-border last:border-0 hover:bg-muted/20",
+                        selectedProducts.has(product.id) && "bg-primary/5"
+                      )}>
+                        <td className="px-4 py-4">
+                          <Checkbox
+                            checked={selectedProducts.has(product.id)}
+                            onCheckedChange={() => toggleProductSelection(product.id)}
+                          />
+                        </td>
+                        <td className="px-6 py-4">
                          <div className="flex items-center gap-3">
                            <img
                              src={product.image_url || '/placeholder.svg'}
