@@ -32,6 +32,8 @@ export interface Product {
 export interface ProductFilterOptions {
   categoryId?: string;
   featured?: boolean;
+  newArrivals?: boolean;
+  bestSellers?: boolean;
   limit?: number;
   searchQuery?: string;
   barcode?: string;
