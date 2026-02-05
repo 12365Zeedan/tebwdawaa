@@ -12,6 +12,8 @@ import { useProduct } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { ProductReviews } from '@/components/store/ProductReviews';
 import { WishlistButton } from '@/components/store/WishlistButton';
+import { CompareButton } from '@/components/store/CompareButton';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { cn } from '@/lib/utils';
  
  export default function ProductDetail() {
