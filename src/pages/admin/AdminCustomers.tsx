@@ -21,8 +21,9 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Search, Users, Eye, Mail, Phone, MapPin, ShoppingBag, Calendar } from 'lucide-react';
+import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface CustomerWithStats {
   id: string;
