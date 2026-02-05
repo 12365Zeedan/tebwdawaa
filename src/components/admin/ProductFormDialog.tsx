@@ -367,60 +367,100 @@ const productSchema = z.object({
                )}
              />
  
-             {/* Switches */}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <FormField
-                 control={form.control}
-                 name="in_stock"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'متوفر' : 'In Stock'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="requires_prescription"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'وصفة طبية' : 'Prescription'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="is_featured"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'مميز' : 'Featured'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="is_active"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'نشط' : 'Active'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
-             </div>
+            {/* Switches */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="in_stock"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'متوفر' : 'In Stock'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="requires_prescription"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'وصفة طبية' : 'Prescription'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'نشط' : 'Active'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Product Flags */}
+            <div className="space-y-2">
+              <FormLabel className="text-base font-medium">
+                {language === 'ar' ? 'علامات المنتج' : 'Product Flags'}
+              </FormLabel>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="is_featured"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-amber-700">
+                        {language === 'ar' ? '⭐ مميز' : '⭐ Featured'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_new_arrival"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-green-700">
+                        {language === 'ar' ? '🆕 وصل حديثاً' : '🆕 New Arrival'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_best_seller"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-blue-700">
+                        {language === 'ar' ? '🔥 الأكثر مبيعاً' : '🔥 Best Seller'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
  
              {/* Submit Button */}
              <div className="flex justify-end gap-3">

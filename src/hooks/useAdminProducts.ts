@@ -165,27 +165,29 @@ export function useStockHistory(productId: string | null) {
  
    return useMutation({
      mutationFn: async ({ id, ...product }: ProductInput & { id: string }) => {
-       const { data, error } = await supabase
-         .from('products')
-         .update({
-           name: product.name,
-           name_ar: product.name_ar,
-           slug: product.slug,
-           description: product.description || null,
-           description_ar: product.description_ar || null,
-           price: product.price,
-           original_price: product.original_price || null,
-           category_id: product.category_id || null,
-           image_url: product.image_url || null,
-           in_stock: product.in_stock,
-           stock_quantity: product.stock_quantity,
-           requires_prescription: product.requires_prescription,
-           is_featured: product.is_featured,
-           is_active: product.is_active,
-         })
-         .eq('id', id)
-         .select()
-         .single();
+        const { data, error } = await supabase
+          .from('products')
+          .update({
+            name: product.name,
+            name_ar: product.name_ar,
+            slug: product.slug,
+            description: product.description || null,
+            description_ar: product.description_ar || null,
+            price: product.price,
+            original_price: product.original_price || null,
+            category_id: product.category_id || null,
+            image_url: product.image_url || null,
+            in_stock: product.in_stock,
+            stock_quantity: product.stock_quantity,
+            requires_prescription: product.requires_prescription,
+            is_featured: product.is_featured,
+            is_new_arrival: product.is_new_arrival,
+            is_best_seller: product.is_best_seller,
+            is_active: product.is_active,
+          })
+          .eq('id', id)
+          .select()
+          .single();
  
        if (error) throw error;
        return data;
