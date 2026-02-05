@@ -5,48 +5,76 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
-import { Product } from '@/types';
+ import { Product as LegacyProduct } from '@/types';
+ import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
+ import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
-  product: Product;
+   product: LegacyProduct | DBProduct;
 }
 
+ function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
+   return 'name_ar' in product;
+ }
+ 
 export function ProductCard({ product }: ProductCardProps) {
   const { language, t } = useLanguage();
   const { addToCart } = useCart();
-
-  const name = language === 'ar' ? product.nameAr : product.name;
-  const category = language === 'ar' ? product.categoryAr : product.category;
+   const { toast } = useToast();
+ 
+   // Normalize product data for both legacy and DB formats
+   const name = isDBProduct(product) 
+     ? (language === 'ar' ? product.name_ar : product.name)
+     : (language === 'ar' ? product.nameAr : product.name);
+   
+   const category = isDBProduct(product)
+     ? (product.category ? (language === 'ar' ? product.category.name_ar : product.category.name) : '')
+     : (language === 'ar' ? product.categoryAr : product.category);
+   
+   const image = isDBProduct(product) ? (product.image_url || '/placeholder.svg') : product.image;
+   const inStock = isDBProduct(product) ? product.in_stock : product.inStock;
+   const originalPrice = isDBProduct(product) ? product.original_price : product.originalPrice;
+   const requiresPrescription = isDBProduct(product) ? product.requires_prescription : product.requiresPrescription;
+   const reviewCount = isDBProduct(product) ? product.review_count : product.reviewCount;
+   const slug = isDBProduct(product) ? product.slug : product.id;
+   const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
 
   const handleAddToCart = () => {
     addToCart({
       id: product.id,
       name: product.name,
-      nameAr: product.nameAr,
+       nameAr: nameAr,
       price: product.price,
-      image: product.image,
+       image: image,
     });
+     
+     toast({
+       title: language === 'ar' ? 'تمت الإضافة للسلة' : 'Added to Cart',
+       description: language === 'ar' 
+         ? `تمت إضافة ${nameAr} إلى سلة التسوق`
+         : `${product.name} added to your cart`,
+     });
   };
 
   return (
     <div className="product-card group bg-card rounded-2xl overflow-hidden border border-border/50 shadow-soft">
       {/* Image */}
-      <Link to={`/products/${product.id}`} className="block relative aspect-square overflow-hidden">
+       <Link to={`/products/${slug}`} className="block relative aspect-square overflow-hidden">
         <img
-          src={product.image}
+           src={image}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
         {/* Badges */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-          {product.originalPrice && (
+           {originalPrice && (
             <Badge variant="destructive" className="text-xs font-semibold">
-              {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+               {Math.round((1 - product.price / originalPrice) * 100)}% OFF
             </Badge>
           )}
-          {product.requiresPrescription && (
+           {requiresPrescription && (
             <Badge variant="secondary" className="text-xs gap-1">
               <AlertCircle className="h-3 w-3" />
               {t('products.prescription')}
@@ -54,7 +82,7 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {!product.inStock && (
+         {!inStock && (
           <div className="absolute inset-0 bg-foreground/60 flex items-center justify-center">
             <span className="text-background font-semibold text-lg">
               {t('products.outOfStock')}
@@ -71,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </span>
 
         {/* Name */}
-        <Link to={`/products/${product.id}`}>
+         <Link to={`/products/${slug}`}>
           <h3 className="font-semibold text-foreground line-clamp-2 hover:text-primary transition-colors">
             {name}
           </h3>
@@ -84,7 +112,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-sm font-medium">{product.rating}</span>
           </div>
           <span className="text-xs text-muted-foreground">
-            ({product.reviewCount})
+             ({reviewCount})
           </span>
         </div>
 
@@ -94,9 +122,9 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-xl font-bold text-foreground">
               {product.price} {t('common.currency')}
             </span>
-            {product.originalPrice && (
+             {originalPrice && (
               <span className="text-sm text-muted-foreground line-through">
-                {product.originalPrice}
+                 {originalPrice}
               </span>
             )}
           </div>
@@ -104,10 +132,10 @@ export function ProductCard({ product }: ProductCardProps) {
           <Button
             size="sm"
             onClick={handleAddToCart}
-            disabled={!product.inStock}
+             disabled={!inStock}
             className={cn(
               'gap-2 transition-all',
-              product.inStock && 'hover:shadow-glow'
+               inStock && 'hover:shadow-glow'
             )}
           >
             <ShoppingCart className="h-4 w-4" />
