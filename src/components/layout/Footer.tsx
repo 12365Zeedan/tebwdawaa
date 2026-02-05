@@ -27,17 +27,17 @@ export function Footer() {
                 {storeName}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-link/80 leading-relaxed">
               {t('footer.aboutText')}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
             </div>
