@@ -224,14 +224,27 @@ import {
                    <User className="h-4 w-4" />
                    {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
                  </Link>
-                 <Link
-                   to="/orders"
-                   onClick={() => setIsOpen(false)}
-                   className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
-                 >
-                   <Package className="h-4 w-4" />
-                   {language === 'ar' ? 'طلباتي' : 'My Orders'}
-                 </Link>
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                  >
+                    <Heart className="h-4 w-4" />
+                    {language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
+                    {wishlistItems.length > 0 && (
+                      <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                        {wishlistItems.length}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    to="/orders"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                  >
+                    <Package className="h-4 w-4" />
+                    {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                  </Link>
                  {isAdmin && (
                    <Link
                      to="/admin"
