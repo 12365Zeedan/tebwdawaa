@@ -41,9 +41,12 @@ export function ProductCard({ product }: ProductCardProps) {
    const originalPrice = isDBProduct(product) ? product.original_price : product.originalPrice;
    const requiresPrescription = isDBProduct(product) ? product.requires_prescription : product.requiresPrescription;
    const reviewCount = isDBProduct(product) ? product.review_count : product.reviewCount;
-   const slug = isDBProduct(product) ? product.slug : product.id;
-   const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
+  const slug = isDBProduct(product) ? product.slug : product.id;
+  const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
   const stockQuantity = isDBProduct(product) ? product.stock_quantity : null;
+  const isNewArrival = isDBProduct(product) ? product.is_new_arrival : false;
+  const isBestSeller = isDBProduct(product) ? product.is_best_seller : false;
+  const isFeatured = isDBProduct(product) ? product.is_featured : false;
 
   const handleAddToCart = () => {
    // Check if out of stock
