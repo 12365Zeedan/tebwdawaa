@@ -1,53 +1,60 @@
- import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History } from 'lucide-react';
- import { useQuery } from '@tanstack/react-query';
- import { AdminLayout } from '@/components/admin/AdminLayout';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { Badge } from '@/components/ui/badge';
- import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState } from 'react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
- import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
- } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useAuth } from '@/contexts/AuthContext';
- import { useToast } from '@/hooks/use-toast';
- import { supabase } from '@/integrations/supabase/client';
- import { Product } from '@/hooks/useProducts';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
- import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
- import { cn } from '@/lib/utils';
- 
- const AdminProducts = () => {
-   const { language, t, direction } = useLanguage();
-   const { isAdmin } = useAuth();
-   const { toast } = useToast();
- 
-   const [searchQuery, setSearchQuery] = useState('');
-   const [isFormOpen, setIsFormOpen] = useState(false);
-   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
+import { cn } from '@/lib/utils';
+
+const AdminProducts = () => {
+  const { language, t, direction } = useLanguage();
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [historyProductId, setHistoryProductId] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [bulkStockDialogOpen, setBulkStockDialogOpen] = useState(false);
+  const [bulkStockValue, setBulkStockValue] = useState('');
+  const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   const { data: stockHistory, isLoading: isHistoryLoading } = useStockHistory(historyProductId);
  
@@ -176,25 +183,102 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
     }
   };
 
-   const handleConfirmDelete = async () => {
-     if (!productToDelete) return;
- 
-     try {
-       await deleteProduct.mutateAsync(productToDelete.id);
-       toast({
-         title: language === 'ar' ? 'تم الحذف' : 'Deleted',
-         description: language === 'ar' ? 'تم حذف المنتج بنجاح' : 'Product deleted successfully',
-       });
-       setDeleteDialogOpen(false);
-       setProductToDelete(null);
-     } catch (error: any) {
-       toast({
-         title: language === 'ar' ? 'خطأ' : 'Error',
-         description: error.message,
-         variant: 'destructive',
-       });
-     }
-   };
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+
+    try {
+      await deleteProduct.mutateAsync(productToDelete.id);
+      toast({
+        title: language === 'ar' ? 'تم الحذف' : 'Deleted',
+        description: language === 'ar' ? 'تم حذف المنتج بنجاح' : 'Product deleted successfully',
+      });
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProducts(prev => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllProducts = () => {
+    if (!products) return;
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)));
+    }
+  };
+
+  const handleBulkStockUpdate = async () => {
+    const value = parseInt(bulkStockValue);
+    if (isNaN(value) || value < 0) {
+      toast({
+        title: language === 'ar' ? 'قيمة غير صالحة' : 'Invalid value',
+        description: language === 'ar' ? 'يرجى إدخال رقم صحيح' : 'Please enter a valid number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsBulkUpdating(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const productId of selectedProducts) {
+      const product = products?.find(p => p.id === productId);
+      if (!product) continue;
+
+      let newStock: number;
+      switch (bulkStockMode) {
+        case 'add':
+          newStock = product.stock_quantity + value;
+          break;
+        case 'subtract':
+          newStock = Math.max(0, product.stock_quantity - value);
+          break;
+        default:
+          newStock = value;
+      }
+
+      try {
+        await updateStock.mutateAsync({ 
+          id: productId, 
+          stock_quantity: newStock,
+          change_type: bulkStockMode === 'add' ? 'restock' : 'manual_adjustment',
+        });
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    setIsBulkUpdating(false);
+    setBulkStockDialogOpen(false);
+    setBulkStockValue('');
+    setSelectedProducts(new Set());
+
+    toast({
+      title: language === 'ar' ? 'تم التحديث' : 'Bulk Update Complete',
+      description: language === 'ar' 
+        ? `تم تحديث ${successCount} منتج${errorCount > 0 ? `، فشل ${errorCount}` : ''}`
+        : `Updated ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+    });
+  };
  
    if (!isAdmin) {
      return (
@@ -238,34 +322,66 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
              onChange={(e) => setSearchQuery(e.target.value)}
              className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
            />
-         </div>
- 
-         {/* Products Table */}
-         <div className="bg-card rounded-xl border border-border/50 shadow-soft overflow-hidden">
-           <div className="overflow-x-auto">
-             <table className="w-full">
-               <thead>
-                 <tr className="border-b border-border bg-muted/30">
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'المنتج' : 'Product'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الفئة' : 'Category'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'السعر' : 'Price'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الكمية' : 'Stock'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الحالة' : 'Status'}
-                   </th>
-                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
-                     {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                   </th>
-                 </tr>
-               </thead>
+          </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedProducts.size > 0 && (
+            <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
+              <span className="text-sm font-medium">
+                {language === 'ar' 
+                  ? `تم تحديد ${selectedProducts.size} منتج`
+                  : `${selectedProducts.size} products selected`}
+              </span>
+              <Button 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setBulkStockDialogOpen(true)}
+              >
+                <PackagePlus className="h-4 w-4" />
+                {language === 'ar' ? 'تحديث المخزون' : 'Update Stock'}
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setSelectedProducts(new Set())}
+              >
+                {language === 'ar' ? 'إلغاء التحديد' : 'Clear Selection'}
+              </Button>
+            </div>
+          )}
+
+          {/* Products Table */}
+          <div className="bg-card rounded-xl border border-border/50 shadow-soft overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-4 py-3 w-12">
+                      <Checkbox
+                        checked={products?.length ? selectedProducts.size === products.length : false}
+                        onCheckedChange={toggleAllProducts}
+                      />
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'المنتج' : 'Product'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الفئة' : 'Category'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'السعر' : 'Price'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الكمية' : 'Stock'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الحالة' : 'Status'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                    </th>
+                  </tr>
+                </thead>
                <tbody>
                  {isLoading ? (
                    [...Array(5)].map((_, i) => (
@@ -286,21 +402,30 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
                        <td className="px-6 py-4"><Skeleton className="h-8 w-20" /></td>
                      </tr>
                    ))
-                 ) : products?.length === 0 ? (
-                   <tr>
-                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                       {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
-                     </td>
-                   </tr>
-                 ) : products?.map((product) => {
-                   const name = language === 'ar' ? product.name_ar : product.name;
-                   const category = product.category 
-                     ? (language === 'ar' ? product.category.name_ar : product.category.name)
-                     : '-';
- 
-                   return (
-                     <tr key={product.id} className="border-b border-border last:border-0 hover:bg-muted/20">
-                       <td className="px-6 py-4">
+                  ) : products?.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                        {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
+                      </td>
+                    </tr>
+                  ) : products?.map((product) => {
+                    const name = language === 'ar' ? product.name_ar : product.name;
+                    const category = product.category 
+                      ? (language === 'ar' ? product.category.name_ar : product.category.name)
+                      : '-';
+
+                    return (
+                      <tr key={product.id} className={cn(
+                        "border-b border-border last:border-0 hover:bg-muted/20",
+                        selectedProducts.has(product.id) && "bg-primary/5"
+                      )}>
+                        <td className="px-4 py-4">
+                          <Checkbox
+                            checked={selectedProducts.has(product.id)}
+                            onCheckedChange={() => toggleProductSelection(product.id)}
+                          />
+                        </td>
+                        <td className="px-6 py-4">
                          <div className="flex items-center gap-3">
                            <img
                              src={product.image_url || '/placeholder.svg'}
@@ -576,8 +701,85 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
           </ScrollArea>
         </DialogContent>
       </Dialog>
-     </AdminLayout>
-   );
- };
+
+      {/* Bulk Stock Update Dialog */}
+      <Dialog open={bulkStockDialogOpen} onOpenChange={setBulkStockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? 'تحديث المخزون بالجملة' : 'Bulk Stock Update'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {language === 'ar' 
+                ? `سيتم تحديث ${selectedProducts.size} منتج`
+                : `This will update ${selectedProducts.size} products`}
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'نوع التحديث' : 'Update Type'}
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'set' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('set')}
+                >
+                  {language === 'ar' ? 'تعيين' : 'Set to'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'add' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('add')}
+                >
+                  {language === 'ar' ? 'إضافة' : 'Add'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={bulkStockMode === 'subtract' ? 'default' : 'outline'}
+                  onClick={() => setBulkStockMode('subtract')}
+                >
+                  {language === 'ar' ? 'خصم' : 'Subtract'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {language === 'ar' ? 'الكمية' : 'Quantity'}
+              </label>
+              <Input
+                type="number"
+                min="0"
+                value={bulkStockValue}
+                onChange={(e) => setBulkStockValue(e.target.value)}
+                placeholder={language === 'ar' ? 'أدخل الكمية' : 'Enter quantity'}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkStockDialogOpen(false)}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button 
+              onClick={handleBulkStockUpdate}
+              disabled={isBulkUpdating || !bulkStockValue}
+            >
+              {isBulkUpdating && <Loader2 className="h-4 w-4 animate-spin me-2" />}
+              {language === 'ar' ? 'تحديث' : 'Update'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
+  );
+};
  
  export default AdminProducts;
