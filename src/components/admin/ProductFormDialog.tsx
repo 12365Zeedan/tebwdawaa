@@ -43,7 +43,6 @@
    price: z.coerce.number().min(0, 'Price must be positive'),
    original_price: z.coerce.number().min(0).optional().nullable(),
    category_id: z.string().optional().nullable(),
-   image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
    image_url: z.string().optional().or(z.literal('')),
    in_stock: z.boolean(),
    stock_quantity: z.coerce.number().min(0),
