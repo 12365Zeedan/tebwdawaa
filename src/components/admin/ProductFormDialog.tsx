@@ -31,6 +31,8 @@
  import { useLanguage } from '@/contexts/LanguageContext';
  import { useCategories } from '@/hooks/useCategories';
  import { Product } from '@/hooks/useProducts';
+ import { ImageUpload } from './ImageUpload';
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  
  const productSchema = z.object({
    name: z.string().min(1, 'Name is required'),
@@ -41,7 +43,7 @@
    price: z.coerce.number().min(0, 'Price must be positive'),
    original_price: z.coerce.number().min(0).optional().nullable(),
    category_id: z.string().optional().nullable(),
-   image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+   image_url: z.string().optional().or(z.literal('')),
    in_stock: z.boolean(),
    stock_quantity: z.coerce.number().min(0),
    requires_prescription: z.boolean(),
@@ -326,9 +328,31 @@
                name="image_url"
                render={({ field }) => (
                  <FormItem>
-                   <FormLabel>{language === 'ar' ? 'رابط الصورة' : 'Image URL'}</FormLabel>
+                   <FormLabel>{language === 'ar' ? 'صورة المنتج' : 'Product Image'}</FormLabel>
                    <FormControl>
-                     <Input {...field} placeholder="https://example.com/image.jpg" />
+                     <Tabs defaultValue="upload" className="w-full">
+                       <TabsList className="grid w-full grid-cols-2 mb-2">
+                         <TabsTrigger value="upload">
+                           {language === 'ar' ? 'رفع صورة' : 'Upload'}
+                         </TabsTrigger>
+                         <TabsTrigger value="url">
+                           {language === 'ar' ? 'رابط URL' : 'URL'}
+                         </TabsTrigger>
+                       </TabsList>
+                       <TabsContent value="upload">
+                         <ImageUpload
+                           value={field.value || null}
+                           onChange={(url) => field.onChange(url || '')}
+                         />
+                       </TabsContent>
+                       <TabsContent value="url">
+                         <Input
+                           value={field.value || ''}
+                           onChange={field.onChange}
+                           placeholder="https://example.com/image.jpg"
+                         />
+                       </TabsContent>
+                     </Tabs>
                    </FormControl>
                    <FormMessage />
                  </FormItem>
