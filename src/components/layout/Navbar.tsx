@@ -271,9 +271,9 @@ export function Navbar() {
                   <Link
                     to="/admin"
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2"
+                    className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2"
                   >
-                    <User className="h-4 w-4" />
+                    <User />
                     {t("nav.admin")}
                   </Link>
                 )}
