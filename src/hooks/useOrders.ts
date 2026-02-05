@@ -42,7 +42,7 @@
            customer_name: data.customerName,
            customer_email: data.customerEmail,
            customer_phone: data.customerPhone || null,
-           shipping_address: data.shippingAddress,
+          shipping_address: data.shippingAddress as unknown as Record<string, unknown>,
            subtotal: data.subtotal,
            shipping_cost: data.shippingCost,
            total: data.total,
