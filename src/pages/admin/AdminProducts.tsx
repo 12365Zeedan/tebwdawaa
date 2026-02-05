@@ -351,19 +351,56 @@ const AdminProducts = () => {
            </Button>
          </div>
  
-         {/* Search */}
-         <div className="relative max-w-sm">
-           <Search className={cn(
-             'absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
-             direction === 'rtl' ? 'right-3' : 'left-3'
-           )} />
-           <Input
-             type="search"
-             placeholder={t('products.search')}
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
-           />
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className={cn(
+                'absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
+                direction === 'rtl' ? 'right-3' : 'left-3'
+              )} />
+              <Input
+                type="search"
+                placeholder={t('products.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
+              />
+            </div>
+
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[220px] bg-muted/50">
+                <Filter className="h-4 w-4 me-2 text-muted-foreground" />
+                <SelectValue placeholder={language === 'ar' ? 'فلتر حسب الفئة' : 'Filter by category'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {language === 'ar' ? 'جميع الفئات' : 'All Categories'}
+                </SelectItem>
+                {parentCategories.map((parent) => (
+                  <React.Fragment key={parent.id}>
+                    <SelectItem value={parent.id} className="font-medium">
+                      {language === 'ar' ? parent.name_ar : parent.name}
+                    </SelectItem>
+                    {getSubcategories(parent.id).map((sub) => (
+                      <SelectItem key={sub.id} value={sub.id} className="ps-6 text-muted-foreground">
+                        ↳ {language === 'ar' ? sub.name_ar : sub.name}
+                      </SelectItem>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {categoryFilter !== 'all' && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCategoryFilter('all')}
+                className="text-muted-foreground"
+              >
+                {language === 'ar' ? 'مسح الفلتر' : 'Clear filter'}
+              </Button>
+            )}
           </div>
 
           {/* Bulk Actions Bar */}
