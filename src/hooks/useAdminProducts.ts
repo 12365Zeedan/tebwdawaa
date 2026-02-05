@@ -2,22 +2,24 @@
  import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
  
- interface ProductInput {
-   name: string;
-   name_ar: string;
-   slug: string;
-   description?: string | null;
-   description_ar?: string | null;
-   price: number;
-   original_price?: number | null;
-   category_id?: string | null;
-   image_url?: string | null;
-   in_stock: boolean;
-   stock_quantity: number;
-   requires_prescription: boolean;
-   is_featured: boolean;
-   is_active: boolean;
- }
+interface ProductInput {
+  name: string;
+  name_ar: string;
+  slug: string;
+  description?: string | null;
+  description_ar?: string | null;
+  price: number;
+  original_price?: number | null;
+  category_id?: string | null;
+  image_url?: string | null;
+  in_stock: boolean;
+  stock_quantity: number;
+  requires_prescription: boolean;
+  is_featured: boolean;
+  is_new_arrival: boolean;
+  is_best_seller: boolean;
+  is_active: boolean;
+}
  
  export function useCreateProduct() {
    const queryClient = useQueryClient();
