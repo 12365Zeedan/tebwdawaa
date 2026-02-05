@@ -170,48 +170,91 @@ import { TransactionHistory } from '@/components/orders/TransactionHistory';
                     <PaymentMethodBadge method={orderDetails.payment_method} />
                  </div>
  
-                 <Separator />
- 
-                 {/* Items */}
-                 <div>
-                   <h3 className="font-semibold text-foreground mb-4">
-                     {language === 'ar' ? 'المنتجات' : 'Items'}
-                   </h3>
-                   <div className="space-y-3">
-                     {orderDetails.items?.map((item: {
-                       id: string;
-                       product_name: string;
-                       product_name_ar: string | null;
-                       quantity: number;
-                       unit_price: number;
-                       total_price: number;
-                     }) => (
-                       <div
-                         key={item.id}
-                         className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
-                       >
-                         <div>
-                           <p className="font-medium text-foreground">
-                             {language === 'ar' && item.product_name_ar
-                               ? item.product_name_ar
-                               : item.product_name}
-                           </p>
-                           <p className="text-sm text-muted-foreground">
-                             {item.unit_price} {t('common.currency')} × {item.quantity}
-                           </p>
-                         </div>
-                         <p className="font-semibold text-foreground">
-                           {item.total_price} {t('common.currency')}
-                         </p>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
- 
-                 <Separator />
- 
-                 {/* Shipping Address */}
-                 {orderDetails.shipping_address && (
+                  <Separator />
+
+                  <Tabs defaultValue="items" className="w-full">
+                    <TabsList className="w-full grid grid-cols-2">
+                      <TabsTrigger value="items" className="gap-1">
+                        <Package className="h-4 w-4" />
+                        {language === 'ar' ? 'المنتجات' : 'Items'}
+                      </TabsTrigger>
+                      <TabsTrigger value="payment" className="gap-1">
+                        <CreditCard className="h-4 w-4" />
+                        {language === 'ar' ? 'الدفع' : 'Payment'}
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="items" className="mt-4">
+                      {/* Items */}
+                      <div className="space-y-3">
+                        {orderDetails.items?.map((item: {
+                          id: string;
+                          product_name: string;
+                          product_name_ar: string | null;
+                          quantity: number;
+                          unit_price: number;
+                          total_price: number;
+                        }) => (
+                          <div
+                            key={item.id}
+                            className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
+                          >
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {language === 'ar' && item.product_name_ar
+                                  ? item.product_name_ar
+                                  : item.product_name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {item.unit_price} {t('common.currency')} × {item.quantity}
+                              </p>
+                            </div>
+                            <p className="font-semibold text-foreground">
+                              {item.total_price} {t('common.currency')}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="payment" className="mt-4">
+                      {/* Payment & Transaction History */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">
+                            {language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}
+                          </span>
+                          <PaymentMethodBadge method={orderDetails.payment_method} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">
+                            {language === 'ar' ? 'حالة الدفع' : 'Payment Status'}
+                          </span>
+                          <PaymentStatusBadge status={orderDetails.payment_status} />
+                        </div>
+                        {orderDetails.payment_reference && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">
+                              {language === 'ar' ? 'مرجع الدفع' : 'Payment Reference'}
+                            </span>
+                            <span className="font-mono text-sm">{orderDetails.payment_reference}</span>
+                          </div>
+                        )}
+                        <Separator />
+                        <div>
+                          <h4 className="font-medium text-foreground mb-3">
+                            {language === 'ar' ? 'سجل المعاملات' : 'Transaction History'}
+                          </h4>
+                          <TransactionHistory orderId={orderDetails.id} />
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+
+                  <Separator />
+
+                  {/* Shipping Address */}
+                  {orderDetails.shipping_address && (
                    <div>
                      <h3 className="font-semibold text-foreground mb-2">
                        {language === 'ar' ? 'عنوان الشحن' : 'Shipping Address'}
