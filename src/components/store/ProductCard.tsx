@@ -10,6 +10,7 @@ import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { WishlistButton } from './WishlistButton';
+import { CompareButton } from './CompareButton';
 
 interface ProductCardProps {
   product: LegacyProduct | DBProduct;
@@ -96,7 +97,10 @@ export function ProductCard({ product }: ProductCardProps) {
               </Badge>
             )}
           </div>
-          <WishlistButton productId={product.id} />
+          <div className="flex gap-1">
+            <WishlistButton productId={product.id} />
+            <CompareButton productId={product.id} />
+          </div>
         </div>
 
          {!inStock && (

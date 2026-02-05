@@ -12,6 +12,8 @@ import { useProduct } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { ProductReviews } from '@/components/store/ProductReviews';
 import { WishlistButton } from '@/components/store/WishlistButton';
+import { CompareButton } from '@/components/store/CompareButton';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { cn } from '@/lib/utils';
  
  export default function ProductDetail() {
@@ -19,9 +21,17 @@ import { cn } from '@/lib/utils';
    const { language, t } = useLanguage();
    const { addToCart } = useCart();
    const { toast } = useToast();
-   const { data: product, isLoading, error } = useProduct(slug || '');
-   const [quantity, setQuantity] = useState(1);
-   const [selectedImage, setSelectedImage] = useState(0);
+  const { data: product, isLoading, error } = useProduct(slug || '');
+  const { addToRecentlyViewed } = useRecentlyViewed();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  // Track recently viewed
+  React.useEffect(() => {
+    if (product?.id) {
+      addToRecentlyViewed(product.id);
+    }
+  }, [product?.id, addToRecentlyViewed]);
  
    const handleAddToCart = () => {
      if (!product) return;
@@ -306,9 +316,12 @@ import { cn } from '@/lib/utils';
                   </p>
                 )}
 
-                <WishlistButton productId={product.id} variant="default" className="w-full" />
-            </div>
+                <div className="flex gap-2">
+                  <WishlistButton productId={product.id} variant="default" className="flex-1" />
+                  <CompareButton productId={product.id} variant="default" />
+                </div>
               </div>
+            </div>
             </div>
 
           {/* Reviews Section */}
