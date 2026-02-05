@@ -1,10 +1,12 @@
 import React from 'react';
 import { CategoryCard } from '@/components/store/CategoryCard';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { mockCategories } from '@/data/mockData';
+import { useCategories } from '@/hooks/useCategories';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function CategoriesSection() {
   const { t } = useLanguage();
+  const { data: categories, isLoading } = useCategories();
 
   return (
     <section className="py-16 md:py-24 bg-muted/30">
@@ -18,15 +20,28 @@ export function CategoriesSection() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockCategories.map((category, index) => (
-            <div
-              key={category.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CategoryCard category={category} />
-            </div>
-          ))}
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-[4/3] w-full rounded-2xl" />
+            ))
+          ) : (
+            categories?.map((category, index) => (
+              <div
+                key={category.id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CategoryCard category={{
+                  id: category.id,
+                  name: category.name,
+                  nameAr: category.name_ar,
+                  icon: category.icon || 'pill',
+                  productCount: 0,
+                  image: category.image_url || '/placeholder.svg'
+                }} />
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>
