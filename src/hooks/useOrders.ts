@@ -30,6 +30,12 @@
    return useMutation({
      mutationFn: async (data: CreateOrderData) => {
        // Create the order
+       // Generate order number in format ORD-YYYYMMDD-XXXX
+       const now = new Date();
+       const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+       const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+       const orderNumber = `ORD-${dateStr}-${randomNum}`;
+ 
        const { data: order, error: orderError } = await supabase
          .from('orders')
          .insert({
@@ -43,6 +49,7 @@
            notes: data.notes || null,
            user_id: data.userId || null,
            status: 'pending',
+           order_number: orderNumber,
          })
          .select()
          .single();

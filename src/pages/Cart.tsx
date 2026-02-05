@@ -128,10 +128,12 @@ const Cart = () => {
                 </div>
               </div>
 
-              <Button className="w-full gap-2 shadow-glow">
-                {t('cart.checkout')}
-                <Arrow className="h-4 w-4" />
-              </Button>
+               <Link to="/checkout">
+                 <Button className="w-full gap-2 shadow-glow">
+                   {t('cart.checkout')}
+                   <Arrow className="h-4 w-4" />
+                 </Button>
+               </Link>
 
               <Link to="/products">
                 <Button variant="ghost" className="w-full gap-2">
