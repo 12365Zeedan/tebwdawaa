@@ -188,14 +188,36 @@ import { cn } from '@/lib/utils';
              )}
            </div>
  
-           {/* Product Info */}
-           <div className="space-y-6">
-             {/* Category */}
-             {categoryName && (
-               <span className="text-sm font-medium text-primary uppercase tracking-wide">
-                 {categoryName}
-               </span>
-             )}
+            {/* Product Info */}
+            <div className="space-y-6">
+              {/* Product Flags */}
+              <div className="flex flex-wrap gap-2">
+                {product.is_new_arrival && (
+                  <Badge className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white gap-1">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {language === 'ar' ? 'جديد' : 'New Arrival'}
+                  </Badge>
+                )}
+                {product.is_best_seller && (
+                  <Badge className="text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white gap-1">
+                    <Flame className="h-3.5 w-3.5" />
+                    {language === 'ar' ? 'الأكثر مبيعاً' : 'Best Seller'}
+                  </Badge>
+                )}
+                {product.is_featured && (
+                  <Badge className="text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white gap-1">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    {language === 'ar' ? 'مميز' : 'Featured'}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Category */}
+              {categoryName && (
+                <span className="text-sm font-medium text-primary uppercase tracking-wide">
+                  {categoryName}
+                </span>
+              )}
  
              {/* Name */}
              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
