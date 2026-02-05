@@ -308,7 +308,8 @@ import { cn } from '@/lib/utils';
 
                 <WishlistButton productId={product.id} variant="default" className="w-full" />
             </div>
-          </div>
+              </div>
+            </div>
 
           {/* Reviews Section */}
           <Separator className="my-12" />

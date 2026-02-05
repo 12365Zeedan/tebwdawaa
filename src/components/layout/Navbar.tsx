@@ -133,12 +133,23 @@ import {
                        {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
                      </Link>
                    </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                     <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
-                       <Package className="h-4 w-4" />
-                       {language === 'ar' ? 'طلباتي' : 'My Orders'}
-                     </Link>
-                   </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="flex items-center gap-2 cursor-pointer">
+                        <Heart className="h-4 w-4" />
+                        {language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
+                        {wishlistItems.length > 0 && (
+                          <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                            {wishlistItems.length}
+                          </span>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
+                        <Package className="h-4 w-4" />
+                        {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                      </Link>
+                    </DropdownMenuItem>
                    <DropdownMenuSeparator />
                    <DropdownMenuItem
                      onClick={() => signOut()}
