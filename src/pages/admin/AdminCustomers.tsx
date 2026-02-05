@@ -125,6 +125,83 @@ export default function AdminCustomers() {
     setDetailsOpen(true);
   };
 
+  const exportToCSV = () => {
+    if (!customers || customers.length === 0) {
+      toast({
+        title: language === 'ar' ? 'لا توجد بيانات' : 'No Data',
+        description: language === 'ar' ? 'لا يوجد عملاء للتصدير' : 'No customers to export',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // CSV headers
+      const headers = [
+        'Customer Name',
+        'Customer Name (Arabic)',
+        'Phone',
+        'Total Orders',
+        'Total Spent (SAR)',
+        'Average Order (SAR)',
+        'Last Order Date',
+        'Registration Date',
+      ];
+
+      // CSV rows
+      const rows = customers.map((customer) => [
+        customer.full_name || '',
+        customer.full_name_ar || '',
+        customer.phone || '',
+        customer.order_count.toString(),
+        customer.total_spent.toFixed(2),
+        customer.order_count > 0 
+          ? (customer.total_spent / customer.order_count).toFixed(2) 
+          : '0.00',
+        customer.last_order_date 
+          ? format(new Date(customer.last_order_date), 'yyyy-MM-dd')
+          : '',
+        format(new Date(customer.created_at), 'yyyy-MM-dd'),
+      ]);
+
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...rows.map((row) => 
+          row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')
+        ),
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `customers_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: language === 'ar' ? 'تم التصدير بنجاح' : 'Export Successful',
+        description: language === 'ar' 
+          ? `تم تصدير ${customers.length} عميل`
+          : `Exported ${customers.length} customers`,
+      });
+    } catch (error) {
+      toast({
+        title: language === 'ar' ? 'خطأ في التصدير' : 'Export Error',
+        description: language === 'ar' ? 'فشل تصدير البيانات' : 'Failed to export data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; labelAr: string }> = {
       pending: { variant: 'secondary', label: 'Pending', labelAr: 'قيد الانتظار' },
