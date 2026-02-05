@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,9 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminOrders, useAdminOrderDetails, useUpdateOrderStatus } from '@/hooks/useAdminOrders';
+import { useUpdatePaymentStatus } from '@/hooks/usePayment';
+import { PaymentStatusBadge, PaymentMethodBadge, paymentStatusConfig } from '@/components/orders/PaymentStatusBadge';
+import { TransactionHistory } from '@/components/orders/TransactionHistory';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
@@ -41,11 +45,14 @@ const statusConfig: Record<string, { icon: React.ElementType; color: string; lab
 
 const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
+const paymentStatusOptions = ['pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled'];
+
 const AdminOrders = () => {
   const { language, t, direction } = useLanguage();
   const { isAdmin } = useAuth();
   const { data: orders, isLoading } = useAdminOrders();
   const updateStatus = useUpdateOrderStatus();
+  const updatePaymentStatus = useUpdatePaymentStatus();
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -57,6 +64,10 @@ const AdminOrders = () => {
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
     updateStatus.mutate({ orderId, status: newStatus });
+  };
+
+  const handlePaymentStatusChange = (orderId: string, newStatus: string) => {
+    updatePaymentStatus.mutate({ orderId, status: newStatus as any });
   };
 
   const filteredOrders = orders?.filter((order) => {
@@ -155,6 +166,9 @@ const AdminOrders = () => {
                       {language === 'ar' ? 'الحالة' : 'Status'}
                     </th>
                     <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الدفع' : 'Payment'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
                       {language === 'ar' ? 'الإجراءات' : 'Actions'}
                     </th>
                   </tr>
@@ -210,6 +224,12 @@ const AdminOrders = () => {
                               })}
                             </DropdownMenuContent>
                           </DropdownMenu>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            <PaymentStatusBadge status={order.payment_status} />
+                            <PaymentMethodBadge method={order.payment_method} />
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <Button
@@ -296,86 +316,151 @@ const AdminOrders = () => {
 
                 <Separator />
 
-                {/* Customer Info */}
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">
-                    {language === 'ar' ? 'معلومات العميل' : 'Customer Information'}
-                  </h3>
-                  <div className="text-sm space-y-1 text-muted-foreground">
-                    <p><span className="font-medium text-foreground">{orderDetails.customer_name}</span></p>
-                    <p>{orderDetails.customer_email}</p>
-                    {orderDetails.customer_phone && <p>{orderDetails.customer_phone}</p>}
-                  </div>
-                </div>
+                <Tabs defaultValue="details" className="w-full">
+                  <TabsList className="w-full grid grid-cols-3">
+                    <TabsTrigger value="details" className="gap-1">
+                      <Package className="h-4 w-4" />
+                      {language === 'ar' ? 'التفاصيل' : 'Details'}
+                    </TabsTrigger>
+                    <TabsTrigger value="items" className="gap-1">
+                      <Package className="h-4 w-4" />
+                      {language === 'ar' ? 'المنتجات' : 'Items'}
+                    </TabsTrigger>
+                    <TabsTrigger value="payment" className="gap-1">
+                      <CreditCard className="h-4 w-4" />
+                      {language === 'ar' ? 'الدفع' : 'Payment'}
+                    </TabsTrigger>
+                  </TabsList>
 
-                {/* Shipping Address */}
-                {orderDetails.shipping_address && (
-                  <>
-                    <Separator />
+                  <TabsContent value="details" className="mt-4 space-y-4">
+                    {/* Customer Info */}
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">
-                        {language === 'ar' ? 'عنوان الشحن' : 'Shipping Address'}
+                        {language === 'ar' ? 'معلومات العميل' : 'Customer Information'}
                       </h3>
-                      {(() => {
-                        const addr = orderDetails.shipping_address as {
-                          street?: string;
-                          city?: string;
-                          country?: string;
-                          postalCode?: string;
-                        };
-                        return (
-                          <div className="text-muted-foreground text-sm space-y-1">
-                            <p>{addr.street}</p>
-                            <p>
-                              {addr.city}, {addr.postalCode}
-                            </p>
-                            <p>{addr.country}</p>
-                          </div>
-                        );
-                      })()}
+                      <div className="text-sm space-y-1 text-muted-foreground">
+                        <p><span className="font-medium text-foreground">{orderDetails.customer_name}</span></p>
+                        <p>{orderDetails.customer_email}</p>
+                        {orderDetails.customer_phone && <p>{orderDetails.customer_phone}</p>}
+                      </div>
                     </div>
-                  </>
-                )}
 
-                <Separator />
+                    {/* Shipping Address */}
+                    {orderDetails.shipping_address && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-2">
+                            {language === 'ar' ? 'عنوان الشحن' : 'Shipping Address'}
+                          </h3>
+                          {(() => {
+                            const addr = orderDetails.shipping_address as {
+                              street?: string;
+                              city?: string;
+                              country?: string;
+                              postalCode?: string;
+                            };
+                            return (
+                              <div className="text-muted-foreground text-sm space-y-1">
+                                <p>{addr.street}</p>
+                                <p>
+                                  {addr.city}, {addr.postalCode}
+                                </p>
+                                <p>{addr.country}</p>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </>
+                    )}
+                  </TabsContent>
 
-                {/* Items */}
-                <div>
-                  <h3 className="font-semibold text-foreground mb-4">
-                    {language === 'ar' ? 'المنتجات' : 'Items'}
-                  </h3>
-                  <div className="space-y-3">
-                    {orderDetails.items?.map(
-                      (item: {
-                        id: string;
-                        product_name: string;
-                        product_name_ar: string | null;
-                        quantity: number;
-                        unit_price: number;
-                        total_price: number;
-                      }) => (
-                        <div
-                          key={item.id}
-                          className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
-                        >
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {language === 'ar' && item.product_name_ar
-                                ? item.product_name_ar
-                                : item.product_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {item.unit_price} {t('common.currency')} × {item.quantity}
+                  <TabsContent value="items" className="mt-4">
+                    {/* Items */}
+                    <div className="space-y-3">
+                      {orderDetails.items?.map(
+                        (item: {
+                          id: string;
+                          product_name: string;
+                          product_name_ar: string | null;
+                          quantity: number;
+                          unit_price: number;
+                          total_price: number;
+                        }) => (
+                          <div
+                            key={item.id}
+                            className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
+                          >
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {language === 'ar' && item.product_name_ar
+                                  ? item.product_name_ar
+                                  : item.product_name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {item.unit_price} {t('common.currency')} × {item.quantity}
+                              </p>
+                            </div>
+                            <p className="font-semibold text-foreground">
+                              {item.total_price} {t('common.currency')}
                             </p>
                           </div>
-                          <p className="font-semibold text-foreground">
-                            {item.total_price} {t('common.currency')}
-                          </p>
-                        </div>
-                      )
+                        )
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="payment" className="mt-4 space-y-4">
+                    {/* Payment Status Management */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}
+                      </span>
+                      <PaymentMethodBadge method={orderDetails.payment_method} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {language === 'ar' ? 'حالة الدفع' : 'Payment Status'}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <PaymentStatusBadge status={orderDetails.payment_status} />
+                        <Select
+                          value={orderDetails.payment_status || 'pending'}
+                          onValueChange={(value) => handlePaymentStatusChange(orderDetails.id, value)}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {paymentStatusOptions.map((status) => {
+                              const config = paymentStatusConfig[status];
+                              return (
+                                <SelectItem key={status} value={status}>
+                                  {language === 'ar' ? config.labelAr : config.labelEn}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {orderDetails.payment_reference && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">
+                          {language === 'ar' ? 'مرجع الدفع' : 'Payment Reference'}
+                        </span>
+                        <span className="font-mono text-sm">{orderDetails.payment_reference}</span>
+                      </div>
                     )}
-                  </div>
-                </div>
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium text-foreground mb-3">
+                        {language === 'ar' ? 'سجل المعاملات' : 'Transaction History'}
+                      </h4>
+                      <TransactionHistory orderId={orderDetails.id} />
+                    </div>
+                  </TabsContent>
+                </Tabs>
 
                 <Separator />
 
