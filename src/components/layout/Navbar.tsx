@@ -74,14 +74,14 @@ import {
  
          {/* Actions */}
          <div className="flex items-center gap-2">
-           {/* Search Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             onClick={() => setShowSearch(!showSearch)}
-             className="hidden md:flex"
-           >
-             <Search className="h-5 w-5" />
+            {/* Search Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSearch(!showSearch)}
+              className="hidden md:flex text-link hover:text-link-hover hover:bg-white/10"
+            >
+              <Search className="h-5 w-5" />
            </Button>
  
            {/* Language Toggle */}
