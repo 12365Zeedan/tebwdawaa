@@ -434,14 +434,16 @@ export default function AdminCustomers() {
                     <TableCell><Skeleton className="h-8 w-8 mx-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : customers?.length === 0 ? (
+              ) : filteredCustomers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {language === 'ar' ? 'لا يوجد عملاء' : 'No customers found'}
+                    {segmentFilter !== 'all' 
+                      ? (language === 'ar' ? 'لا يوجد عملاء في هذه الفئة' : 'No customers in this segment')
+                      : (language === 'ar' ? 'لا يوجد عملاء' : 'No customers found')}
                   </TableCell>
                 </TableRow>
               ) : (
-                customers?.map((customer) => (
+                filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
