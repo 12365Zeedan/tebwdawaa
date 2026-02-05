@@ -49,7 +49,7 @@ import {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
               <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
             </div>
-            <span className="text-xl font-bold text-foreground">
+            <span className="text-xl font-bold text-link">
               {storeName}
             </span>
           </Link>
