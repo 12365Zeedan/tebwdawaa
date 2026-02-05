@@ -62,6 +62,7 @@ const Checkout = () => {
   const isFreeShipping = totalPrice >= freeShippingThreshold;
   const shippingCost = isFreeShipping ? 0 : configuredShipping;
   const total = totalPrice + shippingCost;
+  const maintenanceMode = settings?.maintenanceMode ?? false;
  
    const form = useForm<CheckoutFormData>({
      resolver: zodResolver(checkoutSchema),
