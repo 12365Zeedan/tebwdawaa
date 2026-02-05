@@ -66,6 +66,10 @@ const AdminOrders = () => {
     updateStatus.mutate({ orderId, status: newStatus });
   };
 
+  const handlePaymentStatusChange = (orderId: string, newStatus: string) => {
+    updatePaymentStatus.mutate({ orderId, status: newStatus as any });
+  };
+
   const filteredOrders = orders?.filter((order) => {
     const matchesSearch =
       order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
