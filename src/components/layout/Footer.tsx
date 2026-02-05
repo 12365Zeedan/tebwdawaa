@@ -2,10 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 
 export function Footer() {
   const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const { data: settings } = useStoreSettings();
+
+  const storeName = language === 'ar' 
+    ? (settings?.storeNameAr || 'صيدلية') 
+    : (settings?.storeName || 'PharmaCare');
 
   return (
     <footer className="bg-foreground text-background">
@@ -15,10 +21,10 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-                <span className="text-xl font-bold text-primary-foreground">P</span>
+                <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
               </div>
               <span className="text-xl font-bold">
-                {language === 'ar' ? 'صيدلية' : 'PharmaCare'}
+                {storeName}
               </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -94,7 +100,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-muted-foreground/20">
           <p className="text-center text-sm text-muted-foreground">
-            © {currentYear} {language === 'ar' ? 'صيدلية' : 'PharmaCare'}. {t('footer.rights')}
+            © {currentYear} {storeName}. {t('footer.rights')}
           </p>
         </div>
       </div>

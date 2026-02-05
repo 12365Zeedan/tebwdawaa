@@ -62,6 +62,7 @@ const Checkout = () => {
   const isFreeShipping = totalPrice >= freeShippingThreshold;
   const shippingCost = isFreeShipping ? 0 : configuredShipping;
   const total = totalPrice + shippingCost;
+  const maintenanceMode = settings?.maintenanceMode ?? false;
  
    const form = useForm<CheckoutFormData>({
      resolver: zodResolver(checkoutSchema),
@@ -141,6 +142,35 @@ const Checkout = () => {
     }
   };
  
+   // Maintenance mode block
+   if (maintenanceMode) {
+     return (
+       <MainLayout>
+         <div className="container py-16 md:py-24">
+           <div className="max-w-md mx-auto text-center space-y-6">
+             <div className="w-24 h-24 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+               <ShoppingBag className="h-12 w-12 text-amber-600 dark:text-amber-400" />
+             </div>
+             <h1 className="text-2xl font-bold text-foreground">
+               {language === 'ar' ? 'الدفع غير متاح حالياً' : 'Checkout Unavailable'}
+             </h1>
+             <p className="text-muted-foreground">
+               {language === 'ar'
+                 ? 'نحن في وضع الصيانة حالياً. يرجى المحاولة مرة أخرى لاحقاً.'
+                 : 'We are currently in maintenance mode. Please try again later.'}
+             </p>
+             <Link to="/cart">
+               <Button variant="outline" className="gap-2">
+                 <BackArrow className="h-4 w-4" />
+                 {language === 'ar' ? 'العودة للسلة' : 'Back to Cart'}
+               </Button>
+             </Link>
+           </div>
+         </div>
+       </MainLayout>
+     );
+   }
+
    // Empty cart redirect
    if (items.length === 0 && !orderComplete) {
      return (

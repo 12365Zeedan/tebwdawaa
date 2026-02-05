@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,10 +21,15 @@ import {
    const [isOpen, setIsOpen] = useState(false);
    const [showSearch, setShowSearch] = useState(false);
    const { language, setLanguage, t, direction } = useLanguage();
-   const { totalItems } = useCart();
+    const { totalItems } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const { wishlistItems } = useWishlist();
   const location = useLocation();
+  const { data: settings } = useStoreSettings();
+
+  const storeName = language === 'ar' 
+    ? (settings?.storeNameAr || 'صيدلية') 
+    : (settings?.storeName || 'PharmaCare');
  
    const navLinks = [
      { href: '/', label: t('nav.home') },
@@ -39,14 +45,14 @@ import {
      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
        <div className="container flex h-16 items-center justify-between">
          {/* Logo */}
-         <Link to="/" className="flex items-center gap-2">
-           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-             <span className="text-xl font-bold text-primary-foreground">P</span>
-           </div>
-           <span className="text-xl font-bold text-foreground">
-             {language === 'ar' ? 'صيدلية' : 'PharmaCare'}
-           </span>
-         </Link>
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+              <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
+            </div>
+            <span className="text-xl font-bold text-foreground">
+              {storeName}
+            </span>
+          </Link>
  
          {/* Desktop Navigation */}
          <nav className="hidden md:flex items-center gap-1">
