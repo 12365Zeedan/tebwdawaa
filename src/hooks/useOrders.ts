@@ -38,7 +38,7 @@
  
        const { data: order, error: orderError } = await supabase
          .from('orders')
-         .insert({
+        .insert([{
            customer_name: data.customerName,
            customer_email: data.customerEmail,
            customer_phone: data.customerPhone || null,
@@ -50,7 +50,7 @@
            user_id: data.userId || null,
            status: 'pending',
            order_number: orderNumber,
-         })
+        }])
          .select()
          .single();
  
