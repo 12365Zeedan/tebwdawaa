@@ -1,11 +1,12 @@
- import React, { useState } from 'react';
- import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle } from 'lucide-react';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useCart } from '@/contexts/CartContext';
- import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWishlist } from '@/hooks/useWishlist';
 import {
   DropdownMenu,
   DropdownMenuContent,
