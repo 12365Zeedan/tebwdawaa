@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useProduct } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { ProductReviews } from '@/components/store/ProductReviews';
+import { YouMayAlsoLike } from '@/components/store/YouMayAlsoLike';
 import { WishlistButton } from '@/components/store/WishlistButton';
 import { CompareButton } from '@/components/store/CompareButton';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
