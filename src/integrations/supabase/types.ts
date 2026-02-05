@@ -116,6 +116,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_ar: string
+          parent_category_id: string | null
           slug: string
           sort_order: number | null
           updated_at: string
@@ -128,6 +129,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_ar: string
+          parent_category_id?: string | null
           slug: string
           sort_order?: number | null
           updated_at?: string
@@ -140,11 +142,20 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_ar?: string
+          parent_category_id?: string | null
           slug?: string
           sort_order?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
@@ -379,7 +390,9 @@ export type Database = {
           images: string[] | null
           in_stock: boolean | null
           is_active: boolean | null
+          is_best_seller: boolean | null
           is_featured: boolean | null
+          is_new_arrival: boolean | null
           name: string
           name_ar: string
           original_price: number | null
@@ -402,7 +415,9 @@ export type Database = {
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_best_seller?: boolean | null
           is_featured?: boolean | null
+          is_new_arrival?: boolean | null
           name: string
           name_ar: string
           original_price?: number | null
@@ -425,7 +440,9 @@ export type Database = {
           images?: string[] | null
           in_stock?: boolean | null
           is_active?: boolean | null
+          is_best_seller?: boolean | null
           is_featured?: boolean | null
+          is_new_arrival?: boolean | null
           name?: string
           name_ar?: string
           original_price?: number | null
