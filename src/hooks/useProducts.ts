@@ -19,6 +19,8 @@ export interface Product {
   rating: number;
   review_count: number;
   is_featured: boolean;
+  is_new_arrival: boolean;
+  is_best_seller: boolean;
   is_active: boolean;
   created_at: string;
   barcode?: string | null;

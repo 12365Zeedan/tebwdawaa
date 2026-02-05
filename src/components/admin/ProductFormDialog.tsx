@@ -34,22 +34,24 @@
  import { ImageUpload } from './ImageUpload';
  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  
- const productSchema = z.object({
-   name: z.string().min(1, 'Name is required'),
-   name_ar: z.string().min(1, 'Arabic name is required'),
-   slug: z.string().min(1, 'Slug is required'),
-   description: z.string().optional(),
-   description_ar: z.string().optional(),
-   price: z.coerce.number().min(0, 'Price must be positive'),
-   original_price: z.coerce.number().min(0).optional().nullable(),
-   category_id: z.string().optional().nullable(),
-   image_url: z.string().optional().or(z.literal('')),
-   in_stock: z.boolean(),
-   stock_quantity: z.coerce.number().min(0),
-   requires_prescription: z.boolean(),
-   is_featured: z.boolean(),
-   is_active: z.boolean(),
- });
+const productSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  name_ar: z.string().min(1, 'Arabic name is required'),
+  slug: z.string().min(1, 'Slug is required'),
+  description: z.string().optional(),
+  description_ar: z.string().optional(),
+  price: z.coerce.number().min(0, 'Price must be positive'),
+  original_price: z.coerce.number().min(0).optional().nullable(),
+  category_id: z.string().optional().nullable(),
+  image_url: z.string().optional().or(z.literal('')),
+  in_stock: z.boolean(),
+  stock_quantity: z.coerce.number().min(0),
+  requires_prescription: z.boolean(),
+  is_featured: z.boolean(),
+  is_new_arrival: z.boolean(),
+  is_best_seller: z.boolean(),
+  is_active: z.boolean(),
+});
  
  type ProductFormData = z.infer<typeof productSchema>;
  
@@ -74,60 +76,66 @@
  
    const form = useForm<ProductFormData>({
      resolver: zodResolver(productSchema),
-     defaultValues: {
-       name: '',
-       name_ar: '',
-       slug: '',
-       description: '',
-       description_ar: '',
-       price: 0,
-       original_price: null,
-       category_id: null,
-       image_url: '',
-       in_stock: true,
-       stock_quantity: 0,
-       requires_prescription: false,
-       is_featured: false,
-       is_active: true,
-     },
-   });
+    defaultValues: {
+      name: '',
+      name_ar: '',
+      slug: '',
+      description: '',
+      description_ar: '',
+      price: 0,
+      original_price: null,
+      category_id: null,
+      image_url: '',
+      in_stock: true,
+      stock_quantity: 0,
+      requires_prescription: false,
+      is_featured: false,
+      is_new_arrival: false,
+      is_best_seller: false,
+      is_active: true,
+    },
+  });
  
    useEffect(() => {
      if (product) {
-       form.reset({
-         name: product.name,
-         name_ar: product.name_ar,
-         slug: product.slug,
-         description: product.description || '',
-         description_ar: product.description_ar || '',
-         price: product.price,
-         original_price: product.original_price,
-         category_id: product.category_id,
-         image_url: product.image_url || '',
-         in_stock: product.in_stock,
-         stock_quantity: product.stock_quantity,
-         requires_prescription: product.requires_prescription,
-         is_featured: product.is_featured,
-         is_active: product.is_active,
-       });
+        form.reset({
+          name: product.name,
+          name_ar: product.name_ar,
+          slug: product.slug,
+          description: product.description || '',
+          description_ar: product.description_ar || '',
+          price: product.price,
+          original_price: product.original_price,
+          category_id: product.category_id,
+          image_url: product.image_url || '',
+          in_stock: product.in_stock,
+          stock_quantity: product.stock_quantity,
+          requires_prescription: product.requires_prescription,
+          is_featured: product.is_featured,
+          is_new_arrival: product.is_new_arrival ?? false,
+          is_best_seller: product.is_best_seller ?? false,
+          is_active: product.is_active,
+        });
      } else {
-       form.reset({
-         name: '',
-         name_ar: '',
-         slug: '',
-         description: '',
-         description_ar: '',
-         price: 0,
-         original_price: null,
-         category_id: null,
-         image_url: '',
-         in_stock: true,
-         stock_quantity: 0,
-         requires_prescription: false,
-         is_featured: false,
-         is_active: true,
-       });
-     }
+        form.reset({
+          name: '',
+          name_ar: '',
+          slug: '',
+          description: '',
+          description_ar: '',
+          price: 0,
+          original_price: null,
+          category_id: null,
+          image_url: '',
+          in_stock: true,
+          stock_quantity: 0,
+          requires_prescription: false,
+          is_featured: false,
+          is_new_arrival: false,
+          is_best_seller: false,
+          is_active: true,
+        });
+      }
    }, [product, form]);
  
    const generateSlug = (name: string) => {
@@ -359,60 +367,100 @@
                )}
              />
  
-             {/* Switches */}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <FormField
-                 control={form.control}
-                 name="in_stock"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'متوفر' : 'In Stock'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="requires_prescription"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'وصفة طبية' : 'Prescription'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="is_featured"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'مميز' : 'Featured'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="is_active"
-                 render={({ field }) => (
-                   <FormItem className="flex items-center justify-between rounded-lg border p-3">
-                     <FormLabel className="text-sm">{language === 'ar' ? 'نشط' : 'Active'}</FormLabel>
-                     <FormControl>
-                       <Switch checked={field.value} onCheckedChange={field.onChange} />
-                     </FormControl>
-                   </FormItem>
-                 )}
-               />
-             </div>
+            {/* Switches */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="in_stock"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'متوفر' : 'In Stock'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="requires_prescription"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'وصفة طبية' : 'Prescription'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                    <FormLabel className="text-sm">{language === 'ar' ? 'نشط' : 'Active'}</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Product Flags */}
+            <div className="space-y-2">
+              <FormLabel className="text-base font-medium">
+                {language === 'ar' ? 'علامات المنتج' : 'Product Flags'}
+              </FormLabel>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="is_featured"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-amber-700">
+                        {language === 'ar' ? '⭐ مميز' : '⭐ Featured'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_new_arrival"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-green-700">
+                        {language === 'ar' ? '🆕 وصل حديثاً' : '🆕 New Arrival'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_best_seller"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50/50 p-3">
+                      <FormLabel className="text-sm font-medium text-blue-700">
+                        {language === 'ar' ? '🔥 الأكثر مبيعاً' : '🔥 Best Seller'}
+                      </FormLabel>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
  
              {/* Submit Button */}
              <div className="flex justify-end gap-3">
