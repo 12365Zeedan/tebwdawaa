@@ -84,18 +84,18 @@ import {
               <Search className="h-5 w-5" />
            </Button>
  
-           {/* Language Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-             className="relative"
-           >
-             <Globe className="h-5 w-5" />
-             <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
-               {language.toUpperCase()}
-             </span>
-           </Button>
+            {/* Language Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              className="relative text-link hover:text-link-hover hover:bg-white/10"
+            >
+              <Globe className="h-5 w-5" />
+              <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
+                {language.toUpperCase()}
+              </span>
+            </Button>
  
             {/* Wishlist */}
             {user && (
