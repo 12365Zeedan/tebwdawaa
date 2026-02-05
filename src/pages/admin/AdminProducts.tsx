@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
@@ -38,6 +45,13 @@ import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
 import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
 import { cn } from '@/lib/utils';
+
+interface AdminCategory {
+  id: string;
+  name: string;
+  name_ar: string;
+  parent_category_id: string | null;
+}
 
 const AdminProducts = () => {
   const { language, t, direction } = useLanguage();
