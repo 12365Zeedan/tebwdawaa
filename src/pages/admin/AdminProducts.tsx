@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus, Filter } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
@@ -39,12 +46,20 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
 import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
 import { cn } from '@/lib/utils';
 
+interface AdminCategory {
+  id: string;
+  name: string;
+  name_ar: string;
+  parent_category_id: string | null;
+}
+
 const AdminProducts = () => {
   const { language, t, direction } = useLanguage();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -56,11 +71,29 @@ const AdminProducts = () => {
   const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
+  // Fetch categories for filter
+  const { data: categories } = useQuery({
+    queryKey: ['admin-all-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, name_ar, parent_category_id')
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data as AdminCategory[];
+    },
+    enabled: isAdmin,
+  });
+
+  const parentCategories = categories?.filter(c => !c.parent_category_id) || [];
+  const getSubcategories = (parentId: string) => 
+    categories?.filter(c => c.parent_category_id === parentId) || [];
+
   const { data: stockHistory, isLoading: isHistoryLoading } = useStockHistory(historyProductId);
  
    // Fetch all products (including inactive) for admin
    const { data: products, isLoading } = useQuery({
-     queryKey: ['admin-products', searchQuery],
+     queryKey: ['admin-products', searchQuery, categoryFilter],
      queryFn: async () => {
        let query = supabase
          .from('products')
@@ -72,6 +105,10 @@ const AdminProducts = () => {
  
        if (searchQuery) {
          query = query.or(`name.ilike.%${searchQuery}%,name_ar.ilike.%${searchQuery}%`);
+       }
+
+       if (categoryFilter && categoryFilter !== 'all') {
+         query = query.eq('category_id', categoryFilter);
        }
  
        const { data, error } = await query;
@@ -309,19 +346,56 @@ const AdminProducts = () => {
            </Button>
          </div>
  
-         {/* Search */}
-         <div className="relative max-w-sm">
-           <Search className={cn(
-             'absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
-             direction === 'rtl' ? 'right-3' : 'left-3'
-           )} />
-           <Input
-             type="search"
-             placeholder={t('products.search')}
-             value={searchQuery}
-             onChange={(e) => setSearchQuery(e.target.value)}
-             className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
-           />
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className={cn(
+                'absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
+                direction === 'rtl' ? 'right-3' : 'left-3'
+              )} />
+              <Input
+                type="search"
+                placeholder={t('products.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
+              />
+            </div>
+
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[220px] bg-muted/50">
+                <Filter className="h-4 w-4 me-2 text-muted-foreground" />
+                <SelectValue placeholder={language === 'ar' ? 'فلتر حسب الفئة' : 'Filter by category'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {language === 'ar' ? 'جميع الفئات' : 'All Categories'}
+                </SelectItem>
+                {parentCategories.map((parent) => (
+                  <React.Fragment key={parent.id}>
+                    <SelectItem value={parent.id} className="font-medium">
+                      {language === 'ar' ? parent.name_ar : parent.name}
+                    </SelectItem>
+                    {getSubcategories(parent.id).map((sub) => (
+                      <SelectItem key={sub.id} value={sub.id} className="ps-6 text-muted-foreground">
+                        ↳ {language === 'ar' ? sub.name_ar : sub.name}
+                      </SelectItem>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {categoryFilter !== 'all' && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCategoryFilter('all')}
+                className="text-muted-foreground"
+              >
+                {language === 'ar' ? 'مسح الفلتر' : 'Clear filter'}
+              </Button>
+            )}
           </div>
 
           {/* Bulk Actions Bar */}
