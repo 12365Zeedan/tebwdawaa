@@ -1,22 +1,25 @@
- import React, { useState } from 'react';
- import { Link, Navigate } from 'react-router-dom';
- import { Package, ChevronRight, ChevronLeft, Clock, CheckCircle, Truck, XCircle, Loader2 } from 'lucide-react';
- import { format } from 'date-fns';
- 
- import { MainLayout } from '@/components/layout/MainLayout';
- import { Button } from '@/components/ui/button';
- import { Badge } from '@/components/ui/badge';
- import { Skeleton } from '@/components/ui/skeleton';
- import {
-   Dialog,
-   DialogContent,
-   DialogHeader,
-   DialogTitle,
- } from '@/components/ui/dialog';
- import { Separator } from '@/components/ui/separator';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useAuth } from '@/contexts/AuthContext';
- import { useUserOrders, useOrderDetails } from '@/hooks/useUserOrders';
+import React, { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
+import { Package, ChevronRight, ChevronLeft, Clock, CheckCircle, Truck, XCircle, Loader2, CreditCard } from 'lucide-react';
+import { format } from 'date-fns';
+
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserOrders, useOrderDetails } from '@/hooks/useUserOrders';
+import { PaymentStatusBadge, PaymentMethodBadge } from '@/components/orders/PaymentStatusBadge';
+import { TransactionHistory } from '@/components/orders/TransactionHistory';
  
  const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
    pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
