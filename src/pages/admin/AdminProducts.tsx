@@ -88,11 +88,6 @@ const AdminProducts = () => {
   const parentCategories = categories?.filter(c => !c.parent_category_id) || [];
   const getSubcategories = (parentId: string) => 
     categories?.filter(c => c.parent_category_id === parentId) || [];
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
-  const [bulkStockDialogOpen, setBulkStockDialogOpen] = useState(false);
-  const [bulkStockValue, setBulkStockValue] = useState('');
-  const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
-  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
   const { data: stockHistory, isLoading: isHistoryLoading } = useStockHistory(historyProductId);
  
