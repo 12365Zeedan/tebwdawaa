@@ -398,11 +398,24 @@ export default function AdminCustomers() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">
-                            {language === 'ar' 
-                              ? (customer.full_name_ar || customer.full_name || 'غير محدد')
-                              : (customer.full_name || 'Not specified')}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {language === 'ar' 
+                                ? (customer.full_name_ar || customer.full_name || 'غير محدد')
+                                : (customer.full_name || 'Not specified')}
+                            </p>
+                            {(() => {
+                              const segment = getCustomerSegment(customer);
+                              if (!segment) return null;
+                              const SegmentIcon = segment.icon;
+                              return (
+                                <Badge variant="outline" className={segment.className}>
+                                  <SegmentIcon className="h-3 w-3 mr-1" />
+                                  {language === 'ar' ? segment.labelAr : segment.label}
+                                </Badge>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
