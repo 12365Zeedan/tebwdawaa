@@ -164,46 +164,66 @@ const Checkout = () => {
      );
    }
  
-   // Order complete success screen
-   if (orderComplete) {
-     return (
-       <MainLayout>
-         <div className="container py-16 md:py-24">
-           <div className="max-w-md mx-auto text-center space-y-6">
-             <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-               <CreditCard className="h-12 w-12 text-primary" />
-             </div>
-             <h1 className="text-2xl font-bold text-foreground">
-               {language === 'ar' ? 'تم تأكيد طلبك!' : 'Order Confirmed!'}
-             </h1>
-             <p className="text-muted-foreground">
-               {language === 'ar'
-                 ? `رقم الطلب: ${orderNumber}`
-                 : `Order number: ${orderNumber}`}
-             </p>
-             <p className="text-muted-foreground">
-               {language === 'ar'
-                 ? 'شكراً لك! سنرسل لك تأكيد الطلب عبر البريد الإلكتروني.'
-                 : 'Thank you! We will send you an order confirmation email.'}
-             </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-               <Link to="/products">
-                 <Button variant="outline" className="gap-2 w-full">
-                   <BackArrow className="h-4 w-4" />
-                   {t('cart.continue')}
-                 </Button>
-               </Link>
-               <Link to="/">
-                 <Button className="gap-2 w-full">
-                   {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
-                 </Button>
-               </Link>
-             </div>
-           </div>
-         </div>
-       </MainLayout>
-     );
-   }
+  // Order complete success screen
+  if (orderComplete) {
+    const selectedMethod = PAYMENT_METHODS.find(m => m.id === paymentMethod);
+    
+    return (
+      <MainLayout>
+        <div className="container py-16 md:py-24">
+          <div className="max-w-md mx-auto text-center space-y-6">
+            <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+              {paymentMethod === 'cod' ? (
+                <Wallet className="h-12 w-12 text-primary" />
+              ) : (
+                <CreditCard className="h-12 w-12 text-primary" />
+              )}
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {language === 'ar' ? 'تم تأكيد طلبك!' : 'Order Confirmed!'}
+            </h1>
+            <p className="text-muted-foreground">
+              {language === 'ar'
+                ? `رقم الطلب: ${orderNumber}`
+                : `Order number: ${orderNumber}`}
+            </p>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                {language === 'ar' ? 'طريقة الدفع' : 'Payment Method'}
+              </p>
+              <p className="font-medium text-foreground">
+                {language === 'ar' ? selectedMethod?.nameAr : selectedMethod?.name}
+              </p>
+              {paymentMethod === 'cod' && (
+                <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                  {language === 'ar' 
+                    ? 'سيتم تحصيل المبلغ عند الاستلام' 
+                    : 'Payment will be collected upon delivery'}
+                </p>
+              )}
+            </div>
+            <p className="text-muted-foreground">
+              {language === 'ar'
+                ? 'شكراً لك! سنرسل لك تأكيد الطلب عبر البريد الإلكتروني.'
+                : 'Thank you! We will send you an order confirmation email.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/orders">
+                <Button variant="outline" className="gap-2 w-full">
+                  {language === 'ar' ? 'متابعة الطلب' : 'Track Order'}
+                </Button>
+              </Link>
+              <Link to="/">
+                <Button className="gap-2 w-full">
+                  {language === 'ar' ? 'العودة للرئيسية' : 'Back to Home'}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
  
    return (
      <MainLayout>
