@@ -105,7 +105,7 @@ const Cart = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-foreground">
-                      {item.price * item.quantity} {t('common.currency')}
+                      {item.price * item.quantity} {currency}
                     </p>
                   </div>
                 </div>
