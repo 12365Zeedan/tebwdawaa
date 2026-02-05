@@ -62,7 +62,7 @@ export default function AdminCustomers() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
+  const [segmentFilter, setSegmentFilter] = useState<string>('all');
   // Fetch customers with their stats
   const { data: customers, isLoading } = useQuery({
     queryKey: ['admin-customers', searchQuery],
