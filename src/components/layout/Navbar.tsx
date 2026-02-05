@@ -170,7 +170,7 @@ export function Navbar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover"
+                    className="gap-2 border-link text-link hover:bg-transparent hover:text-link"
                   >
                     <User className="h-4 w-4" />
                     {t("nav.admin")}
@@ -183,7 +183,7 @@ export function Navbar() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover"
+                className="gap-2 border-link text-link hover:bg-transparent hover:text-link"
               >
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
@@ -273,7 +273,7 @@ export function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2"
                   >
-                    <User className="h-4 w-4" />
+                    <User />
                     {t("nav.admin")}
                   </Link>
                 )}
