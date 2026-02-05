@@ -100,7 +100,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-muted-foreground/20">
           <p className="text-center text-sm text-muted-foreground">
-            © {currentYear} {language === 'ar' ? 'صيدلية' : 'PharmaCare'}. {t('footer.rights')}
+            © {currentYear} {storeName}. {t('footer.rights')}
           </p>
         </div>
       </div>
