@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
- import { Product as LegacyProduct } from '@/types';
- import { Product as DBProduct } from '@/hooks/useProducts';
+import { Product as LegacyProduct } from '@/types';
+import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { WishlistButton } from './WishlistButton';
 
 interface ProductCardProps {
-   product: LegacyProduct | DBProduct;
+  product: LegacyProduct | DBProduct;
 }
 
  function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
@@ -82,17 +83,20 @@ export function ProductCard({ product }: ProductCardProps) {
         
         {/* Badges */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-           {originalPrice && (
-            <Badge variant="destructive" className="text-xs font-semibold">
-               {Math.round((1 - product.price / originalPrice) * 100)}% OFF
-            </Badge>
-          )}
-           {requiresPrescription && (
-            <Badge variant="secondary" className="text-xs gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {t('products.prescription')}
-            </Badge>
-          )}
+          <div className="flex flex-col gap-1">
+            {originalPrice && (
+              <Badge variant="destructive" className="text-xs font-semibold">
+                {Math.round((1 - product.price / originalPrice) * 100)}% OFF
+              </Badge>
+            )}
+            {requiresPrescription && (
+              <Badge variant="secondary" className="text-xs gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {t('products.prescription')}
+              </Badge>
+            )}
+          </div>
+          <WishlistButton productId={product.id} />
         </div>
 
          {!inStock && (

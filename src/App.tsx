@@ -10,15 +10,16 @@ import { CartProvider } from "@/contexts/CartContext";
 // Public Pages
 import Index from "./pages/Index";
 import Products from "./pages/Products";
- import ProductDetail from "./pages/ProductDetail";
+import ProductDetail from "./pages/ProductDetail";
 import Categories from "./pages/Categories";
 import Blog from "./pages/Blog";
 import Cart from "./pages/Cart";
- import Checkout from "./pages/Checkout";
- import OrderHistory from "./pages/OrderHistory";
- import Profile from "./pages/Profile";
+import Checkout from "./pages/Checkout";
+import OrderHistory from "./pages/OrderHistory";
+import Profile from "./pages/Profile";
+import Wishlist from "./pages/Wishlist";
 import About from "./pages/About";
- import Auth from "./pages/Auth";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -46,9 +47,10 @@ const App = () => (
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/cart" element={<Cart />} />
-                 <Route path="/checkout" element={<Checkout />} />
-                 <Route path="/orders" element={<OrderHistory />} />
-                 <Route path="/profile" element={<Profile />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/auth" element={<Auth />} />
                 

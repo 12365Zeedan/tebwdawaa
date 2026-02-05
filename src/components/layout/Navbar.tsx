@@ -1,11 +1,12 @@
- import React, { useState } from 'react';
- import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle } from 'lucide-react';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useCart } from '@/contexts/CartContext';
- import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWishlist } from '@/hooks/useWishlist';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +21,9 @@ import {
    const [showSearch, setShowSearch] = useState(false);
    const { language, setLanguage, t, direction } = useLanguage();
    const { totalItems } = useCart();
-   const { user, isAdmin, signOut } = useAuth();
-   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
+  const { wishlistItems } = useWishlist();
+  const location = useLocation();
  
    const navLinks = [
      { href: '/', label: t('nav.home') },
@@ -89,17 +91,31 @@ import {
              </span>
            </Button>
  
-           {/* Cart */}
-           <Link to="/cart">
-             <Button variant="ghost" size="icon" className="relative">
-               <ShoppingCart className="h-5 w-5" />
-               {totalItems > 0 && (
-                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
-                   {totalItems}
-                 </span>
-               )}
-             </Button>
-           </Link>
+            {/* Wishlist */}
+            {user && (
+              <Link to="/wishlist">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Heart className="h-5 w-5" />
+                  {wishlistItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
+
+            {/* Cart */}
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
  
            {/* Auth / User Menu */}
            {user ? (
@@ -117,12 +133,23 @@ import {
                        {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
                      </Link>
                    </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                     <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
-                       <Package className="h-4 w-4" />
-                       {language === 'ar' ? 'طلباتي' : 'My Orders'}
-                     </Link>
-                   </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="flex items-center gap-2 cursor-pointer">
+                        <Heart className="h-4 w-4" />
+                        {language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
+                        {wishlistItems.length > 0 && (
+                          <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                            {wishlistItems.length}
+                          </span>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
+                        <Package className="h-4 w-4" />
+                        {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                      </Link>
+                    </DropdownMenuItem>
                    <DropdownMenuSeparator />
                    <DropdownMenuItem
                      onClick={() => signOut()}
@@ -208,14 +235,27 @@ import {
                    <User className="h-4 w-4" />
                    {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
                  </Link>
-                 <Link
-                   to="/orders"
-                   onClick={() => setIsOpen(false)}
-                   className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
-                 >
-                   <Package className="h-4 w-4" />
-                   {language === 'ar' ? 'طلباتي' : 'My Orders'}
-                 </Link>
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                  >
+                    <Heart className="h-4 w-4" />
+                    {language === 'ar' ? 'قائمة الأمنيات' : 'Wishlist'}
+                    {wishlistItems.length > 0 && (
+                      <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                        {wishlistItems.length}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    to="/orders"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                  >
+                    <Package className="h-4 w-4" />
+                    {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                  </Link>
                  {isAdmin && (
                    <Link
                      to="/admin"
