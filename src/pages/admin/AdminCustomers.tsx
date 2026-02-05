@@ -315,15 +315,49 @@ export default function AdminCustomers() {
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ar' ? 'البحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="ps-9"
-          />
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={language === 'ar' ? 'البحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="ps-9"
+            />
+          </div>
+          <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder={language === 'ar' ? 'تصفية حسب الفئة' : 'Filter by segment'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {language === 'ar' ? 'جميع العملاء' : 'All Customers'}
+              </SelectItem>
+              <SelectItem value="vip">
+                <span className="flex items-center gap-2">
+                  <Crown className="h-3 w-3 text-amber-600" />
+                  {language === 'ar' ? 'مميز (VIP)' : 'VIP'}
+                </span>
+              </SelectItem>
+              <SelectItem value="regular">
+                <span className="flex items-center gap-2">
+                  <Star className="h-3 w-3 text-blue-600" />
+                  {language === 'ar' ? 'منتظم' : 'Regular'}
+                </span>
+              </SelectItem>
+              <SelectItem value="new">
+                <span className="flex items-center gap-2">
+                  <UserPlus className="h-3 w-3 text-emerald-600" />
+                  {language === 'ar' ? 'جديد' : 'New'}
+                </span>
+              </SelectItem>
+              <SelectItem value="inactive">
+                {language === 'ar' ? 'غير نشط' : 'Inactive'}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats Summary */}
