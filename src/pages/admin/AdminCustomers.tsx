@@ -168,6 +168,7 @@ export default function AdminCustomers() {
         'Customer Name',
         'Customer Name (Arabic)',
         'Phone',
+        'Segment',
         'Total Orders',
         'Total Spent (SAR)',
         'Average Order (SAR)',
@@ -175,11 +176,23 @@ export default function AdminCustomers() {
         'Registration Date',
       ];
 
+      // Helper to get segment label
+      const getSegmentLabel = (customer: CustomerWithStats) => {
+        const type = getSegmentType(customer);
+        switch (type) {
+          case 'vip': return 'VIP';
+          case 'regular': return 'Regular';
+          case 'new': return 'New';
+          default: return 'Inactive';
+        }
+      };
+
       // CSV rows
       const rows = customers.map((customer) => [
         customer.full_name || '',
         customer.full_name_ar || '',
         customer.phone || '',
+        getSegmentLabel(customer),
         customer.order_count.toString(),
         customer.total_spent.toFixed(2),
         customer.order_count > 0 
@@ -361,7 +374,7 @@ export default function AdminCustomers() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -369,7 +382,7 @@ export default function AdminCustomers() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'إجمالي العملاء' : 'Total Customers'}
+                  {language === 'ar' ? 'الإجمالي' : 'Total'}
                 </p>
                 <p className="text-2xl font-bold">{customers?.length || 0}</p>
               </div>
@@ -377,30 +390,73 @@ export default function AdminCustomers() {
           </div>
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <ShoppingBag className="h-5 w-5 text-emerald-500" />
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Crown className="h-5 w-5 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'العملاء النشطين' : 'Active Customers'}
-                </p>
+                <p className="text-sm text-muted-foreground">VIP</p>
                 <p className="text-2xl font-bold">
-                  {customers?.filter(c => c.order_count > 0).length || 0}
+                  {customers?.filter(c => getSegmentType(c) === 'vip').length || 0}
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/10 rounded-lg">
-                <ShoppingBag className="h-5 w-5 text-amber-500" />
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Star className="h-5 w-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'إجمالي المبيعات' : 'Total Sales'}
+                  {language === 'ar' ? 'منتظم' : 'Regular'}
                 </p>
                 <p className="text-2xl font-bold">
-                  {customers?.reduce((sum, c) => sum + c.total_spent, 0).toFixed(2) || '0.00'} {language === 'ar' ? 'ر.س' : 'SAR'}
+                  {customers?.filter(c => getSegmentType(c) === 'regular').length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-card rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <UserPlus className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ar' ? 'جديد' : 'New'}
+                </p>
+                <p className="text-2xl font-bold">
+                  {customers?.filter(c => getSegmentType(c) === 'new').length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-card rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-muted rounded-lg">
+                <Users className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ar' ? 'غير نشط' : 'Inactive'}
+                </p>
+                <p className="text-2xl font-bold">
+                  {customers?.filter(c => getSegmentType(c) === 'inactive').length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-card rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ar' ? 'المبيعات' : 'Sales'}
+                </p>
+                <p className="text-xl font-bold">
+                  {customers?.reduce((sum, c) => sum + c.total_spent, 0).toFixed(0) || '0'} <span className="text-sm font-normal">{language === 'ar' ? 'ر.س' : 'SAR'}</span>
                 </p>
               </div>
             </div>
