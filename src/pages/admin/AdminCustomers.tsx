@@ -31,6 +31,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus, Filter, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeSearchInput } from '@/lib/sanitize';
 
 interface CustomerWithStats {
   id: string;
@@ -75,9 +76,12 @@ export default function AdminCustomers() {
         .order('created_at', { ascending: false });
 
       if (searchQuery) {
-        profilesQuery = profilesQuery.or(
-          `full_name.ilike.%${searchQuery}%,full_name_ar.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`
-        );
+        const sanitized = sanitizeSearchInput(searchQuery);
+        if (sanitized) {
+          profilesQuery = profilesQuery.or(
+            `full_name.ilike.%${sanitized}%,full_name_ar.ilike.%${sanitized}%,phone.ilike.%${sanitized}%`
+          );
+        }
       }
 
       const { data: profiles, error: profilesError } = await profilesQuery;

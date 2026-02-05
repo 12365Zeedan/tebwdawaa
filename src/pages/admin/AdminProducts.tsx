@@ -45,6 +45,7 @@ import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
 import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
 import { cn } from '@/lib/utils';
+import { sanitizeSearchInput } from '@/lib/sanitize';
 
 interface AdminCategory {
   id: string;
@@ -104,7 +105,10 @@ const AdminProducts = () => {
          .order('created_at', { ascending: false });
  
        if (searchQuery) {
-         query = query.or(`name.ilike.%${searchQuery}%,name_ar.ilike.%${searchQuery}%`);
+         const sanitized = sanitizeSearchInput(searchQuery);
+         if (sanitized) {
+           query = query.or(`name.ilike.%${sanitized}%,name_ar.ilike.%${sanitized}%`);
+         }
        }
 
        if (categoryFilter && categoryFilter !== 'all') {

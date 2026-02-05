@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeSearchInput, isValidUUID } from '@/lib/sanitize';
 
 export interface Product {
   id: string;
@@ -78,9 +79,12 @@ export function useProducts(options?: ProductFilterOptions) {
         query = query.eq('is_best_seller', true);
       }
 
-      // Search by name or barcode
+      // Search by name or barcode (sanitized)
       if (options?.searchQuery) {
-        query = query.or(`name.ilike.%${options.searchQuery}%,name_ar.ilike.%${options.searchQuery}%,barcode.ilike.%${options.searchQuery}%`);
+        const sanitized = sanitizeSearchInput(options.searchQuery);
+        if (sanitized) {
+          query = query.or(`name.ilike.%${sanitized}%,name_ar.ilike.%${sanitized}%,barcode.ilike.%${sanitized}%`);
+        }
       }
 
       // Search by barcode directly
@@ -167,15 +171,21 @@ export function useProductByBarcode(barcode: string | null) {
    return useQuery({
      queryKey: ['product', slug],
      queryFn: async () => {
-       // Try to find by slug first, then by id
-       const { data, error } = await supabase
-         .from('products')
-         .select(`
-           *,
-           category:categories(id, name, name_ar)
-         `)
-         .or(`slug.eq.${slug},id.eq.${slug}`)
-         .maybeSingle();
+        // Find by slug or id using proper type checking
+        let productQuery = supabase
+          .from('products')
+          .select(`
+            *,
+            category:categories(id, name, name_ar)
+          `);
+
+        if (isValidUUID(slug)) {
+          productQuery = productQuery.or(`slug.eq.${sanitizeSearchInput(slug)},id.eq.${slug}`);
+        } else {
+          productQuery = productQuery.eq('slug', sanitizeSearchInput(slug));
+        }
+
+        const { data, error } = await productQuery.maybeSingle();
  
        if (error) throw error;
        return data as Product | null;
