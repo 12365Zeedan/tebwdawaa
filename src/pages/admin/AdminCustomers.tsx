@@ -50,9 +50,11 @@ interface CustomerOrder {
 
 export default function AdminCustomers() {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch customers with their stats
   const { data: customers, isLoading } = useQuery({
