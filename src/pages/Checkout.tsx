@@ -1,4 +1,4 @@
- import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
  import { useNavigate, Link } from 'react-router-dom';
  import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2 } from 'lucide-react';
  import { z } from 'zod';
@@ -22,6 +22,7 @@
  import { useCart } from '@/contexts/CartContext';
  import { useAuth } from '@/contexts/AuthContext';
  import { useCreateOrder } from '@/hooks/useOrders';
+ import { useProfile } from '@/hooks/useProfile';
  
  const checkoutSchema = z.object({
    customerName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -42,6 +43,7 @@
    const { user } = useAuth();
    const navigate = useNavigate();
    const createOrder = useCreateOrder();
+   const { data: profile } = useProfile();
    const [orderComplete, setOrderComplete] = useState(false);
    const [orderNumber, setOrderNumber] = useState('');
  
@@ -64,6 +66,29 @@
        notes: '',
      },
    });
+ 
+   // Pre-fill form with profile data
+   useEffect(() => {
+     if (profile) {
+       const address = profile.default_shipping_address as {
+         street?: string;
+         city?: string;
+         country?: string;
+         postalCode?: string;
+       } | null;
+ 
+       form.reset({
+         customerName: profile.full_name || form.getValues('customerName'),
+         customerEmail: user?.email || '',
+         customerPhone: profile.phone || '',
+         street: address?.street || '',
+         city: address?.city || '',
+         country: address?.country || 'Saudi Arabia',
+         postalCode: address?.postalCode || '',
+         notes: '',
+       });
+     }
+   }, [profile, user, form]);
  
    const onSubmit = async (data: CheckoutFormData) => {
      try {
