@@ -11,6 +11,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useProduct } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { ProductReviews } from '@/components/store/ProductReviews';
+import { YouMayAlsoLike } from '@/components/store/YouMayAlsoLike';
 import { WishlistButton } from '@/components/store/WishlistButton';
 import { CompareButton } from '@/components/store/CompareButton';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -327,6 +328,13 @@ import { cn } from '@/lib/utils';
           {/* Reviews Section */}
           <Separator className="my-12" />
           <ProductReviews productId={product.id} />
+
+          {/* You May Also Like Section */}
+          <Separator className="my-12" />
+          <YouMayAlsoLike 
+            currentProductId={product.id} 
+            categoryId={product.category_id} 
+          />
         </div>
       </MainLayout>
     );
