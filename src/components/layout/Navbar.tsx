@@ -165,12 +165,12 @@ import {
                    </DropdownMenuItem>
                  </DropdownMenuContent>
                </DropdownMenu>
-               {isAdmin && (
-                 <Link to="/admin">
-                   <Button variant="outline" size="sm" className="gap-2">
-                     <User className="h-4 w-4" />
-                     {t('nav.admin')}
-                   </Button>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm" className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover">
+                      <User className="h-4 w-4" />
+                      {t('nav.admin')}
+                    </Button>
                  </Link>
                )}
              </div>
