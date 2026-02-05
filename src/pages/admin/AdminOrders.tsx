@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,9 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminOrders, useAdminOrderDetails, useUpdateOrderStatus } from '@/hooks/useAdminOrders';
+import { useUpdatePaymentStatus } from '@/hooks/usePayment';
+import { PaymentStatusBadge, PaymentMethodBadge, paymentStatusConfig } from '@/components/orders/PaymentStatusBadge';
+import { TransactionHistory } from '@/components/orders/TransactionHistory';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
