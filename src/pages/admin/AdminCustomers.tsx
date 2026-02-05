@@ -482,11 +482,24 @@ export default function AdminCustomers() {
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-semibold">
-                      {language === 'ar' 
-                        ? (selectedCustomer.full_name_ar || selectedCustomer.full_name || 'غير محدد')
-                        : (selectedCustomer.full_name || 'Not specified')}
-                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xl font-semibold">
+                        {language === 'ar' 
+                          ? (selectedCustomer.full_name_ar || selectedCustomer.full_name || 'غير محدد')
+                          : (selectedCustomer.full_name || 'Not specified')}
+                      </h3>
+                      {(() => {
+                        const segment = getCustomerSegment(selectedCustomer);
+                        if (!segment) return null;
+                        const SegmentIcon = segment.icon;
+                        return (
+                          <Badge variant="outline" className={segment.className}>
+                            <SegmentIcon className="h-3 w-3 mr-1" />
+                            {language === 'ar' ? segment.labelAr : segment.label}
+                          </Badge>
+                        );
+                      })()}
+                    </div>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       {selectedCustomer.phone && (
                         <span className="flex items-center gap-1">
