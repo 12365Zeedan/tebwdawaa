@@ -94,33 +94,46 @@ const Checkout = () => {
      }
    }, [profile, user, form]);
  
-   const onSubmit = async (data: CheckoutFormData) => {
-     try {
-       const order = await createOrder.mutateAsync({
-         customerName: data.customerName,
-         customerEmail: data.customerEmail,
-         customerPhone: data.customerPhone,
-         shippingAddress: {
-           street: data.street,
-           city: data.city,
-           country: data.country,
-           postalCode: data.postalCode,
-         },
-         items,
-         subtotal: totalPrice,
-         shippingCost,
-         total,
-         notes: data.notes,
-         userId: user?.id,
-       });
- 
-       setOrderNumber(order.order_number);
-       setOrderComplete(true);
-       clearCart();
-     } catch (error) {
-       // Error handled in mutation
-     }
-   };
+  const isProcessing = createOrder.isPending || processPayment.isPending;
+
+  const onSubmit = async (data: CheckoutFormData) => {
+    try {
+      // Step 1: Create the order
+      const order = await createOrder.mutateAsync({
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerPhone: data.customerPhone,
+        shippingAddress: {
+          street: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+        items,
+        subtotal: totalPrice,
+        shippingCost,
+        total,
+        notes: data.notes,
+        userId: user?.id,
+      });
+
+      // Step 2: Process payment
+      await processPayment.mutateAsync({
+        orderId: order.id,
+        amount: total,
+        paymentMethod,
+        customerEmail: data.customerEmail,
+        customerName: data.customerName,
+        customerPhone: data.customerPhone,
+      });
+
+      setOrderNumber(order.order_number);
+      setOrderComplete(true);
+      clearCart();
+    } catch (error) {
+      // Error handled in mutation
+    }
+  };
  
    // Empty cart redirect
    if (items.length === 0 && !orderComplete) {
