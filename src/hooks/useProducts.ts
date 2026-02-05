@@ -32,6 +32,8 @@ export interface Product {
 export interface ProductFilterOptions {
   categoryId?: string;
   featured?: boolean;
+  newArrivals?: boolean;
+  bestSellers?: boolean;
   limit?: number;
   searchQuery?: string;
   barcode?: string;
@@ -62,6 +64,16 @@ export function useProducts(options?: ProductFilterOptions) {
       // Featured filter
       if (options?.featured) {
         query = query.eq('is_featured', true);
+      }
+
+      // New arrivals filter
+      if (options?.newArrivals) {
+        query = query.eq('is_new_arrival', true);
+      }
+
+      // Best sellers filter
+      if (options?.bestSellers) {
+        query = query.eq('is_best_seller', true);
       }
 
       // Search by name or barcode
