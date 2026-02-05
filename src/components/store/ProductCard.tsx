@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, AlertCircle, Eye } from 'lucide-react';
+import { ShoppingCart, Star, AlertCircle, Eye, Sparkles, TrendingUp, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -41,9 +41,12 @@ export function ProductCard({ product }: ProductCardProps) {
    const originalPrice = isDBProduct(product) ? product.original_price : product.originalPrice;
    const requiresPrescription = isDBProduct(product) ? product.requires_prescription : product.requiresPrescription;
    const reviewCount = isDBProduct(product) ? product.review_count : product.reviewCount;
-   const slug = isDBProduct(product) ? product.slug : product.id;
-   const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
+  const slug = isDBProduct(product) ? product.slug : product.id;
+  const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
   const stockQuantity = isDBProduct(product) ? product.stock_quantity : null;
+  const isNewArrival = isDBProduct(product) ? product.is_new_arrival : false;
+  const isBestSeller = isDBProduct(product) ? product.is_best_seller : false;
+  const isFeatured = isDBProduct(product) ? product.is_featured : false;
 
   const handleAddToCart = () => {
    // Check if out of stock
@@ -91,6 +94,24 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
           <div className="flex flex-col gap-1">
+            {isNewArrival && (
+              <Badge className="text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white gap-1">
+                <Sparkles className="h-3 w-3" />
+                {language === 'ar' ? 'جديد' : 'New'}
+              </Badge>
+            )}
+            {isBestSeller && (
+              <Badge className="text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white gap-1">
+                <Flame className="h-3 w-3" />
+                {language === 'ar' ? 'الأكثر مبيعاً' : 'Best Seller'}
+              </Badge>
+            )}
+            {isFeatured && (
+              <Badge className="text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white gap-1">
+                <TrendingUp className="h-3 w-3" />
+                {language === 'ar' ? 'مميز' : 'Featured'}
+              </Badge>
+            )}
             {originalPrice && (
               <Badge variant="destructive" className="text-xs font-semibold">
                 {Math.round((1 - product.price / originalPrice) * 100)}% OFF
