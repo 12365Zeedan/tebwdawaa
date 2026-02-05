@@ -76,23 +76,25 @@ const productSchema = z.object({
  
    const form = useForm<ProductFormData>({
      resolver: zodResolver(productSchema),
-     defaultValues: {
-       name: '',
-       name_ar: '',
-       slug: '',
-       description: '',
-       description_ar: '',
-       price: 0,
-       original_price: null,
-       category_id: null,
-       image_url: '',
-       in_stock: true,
-       stock_quantity: 0,
-       requires_prescription: false,
-       is_featured: false,
-       is_active: true,
-     },
-   });
+    defaultValues: {
+      name: '',
+      name_ar: '',
+      slug: '',
+      description: '',
+      description_ar: '',
+      price: 0,
+      original_price: null,
+      category_id: null,
+      image_url: '',
+      in_stock: true,
+      stock_quantity: 0,
+      requires_prescription: false,
+      is_featured: false,
+      is_new_arrival: false,
+      is_best_seller: false,
+      is_active: true,
+    },
+  });
  
    useEffect(() => {
      if (product) {
