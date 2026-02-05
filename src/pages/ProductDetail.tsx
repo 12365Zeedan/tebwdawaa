@@ -328,6 +328,13 @@ import { cn } from '@/lib/utils';
           {/* Reviews Section */}
           <Separator className="my-12" />
           <ProductReviews productId={product.id} />
+
+          {/* You May Also Like Section */}
+          <Separator className="my-12" />
+          <YouMayAlsoLike 
+            currentProductId={product.id} 
+            categoryId={product.category_id} 
+          />
         </div>
       </MainLayout>
     );
