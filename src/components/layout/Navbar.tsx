@@ -42,14 +42,14 @@ import {
    const isActive = (path: string) => location.pathname === path;
  
    return (
-     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-header backdrop-blur supports-[backdrop-filter]:bg-header/95">
        <div className="container flex h-16 items-center justify-between">
          {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
               <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
             </div>
-            <span className="text-xl font-bold text-foreground">
+            <span className="text-xl font-bold text-link">
               {storeName}
             </span>
           </Link>
@@ -60,11 +60,11 @@ import {
              <Link
                key={link.href}
                to={link.href}
-               className={cn(
-                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                 isActive(link.href)
-                   ? 'bg-primary text-primary-foreground'
-                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                className={cn(
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                  isActive(link.href)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-link hover:text-link-hover hover:bg-white/10'
                )}
              >
                {link.label}
@@ -74,62 +74,62 @@ import {
  
          {/* Actions */}
          <div className="flex items-center gap-2">
-           {/* Search Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             onClick={() => setShowSearch(!showSearch)}
-             className="hidden md:flex"
-           >
-             <Search className="h-5 w-5" />
+            {/* Search Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSearch(!showSearch)}
+              className="hidden md:flex text-link hover:text-link-hover hover:bg-white/10"
+            >
+              <Search className="h-5 w-5" />
            </Button>
  
-           {/* Language Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-             className="relative"
-           >
-             <Globe className="h-5 w-5" />
-             <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
-               {language.toUpperCase()}
-             </span>
-           </Button>
+            {/* Language Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              className="relative text-link hover:text-link-hover hover:bg-white/10"
+            >
+              <Globe className="h-5 w-5" />
+              <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
+                {language.toUpperCase()}
+              </span>
+            </Button>
  
-            {/* Wishlist */}
-            {user && (
-              <Link to="/wishlist">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Heart className="h-5 w-5" />
-                  {wishlistItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
-                      {wishlistItems.length}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-            )}
+             {/* Wishlist */}
+             {user && (
+               <Link to="/wishlist">
+                 <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
+                   <Heart className="h-5 w-5" />
+                   {wishlistItems.length > 0 && (
+                     <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                       {wishlistItems.length}
+                     </span>
+                   )}
+                 </Button>
+               </Link>
+             )}
 
-            {/* Cart */}
-            <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
-                    {totalItems}
-                  </span>
-                )}
-              </Button>
-            </Link>
+             {/* Cart */}
+             <Link to="/cart">
+               <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
+                 <ShoppingCart className="h-5 w-5" />
+                 {totalItems > 0 && (
+                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+                     {totalItems}
+                   </span>
+                 )}
+               </Button>
+             </Link>
  
            {/* Auth / User Menu */}
            {user ? (
              <div className="hidden md:flex items-center gap-2">
-               <DropdownMenu>
-                 <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" size="icon">
-                     <UserCircle className="h-5 w-5" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10">
+                      <UserCircle className="h-5 w-5" />
                    </Button>
                  </DropdownMenuTrigger>
                  <DropdownMenuContent align="end" className="w-48">
@@ -165,33 +165,33 @@ import {
                    </DropdownMenuItem>
                  </DropdownMenuContent>
                </DropdownMenu>
-               {isAdmin && (
-                 <Link to="/admin">
-                   <Button variant="outline" size="sm" className="gap-2">
-                     <User className="h-4 w-4" />
-                     {t('nav.admin')}
-                   </Button>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="outline" size="sm" className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover">
+                      <User className="h-4 w-4" />
+                      {t('nav.admin')}
+                    </Button>
                  </Link>
                )}
              </div>
-           ) : (
-             <Link to="/auth" className="hidden md:block">
-               <Button variant="outline" size="sm" className="gap-2">
-                 <User className="h-4 w-4" />
-                 {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-               </Button>
+            ) : (
+              <Link to="/auth" className="hidden md:block">
+                <Button variant="outline" size="sm" className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover">
+                  <User className="h-4 w-4" />
+                  {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                </Button>
              </Link>
            )}
  
-           {/* Mobile Menu Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             className="md:hidden"
-             onClick={() => setIsOpen(!isOpen)}
-           >
-             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-           </Button>
+            {/* Mobile Menu Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-link hover:text-link-hover hover:bg-white/10"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
          </div>
        </div>
  
