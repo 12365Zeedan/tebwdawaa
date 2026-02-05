@@ -476,28 +476,32 @@ const Checkout = () => {
  
                <Separator />
  
-               {/* Totals */}
-               <div className="space-y-3">
-                 <div className="flex justify-between text-muted-foreground">
-                   <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                   <span>
-                     {totalPrice} {t('common.currency')}
-                   </span>
-                 </div>
-                 <div className="flex justify-between text-muted-foreground">
-                   <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                    <span className="text-primary">
-                     {language === 'ar' ? 'مجاني' : 'Free'}
-                   </span>
-                 </div>
-                 <Separator />
-                 <div className="flex justify-between text-lg font-bold text-foreground">
-                   <span>{t('cart.total')}</span>
-                   <span>
-                     {total} {t('common.currency')}
-                   </span>
-                 </div>
-               </div>
+                {/* Totals */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                    <span>
+                      {totalPrice} {currency}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
+                    {isFreeShipping ? (
+                      <span className="text-green-600">
+                        {language === 'ar' ? 'مجاني' : 'Free'}
+                      </span>
+                    ) : (
+                      <span>{shippingCost} {currency}</span>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold text-foreground">
+                    <span>{t('cart.total')}</span>
+                    <span>
+                      {total} {currency}
+                    </span>
+                  </div>
+                </div>
  
                 {/* Submit Button - Desktop */}
                 <div className="hidden lg:block">
