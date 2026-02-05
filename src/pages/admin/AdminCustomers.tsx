@@ -182,6 +182,7 @@ export default function AdminCustomers() {
         'Total Orders',
         'Total Spent (SAR)',
         'Average Order (SAR)',
+        'Lifetime Value (SAR)',
         'Last Order Date',
         'Registration Date',
       ];
