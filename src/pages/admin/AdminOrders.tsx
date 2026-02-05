@@ -226,6 +226,12 @@ const AdminOrders = () => {
                           </DropdownMenu>
                         </td>
                         <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            <PaymentStatusBadge status={order.payment_status} />
+                            <PaymentMethodBadge method={order.payment_method} />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
                           <Button
                             variant="ghost"
                             size="sm"
