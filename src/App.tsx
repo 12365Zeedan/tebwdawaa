@@ -18,6 +18,7 @@ import Checkout from "./pages/Checkout";
 import OrderHistory from "./pages/OrderHistory";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
+import Compare from "./pages/Compare";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
