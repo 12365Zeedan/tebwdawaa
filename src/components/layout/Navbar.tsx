@@ -270,7 +270,7 @@ export function Navbar() {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => setIsOpen(false)}
                     className="px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2"
                   >
                     <User className="h-4 w-4" />
