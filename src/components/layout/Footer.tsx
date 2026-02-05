@@ -47,16 +47,16 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t('footer.quickLinks')}</h3>
             <nav className="flex flex-col gap-2">
-              <Link to="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/products" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('nav.products')}
               </Link>
-              <Link to="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/categories" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('nav.categories')}
               </Link>
-              <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/blog" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('nav.blog')}
               </Link>
-              <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/about" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('nav.about')}
               </Link>
             </nav>
