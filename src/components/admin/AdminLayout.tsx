@@ -10,7 +10,8 @@ import {
   Globe,
   LogOut,
   Menu,
-  X
+  X,
+  FolderTree
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -29,6 +30,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
     { href: '/admin/products', icon: Package, label: t('admin.products') },
+    { href: '/admin/categories', icon: FolderTree, label: language === 'ar' ? 'الفئات' : 'Categories' },
     { href: '/admin/orders', icon: ShoppingCart, label: t('admin.orders') },
     { href: '/admin/customers', icon: Users, label: t('admin.customers') },
     { href: '/admin/blog', icon: FileText, label: t('admin.blog') },
