@@ -3,6 +3,13 @@
  import { useToast } from '@/hooks/use-toast';
  import { CartItem } from '@/contexts/CartContext';
  import type { Json } from '@/integrations/supabase/types';
+
+interface StockCheck {
+  productId: string;
+  productName: string;
+  requestedQuantity: number;
+  availableStock: number;
+}
  
  interface ShippingAddress {
    street: string;
@@ -30,6 +37,34 @@
  
    return useMutation({
      mutationFn: async (data: CreateOrderData) => {
+      // Check stock availability before creating order
+      const productIds = data.items.map(item => item.id);
+      const { data: products, error: stockError } = await supabase
+        .from('products')
+        .select('id, name, stock_quantity, in_stock')
+        .in('id', productIds);
+
+      if (stockError) throw stockError;
+
+      // Validate stock for each item
+      const insufficientStock: StockCheck[] = [];
+      for (const item of data.items) {
+        const product = products?.find(p => p.id === item.id);
+        if (!product || !product.in_stock || (product.stock_quantity !== null && product.stock_quantity < item.quantity)) {
+          insufficientStock.push({
+            productId: item.id,
+            productName: item.name,
+            requestedQuantity: item.quantity,
+            availableStock: product?.stock_quantity ?? 0,
+          });
+        }
+      }
+
+      if (insufficientStock.length > 0) {
+        const outOfStockItems = insufficientStock.map(i => i.productName).join(', ');
+        throw new Error(`Insufficient stock for: ${outOfStockItems}`);
+      }
+
        // Create the order
        // Generate order number in format ORD-YYYYMMDD-XXXX
        const now = new Date();
@@ -78,6 +113,7 @@
      },
      onSuccess: (order) => {
        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
        toast({
          title: 'Order placed successfully!',
          description: `Order number: ${order.order_number}`,
