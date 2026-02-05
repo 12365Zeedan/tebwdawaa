@@ -209,6 +209,7 @@ export default function AdminCustomers() {
         customer.order_count > 0 
           ? (customer.total_spent / customer.order_count).toFixed(2) 
           : '0.00',
+        customer.lifetime_value.toFixed(2),
         customer.last_order_date 
           ? format(new Date(customer.last_order_date), 'yyyy-MM-dd')
           : '',
