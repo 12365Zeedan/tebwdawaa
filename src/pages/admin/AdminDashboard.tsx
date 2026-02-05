@@ -1,4 +1,3 @@
-import React from 'react';
 import React, { useState } from 'react';
 import { DollarSign, ShoppingCart, Users, Package, AlertTriangle, Settings, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
