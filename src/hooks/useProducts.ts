@@ -66,6 +66,16 @@ export function useProducts(options?: ProductFilterOptions) {
         query = query.eq('is_featured', true);
       }
 
+      // New arrivals filter
+      if (options?.newArrivals) {
+        query = query.eq('is_new_arrival', true);
+      }
+
+      // Best sellers filter
+      if (options?.bestSellers) {
+        query = query.eq('is_best_seller', true);
+      }
+
       // Search by name or barcode
       if (options?.searchQuery) {
         query = query.or(`name.ilike.%${options.searchQuery}%,name_ar.ilike.%${options.searchQuery}%,barcode.ilike.%${options.searchQuery}%`);
