@@ -2,6 +2,7 @@
  import { supabase } from '@/integrations/supabase/client';
  import { useToast } from '@/hooks/use-toast';
  import { CartItem } from '@/contexts/CartContext';
+ import type { Json } from '@/integrations/supabase/types';
  
  interface ShippingAddress {
    street: string;
@@ -42,7 +43,7 @@
            customer_name: data.customerName,
            customer_email: data.customerEmail,
            customer_phone: data.customerPhone || null,
-          shipping_address: data.shippingAddress as unknown as Record<string, unknown>,
+          shipping_address: data.shippingAddress as Json,
            subtotal: data.subtotal,
            shipping_cost: data.shippingCost,
            total: data.total,
