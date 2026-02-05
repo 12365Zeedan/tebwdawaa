@@ -99,8 +99,8 @@ export function PaymentMethodSelector({
       </RadioGroup>
 
       {value === 'cod' && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
             {language === 'ar' 
               ? '💵 سيتم تحصيل المبلغ نقداً عند استلام الطلب' 
               : '💵 Payment will be collected in cash upon delivery'}

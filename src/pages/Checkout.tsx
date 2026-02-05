@@ -493,28 +493,32 @@ const Checkout = () => {
                  </div>
                </div>
  
-               {/* Submit Button - Desktop */}
-               <div className="hidden lg:block">
-                 <Button
-                   type="submit"
-                   className="w-full gap-2 shadow-glow"
-                   size="lg"
-                   disabled={createOrder.isPending}
-                   onClick={form.handleSubmit(onSubmit)}
-                 >
-                   {createOrder.isPending ? (
-                     <>
-                       <Loader2 className="h-4 w-4 animate-spin" />
-                       {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
-                     </>
-                   ) : (
-                     <>
-                       <CreditCard className="h-4 w-4" />
-                       {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
-                     </>
-                   )}
-                 </Button>
-               </div>
+                {/* Submit Button - Desktop */}
+                <div className="hidden lg:block">
+                  <Button
+                    type="submit"
+                    className="w-full gap-2 shadow-glow"
+                    size="lg"
+                    disabled={isProcessing}
+                    onClick={form.handleSubmit(onSubmit)}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
+                      </>
+                    ) : (
+                      <>
+                        {paymentMethod === 'cod' ? (
+                          <Wallet className="h-4 w-4" />
+                        ) : (
+                          <CreditCard className="h-4 w-4" />
+                        )}
+                        {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
+                      </>
+                    )}
+                  </Button>
+                </div>
  
                {/* Security Note */}
                <p className="text-xs text-muted-foreground text-center">
