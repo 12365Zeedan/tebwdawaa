@@ -8,7 +8,7 @@ import { useCart } from '@/contexts/CartContext';
  import { Product as LegacyProduct } from '@/types';
  import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
- import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
    product: LegacyProduct | DBProduct;
@@ -39,8 +39,21 @@ export function ProductCard({ product }: ProductCardProps) {
    const reviewCount = isDBProduct(product) ? product.review_count : product.reviewCount;
    const slug = isDBProduct(product) ? product.slug : product.id;
    const nameAr = isDBProduct(product) ? product.name_ar : product.nameAr;
+  const stockQuantity = isDBProduct(product) ? product.stock_quantity : null;
 
   const handleAddToCart = () => {
+   // Check if out of stock
+   if (!inStock || (stockQuantity !== null && stockQuantity <= 0)) {
+     toast({
+       title: language === 'ar' ? 'غير متوفر' : 'Out of Stock',
+       description: language === 'ar' 
+         ? 'هذا المنتج غير متوفر حالياً'
+         : 'This product is currently out of stock',
+       variant: 'destructive',
+     });
+     return;
+   }
+
     addToCart({
       id: product.id,
       name: product.name,
