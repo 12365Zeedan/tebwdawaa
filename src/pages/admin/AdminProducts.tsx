@@ -45,6 +45,7 @@ import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
 import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
 import { cn } from '@/lib/utils';
+import { sanitizeSearchInput } from '@/lib/sanitize';
 
 interface AdminCategory {
   id: string;
