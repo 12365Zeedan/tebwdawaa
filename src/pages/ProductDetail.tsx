@@ -225,8 +225,8 @@
              <div className="flex items-center gap-2">
                {product.in_stock ? (
                  <>
-                   <Check className="h-5 w-5 text-green-500" />
-                   <span className="text-green-600 font-medium">
+                   <Check className="h-5 w-5 text-primary" />
+                   <span className="text-primary font-medium">
                      {language === 'ar' ? 'متوفر في المخزون' : 'In Stock'}
                      {product.stock_quantity > 0 && (
                        <span className="text-muted-foreground font-normal ms-1">
