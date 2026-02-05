@@ -21,10 +21,10 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-                <span className="text-xl font-bold text-primary-foreground">P</span>
+                <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
               </div>
               <span className="text-xl font-bold">
-                {language === 'ar' ? 'صيدلية' : 'PharmaCare'}
+                {storeName}
               </span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
