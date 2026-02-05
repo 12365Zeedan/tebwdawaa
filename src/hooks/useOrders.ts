@@ -107,9 +107,33 @@ interface StockCheck {
          .from('order_items')
          .insert(orderItems);
  
-       if (itemsError) throw itemsError;
- 
-       return order;
+        if (itemsError) throw itemsError;
+
+        // Send order confirmation email (fire-and-forget)
+        const emailPayload = {
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          orderNumber: order.order_number,
+          items: orderItems.map(item => ({
+            product_name: item.product_name,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.total_price,
+          })),
+          subtotal: data.subtotal,
+          shippingCost: data.shippingCost,
+          total: data.total,
+          shippingAddress: data.shippingAddress,
+        };
+
+        supabase.functions
+          .invoke('send-order-confirmation', { body: emailPayload })
+          .then(({ error: emailError }) => {
+            if (emailError) console.error('Failed to send confirmation email:', emailError);
+            else console.log('Order confirmation email sent');
+          });
+
+        return order;
      },
      onSuccess: (order) => {
        queryClient.invalidateQueries({ queryKey: ['orders'] });
