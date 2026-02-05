@@ -185,5 +185,14 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
     </div>
+    
+    {dbProduct && (
+      <QuickViewModal 
+        product={dbProduct} 
+        open={quickViewOpen} 
+        onOpenChange={setQuickViewOpen} 
+      />
+    )}
+    </>
   );
 }
