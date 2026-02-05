@@ -59,11 +59,35 @@ const AdminProducts = () => {
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [historyProductId, setHistoryProductId] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [bulkStockDialogOpen, setBulkStockDialogOpen] = useState(false);
+  const [bulkStockValue, setBulkStockValue] = useState('');
+  const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  // Fetch categories for filter
+  const { data: categories } = useQuery({
+    queryKey: ['admin-all-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, name_ar, parent_category_id')
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data as AdminCategory[];
+    },
+    enabled: isAdmin,
+  });
+
+  const parentCategories = categories?.filter(c => !c.parent_category_id) || [];
+  const getSubcategories = (parentId: string) => 
+    categories?.filter(c => c.parent_category_id === parentId) || [];
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [bulkStockDialogOpen, setBulkStockDialogOpen] = useState(false);
   const [bulkStockValue, setBulkStockValue] = useState('');
