@@ -31,6 +31,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus, Filter, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeSearchInput } from '@/lib/sanitize';
 
 interface CustomerWithStats {
   id: string;
