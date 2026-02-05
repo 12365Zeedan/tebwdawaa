@@ -166,6 +166,9 @@ const AdminOrders = () => {
                       {language === 'ar' ? 'الحالة' : 'Status'}
                     </th>
                     <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الدفع' : 'Payment'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
                       {language === 'ar' ? 'الإجراءات' : 'Actions'}
                     </th>
                   </tr>
