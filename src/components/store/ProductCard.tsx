@@ -74,7 +74,11 @@ export function ProductCard({ product }: ProductCardProps) {
      });
   };
 
+  // For quick view, we need the full DBProduct format
+  const dbProduct = isDBProduct(product) ? product : null;
+
   return (
+    <>
     <div className="product-card group bg-card rounded-2xl overflow-hidden border border-border/50 shadow-soft">
       {/* Image */}
        <Link to={`/products/${slug}`} className="block relative aspect-square overflow-hidden">
