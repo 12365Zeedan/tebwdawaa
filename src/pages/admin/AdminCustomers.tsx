@@ -95,12 +95,21 @@ export default function AdminCustomers() {
           const orderCount = orders?.length || 0;
           const totalSpent = orders?.reduce((sum, o) => sum + Number(o.total), 0) || 0;
           const lastOrderDate = orders?.[0]?.created_at || null;
+          
+          // Calculate Customer Lifetime Value (CLV)
+          // Simple CLV = Average Order Value × Purchase Frequency × Customer Lifespan (in months)
+          const avgOrderValue = orderCount > 0 ? totalSpent / orderCount : 0;
+          const customerAgeMonths = Math.max(1, Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)));
+          const purchaseFrequency = orderCount / customerAgeMonths;
+          const projectedLifespanMonths = 24; // Assume 2-year customer lifespan
+          const lifetimeValue = avgOrderValue * purchaseFrequency * projectedLifespanMonths;
 
           return {
             ...profile,
             order_count: orderCount,
             total_spent: totalSpent,
             last_order_date: lastOrderDate,
+            lifetime_value: lifetimeValue,
           };
         })
       );
