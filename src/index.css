@@ -58,8 +58,8 @@
     --input: 200 30% 85%;
     --ring: 200 79% 49%;
 
-    /* Link colors - white default, #1E9ED8 hover */
-    --link: 0 0% 100%;
+    /* Link colors - black default, #1E9ED8 hover */
+    --link: 0 0% 0%;
     --link-hover: 197 75% 48%;
 
     /* Header background - #004180 */
