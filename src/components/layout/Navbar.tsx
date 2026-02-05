@@ -183,15 +183,15 @@ import {
              </Link>
            )}
  
-           {/* Mobile Menu Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             className="md:hidden"
-             onClick={() => setIsOpen(!isOpen)}
-           >
-             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-           </Button>
+            {/* Mobile Menu Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-link hover:text-link-hover hover:bg-white/10"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
          </div>
        </div>
  
