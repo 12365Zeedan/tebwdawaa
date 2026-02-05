@@ -1,16 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { cn } from '@/lib/utils';
 
 const Cart = () => {
   const { language, t, direction } = useLanguage();
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const { data: settings, isLoading: settingsLoading } = useStoreSettings();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
+
+  const shippingCost = settings?.shippingCost ?? 0;
+  const freeShippingThreshold = settings?.freeShippingThreshold ?? 0;
+  const currency = settings?.currency ?? 'SAR';
+  const isFreeShipping = totalPrice >= freeShippingThreshold;
+  const finalShipping = isFreeShipping ? 0 : shippingCost;
+  const total = totalPrice + finalShipping;
 
   if (items.length === 0) {
     return (
@@ -60,8 +69,8 @@ const Cart = () => {
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="font-semibold text-foreground">{name}</h3>
-                      <p className="text-lg font-bold text-primary">
-                        {item.price} {t('common.currency')}
+                  <p className="text-lg font-bold text-primary">
+                        {item.price} {currency}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -96,7 +105,7 @@ const Cart = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-foreground">
-                      {item.price * item.quantity} {t('common.currency')}
+                      {item.price * item.quantity} {currency}
                     </p>
                   </div>
                 </div>
@@ -114,16 +123,27 @@ const Cart = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                  <span>{totalPrice} {t('common.currency')}</span>
+                  <span>{totalPrice} {currency}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                  <span>{language === 'ar' ? 'مجاني' : 'Free'}</span>
+                  {isFreeShipping ? (
+                    <span className="text-green-600">{language === 'ar' ? 'مجاني' : 'Free'}</span>
+                  ) : (
+                    <span>{finalShipping} {currency}</span>
+                  )}
                 </div>
+                {!isFreeShipping && freeShippingThreshold > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ar'
+                      ? `أضف ${freeShippingThreshold - totalPrice} ${currency} للحصول على شحن مجاني`
+                      : `Add ${freeShippingThreshold - totalPrice} ${currency} for free shipping`}
+                  </p>
+                )}
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between text-lg font-bold text-foreground">
                     <span>{t('cart.total')}</span>
-                    <span>{totalPrice} {t('common.currency')}</span>
+                    <span>{total} {currency}</span>
                   </div>
                 </div>
               </div>

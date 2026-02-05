@@ -24,6 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateOrder } from '@/hooks/useOrders';
 import { useProfile } from '@/hooks/useProfile';
 import { useProcessPayment } from '@/hooks/usePayment';
+import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  const checkoutSchema = z.object({
@@ -47,15 +48,20 @@ const Checkout = () => {
   const createOrder = useCreateOrder();
   const processPayment = useProcessPayment();
   const { data: profile } = useProfile();
+  const { data: settings } = useStoreSettings();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
  
-   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
-   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
- 
-   const shippingCost = 0; // Free shipping
-   const total = totalPrice + shippingCost;
+  const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
+  const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
+
+  const currency = settings?.currency ?? 'SAR';
+  const configuredShipping = settings?.shippingCost ?? 0;
+  const freeShippingThreshold = settings?.freeShippingThreshold ?? 0;
+  const isFreeShipping = totalPrice >= freeShippingThreshold;
+  const shippingCost = isFreeShipping ? 0 : configuredShipping;
+  const total = totalPrice + shippingCost;
  
    const form = useForm<CheckoutFormData>({
      resolver: zodResolver(checkoutSchema),
@@ -459,9 +465,9 @@ const Checkout = () => {
                          <p className="text-xs text-muted-foreground">
                            {language === 'ar' ? 'الكمية' : 'Qty'}: {item.quantity}
                          </p>
-                         <p className="text-sm font-semibold text-primary">
-                           {item.price * item.quantity} {t('common.currency')}
-                         </p>
+                        <p className="text-sm font-semibold text-primary">
+                            {item.price * item.quantity} {currency}
+                          </p>
                        </div>
                      </div>
                    );
@@ -470,28 +476,32 @@ const Checkout = () => {
  
                <Separator />
  
-               {/* Totals */}
-               <div className="space-y-3">
-                 <div className="flex justify-between text-muted-foreground">
-                   <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                   <span>
-                     {totalPrice} {t('common.currency')}
-                   </span>
-                 </div>
-                 <div className="flex justify-between text-muted-foreground">
-                   <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                    <span className="text-primary">
-                     {language === 'ar' ? 'مجاني' : 'Free'}
-                   </span>
-                 </div>
-                 <Separator />
-                 <div className="flex justify-between text-lg font-bold text-foreground">
-                   <span>{t('cart.total')}</span>
-                   <span>
-                     {total} {t('common.currency')}
-                   </span>
-                 </div>
-               </div>
+                {/* Totals */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                    <span>
+                      {totalPrice} {currency}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
+                    {isFreeShipping ? (
+                      <span className="text-green-600">
+                        {language === 'ar' ? 'مجاني' : 'Free'}
+                      </span>
+                    ) : (
+                      <span>{shippingCost} {currency}</span>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold text-foreground">
+                    <span>{t('cart.total')}</span>
+                    <span>
+                      {total} {currency}
+                    </span>
+                  </div>
+                </div>
  
                 {/* Submit Button - Desktop */}
                 <div className="hidden lg:block">
