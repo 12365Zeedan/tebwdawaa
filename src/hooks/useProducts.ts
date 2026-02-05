@@ -79,9 +79,12 @@ export function useProducts(options?: ProductFilterOptions) {
         query = query.eq('is_best_seller', true);
       }
 
-      // Search by name or barcode
+      // Search by name or barcode (sanitized)
       if (options?.searchQuery) {
-        query = query.or(`name.ilike.%${options.searchQuery}%,name_ar.ilike.%${options.searchQuery}%,barcode.ilike.%${options.searchQuery}%`);
+        const sanitized = sanitizeSearchInput(options.searchQuery);
+        if (sanitized) {
+          query = query.or(`name.ilike.%${sanitized}%,name_ar.ilike.%${sanitized}%,barcode.ilike.%${sanitized}%`);
+        }
       }
 
       // Search by barcode directly
