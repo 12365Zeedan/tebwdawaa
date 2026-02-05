@@ -2,6 +2,7 @@
  import { supabase } from '@/integrations/supabase/client';
  import { useAuth } from '@/contexts/AuthContext';
  import { useToast } from '@/hooks/use-toast';
+ import type { Json } from '@/integrations/supabase/types';
  
  interface ShippingAddress {
    street: string;
@@ -53,7 +54,9 @@
            full_name: data.full_name,
            full_name_ar: data.full_name_ar,
            phone: data.phone,
-           default_shipping_address: data.default_shipping_address as unknown as Record<string, unknown>,
+          default_shipping_address: data.default_shipping_address 
+            ? JSON.parse(JSON.stringify(data.default_shipping_address)) as Json
+            : null,
          })
          .eq('user_id', user.id)
          .select()
