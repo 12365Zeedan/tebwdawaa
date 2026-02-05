@@ -98,22 +98,24 @@ const productSchema = z.object({
  
    useEffect(() => {
      if (product) {
-       form.reset({
-         name: product.name,
-         name_ar: product.name_ar,
-         slug: product.slug,
-         description: product.description || '',
-         description_ar: product.description_ar || '',
-         price: product.price,
-         original_price: product.original_price,
-         category_id: product.category_id,
-         image_url: product.image_url || '',
-         in_stock: product.in_stock,
-         stock_quantity: product.stock_quantity,
-         requires_prescription: product.requires_prescription,
-         is_featured: product.is_featured,
-         is_active: product.is_active,
-       });
+        form.reset({
+          name: product.name,
+          name_ar: product.name_ar,
+          slug: product.slug,
+          description: product.description || '',
+          description_ar: product.description_ar || '',
+          price: product.price,
+          original_price: product.original_price,
+          category_id: product.category_id,
+          image_url: product.image_url || '',
+          in_stock: product.in_stock,
+          stock_quantity: product.stock_quantity,
+          requires_prescription: product.requires_prescription,
+          is_featured: product.is_featured,
+          is_new_arrival: product.is_new_arrival ?? false,
+          is_best_seller: product.is_best_seller ?? false,
+          is_active: product.is_active,
+        });
      } else {
        form.reset({
          name: '',
