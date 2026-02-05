@@ -39,15 +39,17 @@ import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  
  type CheckoutFormData = z.infer<typeof checkoutSchema>;
  
- const Checkout = () => {
-   const { language, t, direction } = useLanguage();
-   const { items, totalPrice, clearCart } = useCart();
-   const { user } = useAuth();
-   const navigate = useNavigate();
-   const createOrder = useCreateOrder();
-   const { data: profile } = useProfile();
-   const [orderComplete, setOrderComplete] = useState(false);
-   const [orderNumber, setOrderNumber] = useState('');
+const Checkout = () => {
+  const { language, t, direction } = useLanguage();
+  const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const createOrder = useCreateOrder();
+  const processPayment = useProcessPayment();
+  const { data: profile } = useProfile();
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
  
    const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
    const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
