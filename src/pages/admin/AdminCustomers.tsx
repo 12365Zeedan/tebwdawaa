@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus, Filter } from 'lucide-react';
+import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus, Filter, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -44,6 +44,7 @@ interface CustomerWithStats {
   order_count: number;
   total_spent: number;
   last_order_date: string | null;
+  lifetime_value: number;
 }
 
 interface CustomerOrder {
@@ -94,12 +95,21 @@ export default function AdminCustomers() {
           const orderCount = orders?.length || 0;
           const totalSpent = orders?.reduce((sum, o) => sum + Number(o.total), 0) || 0;
           const lastOrderDate = orders?.[0]?.created_at || null;
+          
+          // Calculate Customer Lifetime Value (CLV)
+          // Simple CLV = Average Order Value × Purchase Frequency × Customer Lifespan (in months)
+          const avgOrderValue = orderCount > 0 ? totalSpent / orderCount : 0;
+          const customerAgeMonths = Math.max(1, Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)));
+          const purchaseFrequency = orderCount / customerAgeMonths;
+          const projectedLifespanMonths = 24; // Assume 2-year customer lifespan
+          const lifetimeValue = avgOrderValue * purchaseFrequency * projectedLifespanMonths;
 
           return {
             ...profile,
             order_count: orderCount,
             total_spent: totalSpent,
             last_order_date: lastOrderDate,
+            lifetime_value: lifetimeValue,
           };
         })
       );
@@ -172,6 +182,7 @@ export default function AdminCustomers() {
         'Total Orders',
         'Total Spent (SAR)',
         'Average Order (SAR)',
+        'Lifetime Value (SAR)',
         'Last Order Date',
         'Registration Date',
       ];
@@ -198,6 +209,7 @@ export default function AdminCustomers() {
         customer.order_count > 0 
           ? (customer.total_spent / customer.order_count).toFixed(2) 
           : '0.00',
+        customer.lifetime_value.toFixed(2),
         customer.last_order_date 
           ? format(new Date(customer.last_order_date), 'yyyy-MM-dd')
           : '',
@@ -373,9 +385,12 @@ export default function AdminCustomers() {
           </Select>
         </div>
 
-        {/* Stats Summary */}
+        {/* Stats Summary - Clickable cards to filter */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+            onClick={() => setSegmentFilter('all')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Users className="h-5 w-5 text-primary" />
@@ -388,7 +403,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'vip' ? 'ring-2 ring-amber-500' : ''}`}
+            onClick={() => setSegmentFilter('vip')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-amber-500/10 rounded-lg">
                 <Crown className="h-5 w-5 text-amber-500" />
@@ -401,7 +419,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'regular' ? 'ring-2 ring-blue-500' : ''}`}
+            onClick={() => setSegmentFilter('regular')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Star className="h-5 w-5 text-blue-500" />
@@ -416,7 +437,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'new' ? 'ring-2 ring-emerald-500' : ''}`}
+            onClick={() => setSegmentFilter('new')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-emerald-500/10 rounded-lg">
                 <UserPlus className="h-5 w-5 text-emerald-500" />
@@ -431,7 +455,10 @@ export default function AdminCustomers() {
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-4">
+          <div 
+            className={`bg-card rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${segmentFilter === 'inactive' ? 'ring-2 ring-muted-foreground' : ''}`}
+            onClick={() => setSegmentFilter('inactive')}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-muted rounded-lg">
                 <Users className="h-5 w-5 text-muted-foreground" />
@@ -449,14 +476,16 @@ export default function AdminCustomers() {
           <div className="bg-card rounded-lg border p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <ShoppingBag className="h-5 w-5 text-primary" />
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'المبيعات' : 'Sales'}
+                  {language === 'ar' ? 'متوسط CLV' : 'Avg CLV'}
                 </p>
                 <p className="text-xl font-bold">
-                  {customers?.reduce((sum, c) => sum + c.total_spent, 0).toFixed(0) || '0'} <span className="text-sm font-normal">{language === 'ar' ? 'ر.س' : 'SAR'}</span>
+                  {customers && customers.length > 0 
+                    ? (customers.reduce((sum, c) => sum + c.lifetime_value, 0) / customers.length).toFixed(0) 
+                    : '0'} <span className="text-sm font-normal">{language === 'ar' ? 'ر.س' : 'SAR'}</span>
                 </p>
               </div>
             </div>
@@ -472,8 +501,8 @@ export default function AdminCustomers() {
                 <TableHead>{language === 'ar' ? 'الهاتف' : 'Phone'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'الطلبات' : 'Orders'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'إجمالي الإنفاق' : 'Total Spent'}</TableHead>
+                <TableHead className="text-center">{language === 'ar' ? 'قيمة العميل' : 'CLV'}</TableHead>
                 <TableHead>{language === 'ar' ? 'آخر طلب' : 'Last Order'}</TableHead>
-                <TableHead>{language === 'ar' ? 'تاريخ التسجيل' : 'Joined'}</TableHead>
                 <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
               </TableRow>
             </TableHeader>
@@ -549,13 +578,15 @@ export default function AdminCustomers() {
                     <TableCell className="text-center font-medium">
                       {customer.total_spent.toFixed(2)} {language === 'ar' ? 'ر.س' : 'SAR'}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-medium text-primary">
+                        {customer.lifetime_value.toFixed(0)} {language === 'ar' ? 'ر.س' : 'SAR'}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       {customer.last_order_date 
                         ? format(new Date(customer.last_order_date), 'MMM d, yyyy')
                         : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(customer.created_at), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
