@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 export function Navbar() {
@@ -12,6 +13,7 @@ export function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const { language, setLanguage, t, direction } = useLanguage();
   const { totalItems } = useCart();
+  const { user, isAdmin, signOut } = useAuth();
   const location = useLocation();
 
   const navLinks = [
@@ -92,9 +94,118 @@ export function Navbar() {
             </Button>
           </Link>
 
-          {/* Admin Link */}
-          <Link to="/admin" className="hidden md:block">
-            <Button variant="outline" size="sm" className="gap-2">
+          {/* Auth / User Menu */}
+          {user ? (
+            <div className="hidden md:flex items-center gap-2">
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {t('nav.admin')}
+                  </Button>
+                </Link>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => signOut()}
+                className="text-muted-foreground"
+              >
+                {language === 'ar' ? 'خروج' : 'Logout'}
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth" className="hidden md:block">
+              <Button variant="outline" size="sm" className="gap-2">
+                <User className="h-4 w-4" />
+                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              </Button>
+            </Link>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="container py-3 border-t border-border/40 animate-fade-in">
+          <div className="relative max-w-xl mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={t('products.search')}
+              className={cn(
+                'pl-10 bg-muted/50',
+                direction === 'rtl' && 'pr-10 pl-4'
+              )}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden border-t border-border/40 animate-fade-in">
+          <nav className="container py-4 flex flex-col gap-2">
+            {navLinks.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  'px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                  isActive(link.href)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    {t('nav.admin')}
+                  </Link>
+                )}
+                <button
+                  onClick={() => { signOut(); setIsOpen(false); }}
+                  className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left rtl:text-right"
+                >
+                  {language === 'ar' ? 'خروج' : 'Logout'}
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}
               <User className="h-4 w-4" />
               {t('nav.admin')}
             </Button>
