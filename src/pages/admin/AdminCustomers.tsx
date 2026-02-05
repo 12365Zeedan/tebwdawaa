@@ -235,6 +235,17 @@ export default function AdminCustomers() {
                 : 'View and manage customer information'}
             </p>
           </div>
+          <Button
+            variant="outline"
+            onClick={exportToCSV}
+            disabled={isExporting || isLoading || !customers?.length}
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {isExporting 
+              ? (language === 'ar' ? 'جاري التصدير...' : 'Exporting...')
+              : (language === 'ar' ? 'تصدير CSV' : 'Export CSV')}
+          </Button>
         </div>
 
         {/* Search */}
