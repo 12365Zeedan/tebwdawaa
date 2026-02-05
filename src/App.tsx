@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Categories from "./pages/Categories";
+import CategoryDetail from "./pages/CategoryDetail";
 import Blog from "./pages/Blog";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
