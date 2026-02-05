@@ -69,8 +69,8 @@ const Cart = () => {
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="font-semibold text-foreground">{name}</h3>
-                      <p className="text-lg font-bold text-primary">
-                        {item.price} {t('common.currency')}
+                  <p className="text-lg font-bold text-primary">
+                        {item.price} {currency}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
