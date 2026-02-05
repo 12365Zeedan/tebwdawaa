@@ -183,25 +183,102 @@ const AdminProducts = () => {
     }
   };
 
-   const handleConfirmDelete = async () => {
-     if (!productToDelete) return;
- 
-     try {
-       await deleteProduct.mutateAsync(productToDelete.id);
-       toast({
-         title: language === 'ar' ? 'تم الحذف' : 'Deleted',
-         description: language === 'ar' ? 'تم حذف المنتج بنجاح' : 'Product deleted successfully',
-       });
-       setDeleteDialogOpen(false);
-       setProductToDelete(null);
-     } catch (error: any) {
-       toast({
-         title: language === 'ar' ? 'خطأ' : 'Error',
-         description: error.message,
-         variant: 'destructive',
-       });
-     }
-   };
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+
+    try {
+      await deleteProduct.mutateAsync(productToDelete.id);
+      toast({
+        title: language === 'ar' ? 'تم الحذف' : 'Deleted',
+        description: language === 'ar' ? 'تم حذف المنتج بنجاح' : 'Product deleted successfully',
+      });
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    setSelectedProducts(prev => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllProducts = () => {
+    if (!products) return;
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)));
+    }
+  };
+
+  const handleBulkStockUpdate = async () => {
+    const value = parseInt(bulkStockValue);
+    if (isNaN(value) || value < 0) {
+      toast({
+        title: language === 'ar' ? 'قيمة غير صالحة' : 'Invalid value',
+        description: language === 'ar' ? 'يرجى إدخال رقم صحيح' : 'Please enter a valid number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsBulkUpdating(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const productId of selectedProducts) {
+      const product = products?.find(p => p.id === productId);
+      if (!product) continue;
+
+      let newStock: number;
+      switch (bulkStockMode) {
+        case 'add':
+          newStock = product.stock_quantity + value;
+          break;
+        case 'subtract':
+          newStock = Math.max(0, product.stock_quantity - value);
+          break;
+        default:
+          newStock = value;
+      }
+
+      try {
+        await updateStock.mutateAsync({ 
+          id: productId, 
+          stock_quantity: newStock,
+          change_type: bulkStockMode === 'add' ? 'restock' : 'manual_adjustment',
+        });
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    setIsBulkUpdating(false);
+    setBulkStockDialogOpen(false);
+    setBulkStockValue('');
+    setSelectedProducts(new Set());
+
+    toast({
+      title: language === 'ar' ? 'تم التحديث' : 'Bulk Update Complete',
+      description: language === 'ar' 
+        ? `تم تحديث ${successCount} منتج${errorCount > 0 ? `، فشل ${errorCount}` : ''}`
+        : `Updated ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+    });
+  };
  
    if (!isAdmin) {
      return (
