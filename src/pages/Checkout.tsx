@@ -195,7 +195,7 @@ const Checkout = () => {
                 {language === 'ar' ? selectedMethod?.nameAr : selectedMethod?.name}
               </p>
               {paymentMethod === 'cod' && (
-                <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                   {language === 'ar' 
                     ? 'سيتم تحصيل المبلغ عند الاستلام' 
                     : 'Payment will be collected upon delivery'}
