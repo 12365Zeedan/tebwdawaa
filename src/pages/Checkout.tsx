@@ -405,8 +405,7 @@
                  </div>
                  <div className="flex justify-between text-muted-foreground">
                    <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                   <span className="text-green-600">
-                   <span className="text-primary">
+                    <span className="text-primary">
                      {language === 'ar' ? 'مجاني' : 'Free'}
                    </span>
                  </div>
