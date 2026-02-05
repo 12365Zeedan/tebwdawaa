@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download } from 'lucide-react';
+import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -202,6 +202,48 @@ export default function AdminCustomers() {
     }
   };
 
+  // Customer segmentation based on order count and total spending
+  const getCustomerSegment = (customer: CustomerWithStats) => {
+    const { order_count, total_spent, created_at } = customer;
+    const daysSinceJoined = Math.floor((Date.now() - new Date(created_at).getTime()) / (1000 * 60 * 60 * 24));
+    
+    // VIP: 5+ orders OR 1000+ SAR spent
+    if (order_count >= 5 || total_spent >= 1000) {
+      return {
+        type: 'vip',
+        label: 'VIP',
+        labelAr: 'مميز',
+        icon: Crown,
+        className: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+      };
+    }
+    
+    // New: Joined within last 30 days
+    if (daysSinceJoined <= 30) {
+      return {
+        type: 'new',
+        label: 'New',
+        labelAr: 'جديد',
+        icon: UserPlus,
+        className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+      };
+    }
+    
+    // Regular: Has at least 1 order
+    if (order_count >= 1) {
+      return {
+        type: 'regular',
+        label: 'Regular',
+        labelAr: 'منتظم',
+        icon: Star,
+        className: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+      };
+    }
+    
+    // Inactive: No orders
+    return null;
+  };
+
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; labelAr: string }> = {
       pending: { variant: 'secondary', label: 'Pending', labelAr: 'قيد الانتظار' },
@@ -356,11 +398,24 @@ export default function AdminCustomers() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">
-                            {language === 'ar' 
-                              ? (customer.full_name_ar || customer.full_name || 'غير محدد')
-                              : (customer.full_name || 'Not specified')}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">
+                              {language === 'ar' 
+                                ? (customer.full_name_ar || customer.full_name || 'غير محدد')
+                                : (customer.full_name || 'Not specified')}
+                            </p>
+                            {(() => {
+                              const segment = getCustomerSegment(customer);
+                              if (!segment) return null;
+                              const SegmentIcon = segment.icon;
+                              return (
+                                <Badge variant="outline" className={segment.className}>
+                                  <SegmentIcon className="h-3 w-3 mr-1" />
+                                  {language === 'ar' ? segment.labelAr : segment.label}
+                                </Badge>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -427,11 +482,24 @@ export default function AdminCustomers() {
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-semibold">
-                      {language === 'ar' 
-                        ? (selectedCustomer.full_name_ar || selectedCustomer.full_name || 'غير محدد')
-                        : (selectedCustomer.full_name || 'Not specified')}
-                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xl font-semibold">
+                        {language === 'ar' 
+                          ? (selectedCustomer.full_name_ar || selectedCustomer.full_name || 'غير محدد')
+                          : (selectedCustomer.full_name || 'Not specified')}
+                      </h3>
+                      {(() => {
+                        const segment = getCustomerSegment(selectedCustomer);
+                        if (!segment) return null;
+                        const SegmentIcon = segment.icon;
+                        return (
+                          <Badge variant="outline" className={segment.className}>
+                            <SegmentIcon className="h-3 w-3 mr-1" />
+                            {language === 'ar' ? segment.labelAr : segment.label}
+                          </Badge>
+                        );
+                      })()}
+                    </div>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       {selectedCustomer.phone && (
                         <span className="flex items-center gap-1">
