@@ -1,11 +1,16 @@
  import React, { useState } from 'react';
- import { Plus, Search, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package } from 'lucide-react';
  import { useQuery } from '@tanstack/react-query';
  import { AdminLayout } from '@/components/admin/AdminLayout';
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { Badge } from '@/components/ui/badge';
  import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
  import {
    AlertDialog,
    AlertDialogAction,
@@ -21,7 +26,7 @@
  import { useToast } from '@/hooks/use-toast';
  import { supabase } from '@/integrations/supabase/client';
  import { Product } from '@/hooks/useProducts';
- import { useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useAdminProducts';
+import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } from '@/hooks/useAdminProducts';
  import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
  import { cn } from '@/lib/utils';
  
@@ -62,6 +67,7 @@
    const createProduct = useCreateProduct();
    const updateProduct = useUpdateProduct();
    const deleteProduct = useDeleteProduct();
+  const updateStock = useUpdateStock();
  
    const handleOpenCreate = () => {
      setSelectedProduct(null);
@@ -104,6 +110,43 @@
      }
    };
  
+  const handleStockAdjust = async (productId: string, currentStock: number, adjustment: number) => {
+    const newStock = Math.max(0, currentStock + adjustment);
+    try {
+      await updateStock.mutateAsync({ id: productId, stock_quantity: newStock });
+      toast({
+        title: language === 'ar' ? 'تم التحديث' : 'Stock Updated',
+        description: language === 'ar' 
+          ? `تم تحديث الكمية إلى ${newStock}` 
+          : `Stock updated to ${newStock}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSetStock = async (productId: string, newStock: number) => {
+    try {
+      await updateStock.mutateAsync({ id: productId, stock_quantity: Math.max(0, newStock) });
+      toast({
+        title: language === 'ar' ? 'تم التحديث' : 'Stock Updated',
+        description: language === 'ar' 
+          ? `تم تحديث الكمية إلى ${newStock}` 
+          : `Stock updated to ${newStock}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ' : 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
    const handleConfirmDelete = async () => {
      if (!productToDelete) return;
  
@@ -251,7 +294,108 @@
                          )}
                        </td>
                        <td className="px-6 py-4 text-sm text-foreground">
-                         {product.stock_quantity}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className={cn(
+                                "gap-2 min-w-[80px]",
+                                product.stock_quantity === 0 && "border-destructive text-destructive"
+                              )}
+                            >
+                              <Package className="h-3 w-3" />
+                              {product.stock_quantity}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-4" align="start">
+                            <div className="space-y-4">
+                              <div className="text-sm font-medium">
+                                {language === 'ar' ? 'تعديل الكمية' : 'Adjust Stock'}
+                              </div>
+                              
+                              {/* Quick adjust buttons */}
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleStockAdjust(product.id, product.stock_quantity, -10)}
+                                  disabled={updateStock.isPending}
+                                >
+                                  -10
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleStockAdjust(product.id, product.stock_quantity, -1)}
+                                  disabled={updateStock.isPending}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="w-12 text-center font-bold text-lg">
+                                  {product.stock_quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleStockAdjust(product.id, product.stock_quantity, 1)}
+                                  disabled={updateStock.isPending}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleStockAdjust(product.id, product.stock_quantity, 10)}
+                                  disabled={updateStock.isPending}
+                                >
+                                  +10
+                                </Button>
+                              </div>
+
+                              {/* Direct input */}
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  placeholder={language === 'ar' ? 'كمية جديدة' : 'Set quantity'}
+                                  className="flex-1"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const value = parseInt((e.target as HTMLInputElement).value);
+                                      if (!isNaN(value)) {
+                                        handleSetStock(product.id, value);
+                                        (e.target as HTMLInputElement).value = '';
+                                      }
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  size="sm"
+                                  disabled={updateStock.isPending}
+                                  onClick={(e) => {
+                                    const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
+                                    const value = parseInt(input?.value);
+                                    if (!isNaN(value)) {
+                                      handleSetStock(product.id, value);
+                                      input.value = '';
+                                    }
+                                  }}
+                                >
+                                  {updateStock.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    language === 'ar' ? 'تحديث' : 'Set'
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                        </td>
                        <td className="px-6 py-4">
                          <div className="flex flex-col gap-1">

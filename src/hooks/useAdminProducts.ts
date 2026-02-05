@@ -53,6 +53,33 @@
      },
    });
  }
+
+export function useUpdateStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, stock_quantity }: { id: string; stock_quantity: number }) => {
+      const in_stock = stock_quantity > 0;
+      
+      const { data, error } = await supabase
+        .from('products')
+        .update({
+          stock_quantity,
+          in_stock,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+  });
+}
  
  export function useUpdateProduct() {
    const queryClient = useQueryClient();
