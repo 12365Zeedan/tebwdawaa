@@ -1,5 +1,6 @@
  import { useMutation, useQueryClient } from '@tanstack/react-query';
  import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
  
  interface ProductInput {
    name: string;
@@ -58,7 +59,28 @@ export function useUpdateStock() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, stock_quantity }: { id: string; stock_quantity: number }) => {
+    mutationFn: async ({ 
+      id, 
+      stock_quantity, 
+      change_type = 'manual_adjustment',
+      notes 
+    }: { 
+      id: string; 
+      stock_quantity: number;
+      change_type?: 'manual_adjustment' | 'restock';
+      notes?: string;
+    }) => {
+      // Get current stock first
+      const { data: currentProduct, error: fetchError } = await supabase
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const previousQuantity = currentProduct.stock_quantity ?? 0;
+      const changeAmount = stock_quantity - previousQuantity;
       const in_stock = stock_quantity > 0;
       
       const { data, error } = await supabase
@@ -72,12 +94,65 @@ export function useUpdateStock() {
         .single();
 
       if (error) throw error;
+
+      // Log to stock history
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error: historyError } = await supabase
+        .from('stock_history')
+        .insert({
+          product_id: id,
+          previous_quantity: previousQuantity,
+          new_quantity: stock_quantity,
+          change_amount: changeAmount,
+          change_type,
+          changed_by: user?.id || null,
+          notes: notes || null,
+        });
+
+      if (historyError) {
+        console.error('Failed to log stock history:', historyError);
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['stock-history'] });
     },
+  });
+}
+
+export interface StockHistoryEntry {
+  id: string;
+  product_id: string;
+  previous_quantity: number;
+  new_quantity: number;
+  change_amount: number;
+  change_type: 'order' | 'manual_adjustment' | 'restock' | 'initial';
+  changed_by: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export function useStockHistory(productId: string | null) {
+  return useQuery({
+    queryKey: ['stock-history', productId],
+    queryFn: async () => {
+      if (!productId) return [];
+      
+      const { data, error } = await supabase
+        .from('stock_history')
+        .select('*')
+        .eq('product_id', productId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return data as StockHistoryEntry[];
+    },
+    enabled: !!productId,
   });
 }
  

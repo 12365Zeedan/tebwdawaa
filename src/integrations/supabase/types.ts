@@ -334,6 +334,50 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_history: {
+        Row: {
+          change_amount: number
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_quantity: number
+          notes: string | null
+          previous_quantity: number
+          product_id: string
+        }
+        Insert: {
+          change_amount: number
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_quantity: number
+          notes?: string | null
+          previous_quantity: number
+          product_id: string
+        }
+        Update: {
+          change_amount?: number
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_quantity?: number
+          notes?: string | null
+          previous_quantity?: number
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_history_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
