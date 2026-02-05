@@ -465,9 +465,9 @@ const Checkout = () => {
                          <p className="text-xs text-muted-foreground">
                            {language === 'ar' ? 'الكمية' : 'Qty'}: {item.quantity}
                          </p>
-                         <p className="text-sm font-semibold text-primary">
-                           {item.price * item.quantity} {t('common.currency')}
-                         </p>
+                        <p className="text-sm font-semibold text-primary">
+                            {item.price * item.quantity} {currency}
+                          </p>
                        </div>
                      </div>
                    );
