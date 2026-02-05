@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Star, AlertCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,14 +11,15 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { WishlistButton } from './WishlistButton';
 import { CompareButton } from './CompareButton';
+import { QuickViewModal } from './QuickViewModal';
 
 interface ProductCardProps {
   product: LegacyProduct | DBProduct;
 }
 
- function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
-   return 'name_ar' in product;
- }
+function isDBProduct(product: LegacyProduct | DBProduct): product is DBProduct {
+  return 'name_ar' in product;
+}
  
 export function ProductCard({ product }: ProductCardProps) {
   const { language, t } = useLanguage();
