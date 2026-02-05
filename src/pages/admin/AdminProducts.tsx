@@ -561,7 +561,7 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, u
                     <div className="text-end">
                       <div className={cn(
                         "text-lg font-bold",
-                        entry.change_amount > 0 ? "text-green-600" : "text-destructive"
+                        entry.change_amount > 0 ? "text-primary" : "text-destructive"
                       )}>
                         {entry.change_amount > 0 ? '+' : ''}{entry.change_amount}
                       </div>
