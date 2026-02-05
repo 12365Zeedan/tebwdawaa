@@ -133,10 +133,17 @@ const AdminCategories = () => {
   // Create category mutation
   const createCategory = useMutation({
     mutationFn: async (data: CategoryFormData) => {
-      const { error } = await supabase.from('categories').insert({
-        ...data,
+      const insertData: any = {
+        name: data.name,
+        name_ar: data.name_ar,
+        slug: data.slug,
+        icon: data.icon,
+        image_url: data.image_url || null,
+        is_active: data.is_active,
+        sort_order: data.sort_order,
         parent_category_id: data.parent_category_id || null,
-      });
+      };
+      const { error } = await supabase.from('categories').insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
