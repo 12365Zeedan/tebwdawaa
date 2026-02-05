@@ -369,54 +369,67 @@ const Checkout = () => {
                    />
                  </div>
  
-                 {/* Order Notes */}
-                 <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
-                   <h2 className="text-xl font-semibold text-foreground">
-                     {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
-                   </h2>
-                   <FormField
-                     control={form.control}
-                     name="notes"
-                     render={({ field }) => (
-                       <FormItem>
-                         <FormControl>
-                           <Textarea
-                             placeholder={
-                               language === 'ar'
-                                 ? 'أي ملاحظات خاصة بالتوصيل...'
-                                 : 'Any special delivery instructions...'
-                             }
-                             className="min-h-[100px]"
-                             {...field}
-                           />
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
-                 </div>
- 
-                 {/* Submit Button - Mobile */}
-                 <div className="lg:hidden">
-                   <Button
-                     type="submit"
-                     className="w-full gap-2 shadow-glow"
-                     size="lg"
-                     disabled={createOrder.isPending}
-                   >
-                     {createOrder.isPending ? (
-                       <>
-                         <Loader2 className="h-4 w-4 animate-spin" />
-                         {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
-                       </>
-                     ) : (
-                       <>
-                         <CreditCard className="h-4 w-4" />
-                         {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
-                       </>
-                     )}
-                   </Button>
-                 </div>
+                {/* Order Notes */}
+                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
+                    </h2>
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder={
+                                language === 'ar'
+                                  ? 'أي ملاحظات خاصة بالتوصيل...'
+                                  : 'Any special delivery instructions...'
+                              }
+                              className="min-h-[100px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Payment Method Selection */}
+                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft">
+                    <PaymentMethodSelector
+                      value={paymentMethod}
+                      onChange={setPaymentMethod}
+                      disabled={isProcessing}
+                    />
+                  </div>
+
+                  {/* Submit Button - Mobile */}
+                  <div className="lg:hidden">
+                    <Button
+                      type="submit"
+                      className="w-full gap-2 shadow-glow"
+                      size="lg"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          {language === 'ar' ? 'جاري المعالجة...' : 'Processing...'}
+                        </>
+                      ) : (
+                        <>
+                          {paymentMethod === 'cod' ? (
+                            <Wallet className="h-4 w-4" />
+                          ) : (
+                            <CreditCard className="h-4 w-4" />
+                          )}
+                          {language === 'ar' ? 'تأكيد الطلب' : 'Place Order'}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                </form>
              </Form>
            </div>
