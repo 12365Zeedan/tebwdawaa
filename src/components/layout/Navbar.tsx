@@ -1,6 +1,6 @@
  import React, { useState } from 'react';
  import { Link, useLocation } from 'react-router-dom';
- import { Menu, X, ShoppingCart, User, Globe, Search } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, Globe, Search, Package } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { useLanguage } from '@/contexts/LanguageContext';
@@ -97,6 +97,11 @@
            {/* Auth / User Menu */}
            {user ? (
              <div className="hidden md:flex items-center gap-2">
+               <Link to="/orders">
+                 <Button variant="ghost" size="icon" title={language === 'ar' ? 'طلباتي' : 'My Orders'}>
+                   <Package className="h-5 w-5" />
+                 </Button>
+               </Link>
                {isAdmin && (
                  <Link to="/admin">
                    <Button variant="outline" size="sm" className="gap-2">
@@ -173,6 +178,14 @@
              ))}
              {user ? (
                <>
+                 <Link
+                   to="/orders"
+                   onClick={() => setIsOpen(false)}
+                   className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                 >
+                   <Package className="h-4 w-4" />
+                   {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                 </Link>
                  {isAdmin && (
                    <Link
                      to="/admin"

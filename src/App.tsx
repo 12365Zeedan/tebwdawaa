@@ -15,6 +15,7 @@ import Categories from "./pages/Categories";
 import Blog from "./pages/Blog";
 import Cart from "./pages/Cart";
  import Checkout from "./pages/Checkout";
+ import OrderHistory from "./pages/OrderHistory";
 import About from "./pages/About";
  import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/cart" element={<Cart />} />
                  <Route path="/checkout" element={<Checkout />} />
+                 <Route path="/orders" element={<OrderHistory />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/auth" element={<Auth />} />
                 
