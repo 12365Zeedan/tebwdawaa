@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from 'react';
- import { useNavigate, Link } from 'react-router-dom';
- import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2 } from 'lucide-react';
- import { z } from 'zod';
- import { useForm } from 'react-hook-form';
- import { zodResolver } from '@hookform/resolvers/zod';
- 
- import { MainLayout } from '@/components/layout/MainLayout';
- import { Button } from '@/components/ui/button';
- import { Input } from '@/components/ui/input';
- import { Textarea } from '@/components/ui/textarea';
- import { Separator } from '@/components/ui/separator';
- import {
-   Form,
-   FormControl,
-   FormField,
-   FormItem,
-   FormLabel,
-   FormMessage,
- } from '@/components/ui/form';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { useCart } from '@/contexts/CartContext';
- import { useAuth } from '@/contexts/AuthContext';
- import { useCreateOrder } from '@/hooks/useOrders';
- import { useProfile } from '@/hooks/useProfile';
- 
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2, Wallet } from 'lucide-react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCreateOrder } from '@/hooks/useOrders';
+import { useProfile } from '@/hooks/useProfile';
+import { useProcessPayment } from '@/hooks/usePayment';
+import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
+import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  const checkoutSchema = z.object({
    customerName: z.string().min(2, 'Name must be at least 2 characters'),
    customerEmail: z.string().email('Invalid email address'),
