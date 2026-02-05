@@ -68,15 +68,16 @@ export default function AdminSettings() {
   // Parse settings into form data
   useEffect(() => {
     if (settings) {
-      const parsed: Partial<SettingsData> = {};
+      const parsed: Record<string, string | number | boolean> = {};
       settings.forEach((setting) => {
         const value = setting.value;
         const key = setting.key as keyof SettingsData;
         if (key in defaultSettings) {
-          if (typeof defaultSettings[key] === 'boolean') {
+          const defaultVal = defaultSettings[key];
+          if (typeof defaultVal === 'boolean') {
             parsed[key] = value === true || value === 'true' || value === '"true"';
-          } else if (typeof defaultSettings[key] === 'number') {
-            parsed[key] = typeof value === 'number' ? value : parseFloat(String(value).replace(/"/g, '')) || defaultSettings[key];
+          } else if (typeof defaultVal === 'number') {
+            parsed[key] = typeof value === 'number' ? value : parseFloat(String(value).replace(/"/g, '')) || defaultVal;
           } else {
             parsed[key] = typeof value === 'string' ? value.replace(/"/g, '') : String(value).replace(/"/g, '');
           }
