@@ -98,8 +98,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-muted-foreground/20">
-          <p className="text-center text-sm text-muted-foreground">
+        <div className="mt-12 pt-8 border-t border-link/20">
+          <p className="text-center text-sm text-link/80">
             © {currentYear} {storeName}. {t('footer.rights')}
           </p>
         </div>
