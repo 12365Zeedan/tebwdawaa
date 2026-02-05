@@ -1,5 +1,5 @@
  import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History } from 'lucide-react';
  import { useQuery } from '@tanstack/react-query';
  import { AdminLayout } from '@/components/admin/AdminLayout';
  import { Button } from '@/components/ui/button';
@@ -21,12 +21,19 @@ import {
    AlertDialogHeader,
    AlertDialogTitle,
  } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
  import { useLanguage } from '@/contexts/LanguageContext';
  import { useAuth } from '@/contexts/AuthContext';
  import { useToast } from '@/hooks/use-toast';
  import { supabase } from '@/integrations/supabase/client';
  import { Product } from '@/hooks/useProducts';
-import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } from '@/hooks/useAdminProducts';
+import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
  import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
  import { cn } from '@/lib/utils';
  
@@ -40,6 +47,9 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } 
    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [historyProductId, setHistoryProductId] = useState<string | null>(null);
+
+  const { data: stockHistory, isLoading: isHistoryLoading } = useStockHistory(historyProductId);
  
    // Fetch all products (including inactive) for admin
    const { data: products, isLoading } = useQuery({
@@ -144,6 +154,25 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } 
         description: error.message,
         variant: 'destructive',
       });
+    }
+  };
+
+  const getChangeTypeLabel = (type: string) => {
+    const labels: Record<string, { en: string; ar: string }> = {
+      order: { en: 'Order', ar: 'طلب' },
+      manual_adjustment: { en: 'Manual Adjustment', ar: 'تعديل يدوي' },
+      restock: { en: 'Restock', ar: 'إعادة تخزين' },
+      initial: { en: 'Initial', ar: 'أولي' },
+    };
+    return labels[type]?.[language] || type;
+  };
+
+  const getChangeTypeBadgeVariant = (type: string): "default" | "destructive" | "secondary" | "outline" => {
+    switch (type) {
+      case 'order': return 'destructive';
+      case 'restock': return 'default';
+      case 'manual_adjustment': return 'secondary';
+      default: return 'outline';
     }
   };
 
@@ -357,6 +386,17 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } 
                                 </Button>
                               </div>
 
+                            {/* History button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full gap-2"
+                              onClick={() => setHistoryProductId(product.id)}
+                            >
+                              <History className="h-4 w-4" />
+                              {language === 'ar' ? 'سجل التغييرات' : 'View History'}
+                            </Button>
+
                               {/* Direct input */}
                               <div className="flex items-center gap-2">
                                 <Input
@@ -477,6 +517,65 @@ import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock } 
            </AlertDialogFooter>
          </AlertDialogContent>
        </AlertDialog>
+
+      {/* Stock History Dialog */}
+      <Dialog open={!!historyProductId} onOpenChange={(open) => !open && setHistoryProductId(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'ar' ? 'سجل تغييرات المخزون' : 'Stock History'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[60vh]">
+            {isHistoryLoading ? (
+              <div className="space-y-3 p-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : stockHistory?.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {language === 'ar' ? 'لا يوجد سجل تغييرات' : 'No stock history found'}
+              </div>
+            ) : (
+              <div className="space-y-3 p-1">
+                {stockHistory?.map((entry) => (
+                  <div 
+                    key={entry.id} 
+                    className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getChangeTypeBadgeVariant(entry.change_type)}>
+                          {getChangeTypeLabel(entry.change_type)}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(entry.created_at).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                        </span>
+                      </div>
+                      {entry.notes && (
+                        <p className="text-sm text-muted-foreground">{entry.notes}</p>
+                      )}
+                    </div>
+                    <div className="text-end">
+                      <div className={cn(
+                        "text-lg font-bold",
+                        entry.change_amount > 0 ? "text-primary" : "text-destructive"
+                      )}>
+                        {entry.change_amount > 0 ? '+' : ''}{entry.change_amount}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {entry.previous_quantity} → {entry.new_quantity}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
      </AdminLayout>
    );
  };
