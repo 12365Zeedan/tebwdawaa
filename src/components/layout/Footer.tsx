@@ -14,7 +14,7 @@ export function Footer() {
     : (settings?.storeName || 'PharmaCare');
 
   return (
-    <footer className="bg-foreground text-background">
+    <footer className="bg-header text-link">
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* About */}
