@@ -123,16 +123,27 @@ const Cart = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                  <span>{totalPrice} {t('common.currency')}</span>
+                  <span>{totalPrice} {currency}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                  <span>{language === 'ar' ? 'مجاني' : 'Free'}</span>
+                  {isFreeShipping ? (
+                    <span className="text-green-600">{language === 'ar' ? 'مجاني' : 'Free'}</span>
+                  ) : (
+                    <span>{finalShipping} {currency}</span>
+                  )}
                 </div>
+                {!isFreeShipping && freeShippingThreshold > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ar'
+                      ? `أضف ${freeShippingThreshold - totalPrice} ${currency} للحصول على شحن مجاني`
+                      : `Add ${freeShippingThreshold - totalPrice} ${currency} for free shipping`}
+                  </p>
+                )}
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between text-lg font-bold text-foreground">
                     <span>{t('cart.total')}</span>
-                    <span>{totalPrice} {t('common.currency')}</span>
+                    <span>{total} {currency}</span>
                   </div>
                 </div>
               </div>

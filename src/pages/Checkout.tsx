@@ -48,15 +48,20 @@ const Checkout = () => {
   const createOrder = useCreateOrder();
   const processPayment = useProcessPayment();
   const { data: profile } = useProfile();
+  const { data: settings } = useStoreSettings();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
  
-   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
-   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
- 
-   const shippingCost = 0; // Free shipping
-   const total = totalPrice + shippingCost;
+  const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
+  const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
+
+  const currency = settings?.currency ?? 'SAR';
+  const configuredShipping = settings?.shippingCost ?? 0;
+  const freeShippingThreshold = settings?.freeShippingThreshold ?? 0;
+  const isFreeShipping = totalPrice >= freeShippingThreshold;
+  const shippingCost = isFreeShipping ? 0 : configuredShipping;
+  const total = totalPrice + shippingCost;
  
    const form = useForm<CheckoutFormData>({
      resolver: zodResolver(checkoutSchema),
