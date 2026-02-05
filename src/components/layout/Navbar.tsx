@@ -183,7 +183,7 @@ export function Navbar() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover"
+                className="gap-2 border-link text-link hover:bg-transparent hover:text-link"
               >
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
