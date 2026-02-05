@@ -174,12 +174,12 @@ import {
                  </Link>
                )}
              </div>
-           ) : (
-             <Link to="/auth" className="hidden md:block">
-               <Button variant="outline" size="sm" className="gap-2">
-                 <User className="h-4 w-4" />
-                 {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-               </Button>
+            ) : (
+              <Link to="/auth" className="hidden md:block">
+                <Button variant="outline" size="sm" className="gap-2 border-link text-link hover:bg-white/10 hover:text-link-hover">
+                  <User className="h-4 w-4" />
+                  {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                </Button>
              </Link>
            )}
  
