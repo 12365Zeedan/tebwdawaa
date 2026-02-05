@@ -25,29 +25,33 @@ export function useProductReviews(productId: string | null) {
     queryFn: async () => {
       if (!productId) return [];
       
-      const { data, error } = await supabase
+      // Get reviews
+      const { data: reviews, error } = await supabase
         .from('product_reviews')
-        .select(`
-          *,
-          profile:profiles!product_reviews_user_id_fkey(full_name, avatar_url)
-        `)
+        .select('*')
         .eq('product_id', productId)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        // If the join fails, try without profile
-        const { data: reviewsOnly, error: reviewsError } = await supabase
-          .from('product_reviews')
-          .select('*')
-          .eq('product_id', productId)
-          .eq('is_approved', true)
-          .order('created_at', { ascending: false });
+      if (error) throw error;
+      
+      // Get profiles for reviewers
+      if (reviews && reviews.length > 0) {
+        const userIds = [...new Set(reviews.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', userIds);
         
-        if (reviewsError) throw reviewsError;
-        return reviewsOnly as Review[];
+        // Map profiles to reviews
+        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+        return reviews.map(review => ({
+          ...review,
+          profile: profileMap.get(review.user_id) || null,
+        })) as Review[];
       }
-      return data as Review[];
+      
+      return reviews as Review[];
     },
     enabled: !!productId,
   });
