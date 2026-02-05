@@ -21,9 +21,17 @@ import { cn } from '@/lib/utils';
    const { language, t } = useLanguage();
    const { addToCart } = useCart();
    const { toast } = useToast();
-   const { data: product, isLoading, error } = useProduct(slug || '');
-   const [quantity, setQuantity] = useState(1);
-   const [selectedImage, setSelectedImage] = useState(0);
+  const { data: product, isLoading, error } = useProduct(slug || '');
+  const { addToRecentlyViewed } = useRecentlyViewed();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  // Track recently viewed
+  React.useEffect(() => {
+    if (product?.id) {
+      addToRecentlyViewed(product.id);
+    }
+  }, [product?.id, addToRecentlyViewed]);
  
    const handleAddToCart = () => {
      if (!product) return;
