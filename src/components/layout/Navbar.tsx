@@ -1,11 +1,18 @@
  import React, { useState } from 'react';
  import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, User, Globe, Search, Package } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { useLanguage } from '@/contexts/LanguageContext';
  import { useCart } from '@/contexts/CartContext';
  import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
  import { cn } from '@/lib/utils';
  
  export function Navbar() {
@@ -97,11 +104,34 @@ import { Menu, X, ShoppingCart, User, Globe, Search, Package } from 'lucide-reac
            {/* Auth / User Menu */}
            {user ? (
              <div className="hidden md:flex items-center gap-2">
-               <Link to="/orders">
-                 <Button variant="ghost" size="icon" title={language === 'ar' ? 'طلباتي' : 'My Orders'}>
-                   <Package className="h-5 w-5" />
-                 </Button>
-               </Link>
+               <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" size="icon">
+                     <UserCircle className="h-5 w-5" />
+                   </Button>
+                 </DropdownMenuTrigger>
+                 <DropdownMenuContent align="end" className="w-48">
+                   <DropdownMenuItem asChild>
+                     <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                       <User className="h-4 w-4" />
+                       {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
+                     </Link>
+                   </DropdownMenuItem>
+                   <DropdownMenuItem asChild>
+                     <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
+                       <Package className="h-4 w-4" />
+                       {language === 'ar' ? 'طلباتي' : 'My Orders'}
+                     </Link>
+                   </DropdownMenuItem>
+                   <DropdownMenuSeparator />
+                   <DropdownMenuItem
+                     onClick={() => signOut()}
+                     className="text-destructive focus:text-destructive cursor-pointer"
+                   >
+                     {language === 'ar' ? 'خروج' : 'Logout'}
+                   </DropdownMenuItem>
+                 </DropdownMenuContent>
+               </DropdownMenu>
                {isAdmin && (
                  <Link to="/admin">
                    <Button variant="outline" size="sm" className="gap-2">
@@ -110,14 +140,6 @@ import { Menu, X, ShoppingCart, User, Globe, Search, Package } from 'lucide-reac
                    </Button>
                  </Link>
                )}
-               <Button 
-                 variant="ghost" 
-                 size="sm" 
-                 onClick={() => signOut()}
-                 className="text-muted-foreground"
-               >
-                 {language === 'ar' ? 'خروج' : 'Logout'}
-               </Button>
              </div>
            ) : (
              <Link to="/auth" className="hidden md:block">
@@ -178,6 +200,14 @@ import { Menu, X, ShoppingCart, User, Globe, Search, Package } from 'lucide-reac
              ))}
              {user ? (
                <>
+                 <Link
+                   to="/profile"
+                   onClick={() => setIsOpen(false)}
+                   className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2"
+                 >
+                   <User className="h-4 w-4" />
+                   {language === 'ar' ? 'الملف الشخصي' : 'My Profile'}
+                 </Link>
                  <Link
                    to="/orders"
                    onClick={() => setIsOpen(false)}
