@@ -97,19 +97,19 @@ import {
               </span>
             </Button>
  
-            {/* Wishlist */}
-            {user && (
-              <Link to="/wishlist">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Heart className="h-5 w-5" />
-                  {wishlistItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
-                      {wishlistItems.length}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-            )}
+             {/* Wishlist */}
+             {user && (
+               <Link to="/wishlist">
+                 <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
+                   <Heart className="h-5 w-5" />
+                   {wishlistItems.length > 0 && (
+                     <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                       {wishlistItems.length}
+                     </span>
+                   )}
+                 </Button>
+               </Link>
+             )}
 
             {/* Cart */}
             <Link to="/cart">
