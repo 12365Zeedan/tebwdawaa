@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -19,9 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus } from 'lucide-react';
+import { Search, Users, Eye, Phone, ShoppingBag, Calendar, Download, Crown, Star, UserPlus, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -55,7 +62,7 @@ export default function AdminCustomers() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
+  const [segmentFilter, setSegmentFilter] = useState<string>('all');
   // Fetch customers with their stats
   const { data: customers, isLoading } = useQuery({
     queryKey: ['admin-customers', searchQuery],
@@ -119,6 +126,24 @@ export default function AdminCustomers() {
     },
     enabled: !!selectedCustomer?.user_id,
   });
+
+  // Helper function to determine segment type for a customer
+  const getSegmentType = (customer: CustomerWithStats): string => {
+    const { order_count, total_spent, created_at } = customer;
+    const daysSinceJoined = Math.floor((Date.now() - new Date(created_at).getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (order_count >= 5 || total_spent >= 1000) return 'vip';
+    if (daysSinceJoined <= 30) return 'new';
+    if (order_count >= 1) return 'regular';
+    return 'inactive';
+  };
+
+  // Filter customers based on segment
+  const filteredCustomers = useMemo(() => {
+    if (!customers) return [];
+    if (segmentFilter === 'all') return customers;
+    return customers.filter(customer => getSegmentType(customer) === segmentFilter);
+  }, [customers, segmentFilter]);
 
   const handleViewDetails = (customer: CustomerWithStats) => {
     setSelectedCustomer(customer);
@@ -290,15 +315,49 @@ export default function AdminCustomers() {
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={language === 'ar' ? 'البحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="ps-9"
-          />
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={language === 'ar' ? 'البحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="ps-9"
+            />
+          </div>
+          <Select value={segmentFilter} onValueChange={setSegmentFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder={language === 'ar' ? 'تصفية حسب الفئة' : 'Filter by segment'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {language === 'ar' ? 'جميع العملاء' : 'All Customers'}
+              </SelectItem>
+              <SelectItem value="vip">
+                <span className="flex items-center gap-2">
+                  <Crown className="h-3 w-3 text-amber-600" />
+                  {language === 'ar' ? 'مميز (VIP)' : 'VIP'}
+                </span>
+              </SelectItem>
+              <SelectItem value="regular">
+                <span className="flex items-center gap-2">
+                  <Star className="h-3 w-3 text-blue-600" />
+                  {language === 'ar' ? 'منتظم' : 'Regular'}
+                </span>
+              </SelectItem>
+              <SelectItem value="new">
+                <span className="flex items-center gap-2">
+                  <UserPlus className="h-3 w-3 text-emerald-600" />
+                  {language === 'ar' ? 'جديد' : 'New'}
+                </span>
+              </SelectItem>
+              <SelectItem value="inactive">
+                {language === 'ar' ? 'غير نشط' : 'Inactive'}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats Summary */}
@@ -375,14 +434,16 @@ export default function AdminCustomers() {
                     <TableCell><Skeleton className="h-8 w-8 mx-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : customers?.length === 0 ? (
+              ) : filteredCustomers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {language === 'ar' ? 'لا يوجد عملاء' : 'No customers found'}
+                    {segmentFilter !== 'all' 
+                      ? (language === 'ar' ? 'لا يوجد عملاء في هذه الفئة' : 'No customers in this segment')
+                      : (language === 'ar' ? 'لا يوجد عملاء' : 'No customers found')}
                   </TableCell>
                 </TableRow>
               ) : (
-                customers?.map((customer) => (
+                filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
