@@ -11,7 +11,15 @@ import { cn } from '@/lib/utils';
 const Cart = () => {
   const { language, t, direction } = useLanguage();
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const { data: settings, isLoading: settingsLoading } = useStoreSettings();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
+
+  const shippingCost = settings?.shippingCost ?? 0;
+  const freeShippingThreshold = settings?.freeShippingThreshold ?? 0;
+  const currency = settings?.currency ?? 'SAR';
+  const isFreeShipping = totalPrice >= freeShippingThreshold;
+  const finalShipping = isFreeShipping ? 0 : shippingCost;
+  const total = totalPrice + finalShipping;
 
   if (items.length === 0) {
     return (
