@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, AlertCircle, Eye } from 'lucide-react';
+import { ShoppingCart, Star, AlertCircle, Eye, Sparkles, TrendingUp, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
