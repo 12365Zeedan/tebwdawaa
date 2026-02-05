@@ -43,7 +43,7 @@
            customer_name: data.customerName,
            customer_email: data.customerEmail,
            customer_phone: data.customerPhone || null,
-          shipping_address: data.shippingAddress as Json,
+          shipping_address: JSON.parse(JSON.stringify(data.shippingAddress)) as Json,
            subtotal: data.subtotal,
            shipping_cost: data.shippingCost,
            total: data.total,
