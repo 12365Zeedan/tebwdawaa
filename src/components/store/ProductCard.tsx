@@ -67,9 +67,11 @@ export function ProductCard({ product }: ProductCardProps) {
     addToCart({
       id: product.id,
       name: product.name,
-       nameAr: nameAr,
+      nameAr: nameAr,
       price: pricing.totalPrice,
-       image: image,
+      basePrice: product.price,
+      vatEnabled: vatEnabled,
+      image: image,
     });
      
      toast({

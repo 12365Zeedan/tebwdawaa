@@ -59,6 +59,8 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
         name: product.name,
         nameAr: product.name_ar,
         price: pricing.totalPrice,
+        basePrice: product.price,
+        vatEnabled: product.vat_enabled,
         image: product.image_url || '/placeholder.svg',
       });
     }

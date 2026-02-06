@@ -9,6 +9,7 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getDisplayPrice } from '@/lib/vat';
 
 export default function Wishlist() {
   const { language, t } = useLanguage();
@@ -33,7 +34,9 @@ export default function Wishlist() {
       id: item.product.id,
       name: item.product.name,
       nameAr: item.product.name_ar,
-      price: item.product.price,
+      price: getDisplayPrice(item.product.price, item.product.vat_enabled).totalPrice,
+      basePrice: item.product.price,
+      vatEnabled: item.product.vat_enabled,
       image: item.product.image_url || '/placeholder.svg',
     });
 

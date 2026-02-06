@@ -42,7 +42,7 @@ import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
  
 const Checkout = () => {
   const { language, t, direction } = useLanguage();
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, totalBasePrice, totalVAT, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const createOrder = useCreateOrder();
@@ -509,11 +509,19 @@ const Checkout = () => {
                 {/* Totals */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-muted-foreground">
-                    <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                    <span>{language === 'ar' ? 'السعر بدون ضريبة' : 'Price Excl. VAT'}</span>
                     <span>
-                      {totalPrice} {currency}
+                      {totalBasePrice.toFixed(2)} {currency}
                     </span>
                   </div>
+                  {totalVAT > 0 && (
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>{language === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'}</span>
+                      <span>
+                        {totalVAT.toFixed(2)} {currency}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-muted-foreground">
                     <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
                     {isFreeShipping ? (
@@ -528,7 +536,7 @@ const Checkout = () => {
                   <div className="flex justify-between text-lg font-bold text-foreground">
                     <span>{t('cart.total')}</span>
                     <span>
-                      {total} {currency}
+                      {total.toFixed(2)} {currency}
                     </span>
                   </div>
                 </div>
