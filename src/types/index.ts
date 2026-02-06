@@ -26,6 +26,7 @@ export interface Category {
 
 export interface BlogPost {
   id: string;
+  slug?: string;
   title: string;
   titleAr: string;
   excerpt: string;

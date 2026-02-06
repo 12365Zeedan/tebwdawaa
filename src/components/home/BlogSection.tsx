@@ -47,6 +47,7 @@ export function BlogSection() {
               >
                 <BlogCard post={{
                   id: post.id,
+                  slug: post.slug,
                   title: post.title,
                   titleAr: post.title_ar,
                   excerpt: post.excerpt || '',
@@ -59,7 +60,7 @@ export function BlogSection() {
                   date: post.published_at || post.created_at,
                   category: post.category || '',
                   categoryAr: post.category_ar || '',
-                  readTime: post.read_time
+                  readTime: post.read_time || 5,
                 }} />
               </div>
             ))
