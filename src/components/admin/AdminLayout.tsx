@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  FolderTree
+  FolderTree,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,6 +35,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/orders', icon: ShoppingCart, label: t('admin.orders') },
     { href: '/admin/customers', icon: Users, label: t('admin.customers') },
     { href: '/admin/blog', icon: FileText, label: t('admin.blog') },
+    { href: '/admin/newsletter', icon: Mail, label: language === 'ar' ? 'النشرة البريدية' : 'Newsletter' },
     { href: '/admin/settings', icon: Settings, label: t('admin.settings') },
   ];
 
