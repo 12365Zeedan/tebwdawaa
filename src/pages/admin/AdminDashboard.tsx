@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { DollarSign, ShoppingCart, Users, Package, AlertTriangle, Settings, Loader2 } from 'lucide-react';
+import { TotalSalesCard } from '@/components/admin/analytics/TotalSalesCard';
+import { ProductSalesCard } from '@/components/admin/analytics/ProductSalesCard';
+import { FrequentlyBoughtTogetherCard } from '@/components/admin/analytics/FrequentlyBoughtTogetherCard';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatCard } from '@/components/admin/StatCard';
@@ -124,6 +127,11 @@ const AdminDashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* Sales Analytics */}
+        <TotalSalesCard />
+        <ProductSalesCard />
+        <FrequentlyBoughtTogetherCard />
 
         {/* Low Stock Alerts */}
         <div className="bg-card rounded-xl border border-border/50 shadow-soft overflow-hidden">
