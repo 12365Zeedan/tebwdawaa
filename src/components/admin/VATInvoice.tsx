@@ -4,8 +4,10 @@ import { format } from 'date-fns';
 import { generateZATCAQRData } from '@/lib/zatca';
 import { calculateVAT, calculateTotalWithVAT, VAT_RATE } from '@/lib/vat';
 import { Button } from '@/components/ui/button';
-import { Printer, Download, Loader2 } from 'lucide-react';
+import { Printer, Download, Loader2, Mail, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface OrderItem {
   id: string;
@@ -66,7 +68,7 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
   const [isDownloading, setIsDownloading] = useState(false);
-
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   // Calculate VAT breakdown
   const subtotalExclVAT = order.subtotal;
   const vatAmount = calculateVAT(subtotalExclVAT);
@@ -136,11 +138,84 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
     }
   };
 
+  const handleSendEmail = async () => {
+    setIsSendingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-invoice-email', {
+        body: {
+          customerEmail: order.customer_email,
+          customerName: order.customer_name,
+          customerPhone: order.customer_phone,
+          orderNumber: order.order_number,
+          createdAt: order.created_at,
+          items: order.items,
+          subtotal: order.subtotal,
+          shippingCost: order.shipping_cost ?? 0,
+          total: order.total,
+          shippingAddress: order.shipping_address,
+          companyInfo,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        toast.success(isAr ? 'تم إرسال الفاتورة بالبريد الإلكتروني' : 'Invoice sent to customer email');
+      } else {
+        throw new Error(data?.error || 'Failed to send email');
+      }
+    } catch (error: any) {
+      console.error('Email send failed:', error);
+      toast.error(isAr ? 'فشل إرسال البريد الإلكتروني' : `Failed to send email: ${error.message}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    const phone = order.customer_phone?.replace(/[^0-9]/g, '') || '';
+    const message = [
+      `📄 ${isAr ? 'فاتورة ضريبية' : 'VAT Invoice'} - ${order.order_number}`,
+      '',
+      `${isAr ? 'العميل' : 'Customer'}: ${order.customer_name}`,
+      `${isAr ? 'التاريخ' : 'Date'}: ${format(new Date(order.created_at), 'dd/MM/yyyy')}`,
+      '',
+      `${isAr ? 'المنتجات' : 'Items'}:`,
+      ...order.items.map(
+        (item) =>
+          `• ${item.product_name} x${item.quantity} = ${item.total_price.toFixed(2)} SAR`
+      ),
+      '',
+      `${isAr ? 'المجموع (بدون ضريبة)' : 'Subtotal (Excl. VAT)'}: ${order.subtotal.toFixed(2)} SAR`,
+      `${isAr ? 'ضريبة القيمة المضافة' : 'VAT'} (15%): ${vatAmount.toFixed(2)} SAR`,
+      `${isAr ? 'الشحن' : 'Shipping'}: ${shippingCost > 0 ? `${shippingCost.toFixed(2)} SAR` : (isAr ? 'مجاني' : 'Free')}`,
+      `${isAr ? 'الإجمالي' : 'Grand Total'}: ${grandTotal.toFixed(2)} SAR`,
+      '',
+      `${companyInfo.company_name || companyInfo.store_name}`,
+      companyInfo.vat_number ? `${isAr ? 'الرقم الضريبي' : 'VAT No.'}: ${companyInfo.vat_number}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const encodedMessage = encodeURIComponent(message);
+    const url = phone
+      ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`
+      : `https://api.whatsapp.com/send?text=${encodedMessage}`;
+    window.open(url, '_blank');
+  };
+
   const isAr = language === 'ar';
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2 no-print">
+      <div className="flex flex-wrap justify-end gap-2 no-print">
+        <Button onClick={handleShareWhatsApp} variant="outline" className="gap-2 text-green-600 border-green-200 hover:bg-green-50">
+          <MessageCircle className="h-4 w-4" />
+          {isAr ? 'واتساب' : 'WhatsApp'}
+        </Button>
+        <Button onClick={handleSendEmail} variant="outline" className="gap-2" disabled={isSendingEmail}>
+          {isSendingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+          {isAr ? 'إرسال بالبريد' : 'Send Email'}
+        </Button>
         <Button onClick={handleDownloadPDF} variant="outline" className="gap-2" disabled={isDownloading}>
           {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {isAr ? 'تحميل PDF' : 'Download PDF'}
