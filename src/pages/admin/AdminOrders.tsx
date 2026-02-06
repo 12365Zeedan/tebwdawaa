@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard } from 'lucide-react';
+import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,9 @@ import { useUpdatePaymentStatus } from '@/hooks/usePayment';
 import { PaymentStatusBadge, PaymentMethodBadge, paymentStatusConfig } from '@/components/orders/PaymentStatusBadge';
 import { TransactionHistory } from '@/components/orders/TransactionHistory';
 import { cn } from '@/lib/utils';
+import VATInvoice from '@/components/admin/VATInvoice';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
   pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
@@ -57,6 +60,36 @@ const AdminOrders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { data: orderDetails, isLoading: detailsLoading } = useAdminOrderDetails(selectedOrderId);
+
+  // Fetch company info for VAT invoice
+  const { data: companySettings } = useQuery({
+    queryKey: ['company-settings-invoice'],
+    queryFn: async () => {
+      const keys = ['company_name', 'company_address', 'cr_number', 'company_email', 'company_phone', 'site_url', 'store_name'];
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('key, value')
+        .in('key', keys);
+      if (error) throw error;
+      const settings: Record<string, string> = {};
+      data?.forEach((s) => {
+        try {
+          settings[s.key] = typeof s.value === 'string' ? JSON.parse(s.value) : String(s.value);
+        } catch {
+          settings[s.key] = String(s.value);
+        }
+      });
+      return {
+        company_name: settings.company_name || '',
+        company_address: settings.company_address || '',
+        cr_number: settings.cr_number || '',
+        company_email: settings.company_email || '',
+        company_phone: settings.company_phone || '',
+        site_url: settings.site_url || '',
+        store_name: settings.store_name || 'My Store',
+      };
+    },
+  });
 
   const getStatusConfig = (status: string) => {
     return statusConfig[status] || statusConfig.pending;
@@ -260,7 +293,7 @@ const AdminOrders = () => {
 
         {/* Order Details Dialog */}
         <Dialog open={!!selectedOrderId} onOpenChange={() => setSelectedOrderId(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {language === 'ar' ? 'تفاصيل الطلب' : 'Order Details'}
@@ -317,7 +350,7 @@ const AdminOrders = () => {
                 <Separator />
 
                 <Tabs defaultValue="details" className="w-full">
-                  <TabsList className="w-full grid grid-cols-3">
+                  <TabsList className="w-full grid grid-cols-4">
                     <TabsTrigger value="details" className="gap-1">
                       <Package className="h-4 w-4" />
                       {language === 'ar' ? 'التفاصيل' : 'Details'}
@@ -329,6 +362,10 @@ const AdminOrders = () => {
                     <TabsTrigger value="payment" className="gap-1">
                       <CreditCard className="h-4 w-4" />
                       {language === 'ar' ? 'الدفع' : 'Payment'}
+                    </TabsTrigger>
+                    <TabsTrigger value="invoice" className="gap-1">
+                      <FileText className="h-4 w-4" />
+                      {language === 'ar' ? 'الفاتورة' : 'Invoice'}
                     </TabsTrigger>
                   </TabsList>
 
@@ -459,6 +496,28 @@ const AdminOrders = () => {
                       </h4>
                       <TransactionHistory orderId={orderDetails.id} />
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="invoice" className="mt-4">
+                    {companySettings && orderDetails.items ? (
+                      <VATInvoice
+                        order={{
+                          ...orderDetails,
+                          shipping_address: orderDetails.shipping_address as {
+                            street?: string;
+                            city?: string;
+                            country?: string;
+                            postalCode?: string;
+                          } | null,
+                          items: orderDetails.items,
+                        }}
+                        companyInfo={companySettings}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
 
