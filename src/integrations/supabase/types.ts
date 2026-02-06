@@ -624,6 +624,7 @@ export type Database = {
           slug: string
           stock_quantity: number | null
           updated_at: string
+          vat_enabled: boolean
         }
         Insert: {
           barcode?: string | null
@@ -649,6 +650,7 @@ export type Database = {
           slug: string
           stock_quantity?: number | null
           updated_at?: string
+          vat_enabled?: boolean
         }
         Update: {
           barcode?: string | null
@@ -674,6 +676,7 @@ export type Database = {
           slug?: string
           stock_quantity?: number | null
           updated_at?: string
+          vat_enabled?: boolean
         }
         Relationships: [
           {

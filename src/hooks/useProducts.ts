@@ -23,6 +23,7 @@ export interface Product {
   is_new_arrival: boolean;
   is_best_seller: boolean;
   is_active: boolean;
+  vat_enabled: boolean;
   created_at: string;
   barcode?: string | null;
   category?: {
