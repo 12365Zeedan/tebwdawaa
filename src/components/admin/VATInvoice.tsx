@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { format } from 'date-fns';
 import { generateZATCAQRData } from '@/lib/zatca';
 import { calculateVAT, calculateTotalWithVAT, VAT_RATE } from '@/lib/vat';
 import { Button } from '@/components/ui/button';
-import { Printer } from 'lucide-react';
+import { Printer, Download, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OrderItem {
@@ -65,6 +65,7 @@ interface VATInvoiceProps {
 const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Calculate VAT breakdown
   const subtotalExclVAT = order.subtotal;
@@ -113,11 +114,37 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
     printWindow.document.close();
   };
 
+  const handleDownloadPDF = async () => {
+    const content = printRef.current;
+    if (!content) return;
+
+    setIsDownloading(true);
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Invoice-${order.order_number}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      };
+      await html2pdf().set(opt).from(content).save();
+    } catch (error) {
+      console.error('PDF download failed:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const isAr = language === 'ar';
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end no-print">
+      <div className="flex justify-end gap-2 no-print">
+        <Button onClick={handleDownloadPDF} variant="outline" className="gap-2" disabled={isDownloading}>
+          {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {isAr ? 'تحميل PDF' : 'Download PDF'}
+        </Button>
         <Button onClick={handlePrint} className="gap-2">
           <Printer className="h-4 w-4" />
           {isAr ? 'طباعة الفاتورة' : 'Print Invoice'}
