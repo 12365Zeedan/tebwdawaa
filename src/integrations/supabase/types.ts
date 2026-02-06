@@ -49,6 +49,7 @@ export type Database = {
           id: string
           is_approved: boolean
           is_rejected: boolean
+          parent_comment_id: string | null
           updated_at: string
           user_id: string
         }
@@ -59,6 +60,7 @@ export type Database = {
           id?: string
           is_approved?: boolean
           is_rejected?: boolean
+          parent_comment_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           id?: string
           is_approved?: boolean
           is_rejected?: boolean
+          parent_comment_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -78,6 +81,13 @@ export type Database = {
             columns: ["blog_post_id"]
             isOneToOne: false
             referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "blog_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -238,6 +248,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          confirmation_token: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          is_confirmed: boolean
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          confirmation_token?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          is_confirmed?: boolean
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          confirmation_token?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          is_confirmed?: boolean
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       order_items: {
         Row: {
