@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, ArrowLeft, Eye } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { BlogPost } from '@/types';
 
@@ -54,6 +54,12 @@ export function BlogCard({ post }: BlogCardProps) {
               {post.readTime} {language === 'ar' ? 'دقائق' : 'min read'}
             </span>
           </div>
+          {post.viewCount && post.viewCount > 0 && (
+            <div className="flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              <span>{post.viewCount}</span>
+            </div>
+          )}
         </div>
 
         {/* Title */}

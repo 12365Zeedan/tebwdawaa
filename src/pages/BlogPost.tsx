@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowLeft, ArrowRight, Tag, User } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, ArrowRight, Tag, User, Eye } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +11,7 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogTag } from '@/hooks/useAdminBlog';
+import { useRecordView } from '@/hooks/useViewTracking';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,6 +20,9 @@ const BlogPostPage = () => {
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
 
   const { data: post, isLoading } = useBlogPost(slug || '');
+
+  // Record view
+  useRecordView(post?.id);
 
   // Fetch tags for this post
   const { data: postTags = [] } = useQuery({
@@ -155,6 +159,12 @@ const BlogPostPage = () => {
                 <span>{post.read_time} {isAr ? 'دقائق' : 'min read'}</span>
               </div>
             )}
+            {(post as any).view_count > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Eye className="h-4 w-4" />
+                <span>{(post as any).view_count} {isAr ? 'مشاهدة' : 'views'}</span>
+              </div>
+            )}
           </div>
 
           {/* Content */}
@@ -210,6 +220,7 @@ const BlogPostPage = () => {
                     category: relPost.category || '',
                     categoryAr: relPost.category_ar || '',
                     readTime: relPost.read_time || 5,
+                    viewCount: (relPost as any).view_count || 0,
                   }}
                 />
               ))}
