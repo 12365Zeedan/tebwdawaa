@@ -19,6 +19,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, Package, Bell, Store, Save, Loader2, Truck, Building2 } from 'lucide-react';
 
+type CompanyAddress = {
+  building_no: string;
+  secondary_no: string;
+  postal_code: string;
+  street: string;
+  district: string;
+  city: string;
+  region: string;
+  country: string;
+};
+
 type SettingsData = {
   store_name: string;
   store_name_ar: string;
@@ -31,12 +42,23 @@ type SettingsData = {
   new_order_notifications: boolean;
   low_stock_notifications: boolean;
   company_name: string;
-  company_address: string;
+  company_address: CompanyAddress;
   cr_number: string;
   company_email: string;
   company_phone: string;
   site_url: string;
   vat_number: string;
+};
+
+const defaultAddress: CompanyAddress = {
+  building_no: '',
+  secondary_no: '',
+  postal_code: '',
+  street: '',
+  district: '',
+  city: '',
+  region: '',
+  country: 'Saudi Arabia',
 };
 
 const defaultSettings: SettingsData = {
@@ -51,7 +73,7 @@ const defaultSettings: SettingsData = {
   new_order_notifications: true,
   low_stock_notifications: true,
   company_name: '',
-  company_address: '',
+  company_address: { ...defaultAddress },
   cr_number: '',
   company_email: '',
   company_phone: '',
@@ -82,18 +104,37 @@ export default function AdminSettings() {
   // Parse settings into form data
   useEffect(() => {
     if (settings) {
-      const parsed: Record<string, string | number | boolean> = {};
+      const parsed: Record<string, string | number | boolean | CompanyAddress> = {};
       settings.forEach((setting) => {
         const value = setting.value;
         const key = setting.key as keyof SettingsData;
         if (key in defaultSettings) {
-          const defaultVal = defaultSettings[key];
-          if (typeof defaultVal === 'boolean') {
-            parsed[key] = value === true || value === 'true' || value === '"true"';
-          } else if (typeof defaultVal === 'number') {
-            parsed[key] = typeof value === 'number' ? value : parseFloat(String(value).replace(/"/g, '')) || defaultVal;
+          if (key === 'company_address') {
+            // Parse structured address
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+              parsed[key] = { ...defaultAddress, ...(value as CompanyAddress) };
+            } else if (typeof value === 'string') {
+              try {
+                const addressObj = JSON.parse(value.replace(/^"|"$/g, ''));
+                if (typeof addressObj === 'object' && addressObj !== null) {
+                  parsed[key] = { ...defaultAddress, ...addressObj };
+                } else {
+                  // Legacy single string address — put into street
+                  parsed[key] = { ...defaultAddress, street: String(addressObj) };
+                }
+              } catch {
+                parsed[key] = { ...defaultAddress, street: value.replace(/"/g, '') };
+              }
+            }
           } else {
-            parsed[key] = typeof value === 'string' ? value.replace(/"/g, '') : String(value).replace(/"/g, '');
+            const defaultVal = defaultSettings[key];
+            if (typeof defaultVal === 'boolean') {
+              parsed[key] = value === true || value === 'true' || value === '"true"';
+            } else if (typeof defaultVal === 'number') {
+              parsed[key] = typeof value === 'number' ? value : parseFloat(String(value).replace(/"/g, '')) || defaultVal;
+            } else {
+              parsed[key] = typeof value === 'string' ? value.replace(/"/g, '') : String(value).replace(/"/g, '');
+            }
           }
         }
       });
@@ -105,7 +146,14 @@ export default function AdminSettings() {
   const updateSettings = useMutation({
     mutationFn: async (updates: Partial<SettingsData>) => {
       const promises = Object.entries(updates).map(async ([key, value]) => {
-        const jsonValue = typeof value === 'string' ? `"${value}"` : JSON.stringify(value);
+        let jsonValue: string;
+        if (typeof value === 'object' && value !== null) {
+          jsonValue = JSON.stringify(value);
+        } else if (typeof value === 'string') {
+          jsonValue = `"${value}"`;
+        } else {
+          jsonValue = JSON.stringify(value);
+        }
         const { error } = await supabase
           .from('app_settings')
           .update({ value: jsonValue })
@@ -326,16 +374,124 @@ export default function AdminSettings() {
                     placeholder={language === 'ar' ? 'رقم التسجيل الضريبي' : 'VAT Registration Number'}
                   />
                 </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="company-address">
-                    {language === 'ar' ? 'العنوان الكامل' : 'Full Address'}
+                <div className="sm:col-span-2 space-y-3">
+                  <Label className="text-base font-semibold">
+                    {language === 'ar' ? 'العنوان التفصيلي' : 'Detailed Address'}
                   </Label>
-                  <Input
-                    id="company-address"
-                    value={formData.company_address}
-                    onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
-                    placeholder={language === 'ar' ? 'العنوان الكامل للشركة' : 'Full company address'}
-                  />
+                  <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="building-no" className="text-xs">
+                        {language === 'ar' ? 'رقم المبنى' : 'Building No.'}
+                      </Label>
+                      <Input
+                        id="building-no"
+                        value={formData.company_address.building_no}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, building_no: e.target.value }
+                        }))}
+                        placeholder="1234"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="secondary-no" className="text-xs">
+                        {language === 'ar' ? 'الرقم الإضافي' : 'Secondary No.'}
+                      </Label>
+                      <Input
+                        id="secondary-no"
+                        value={formData.company_address.secondary_no}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, secondary_no: e.target.value }
+                        }))}
+                        placeholder="5678"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="postal-code" className="text-xs">
+                        {language === 'ar' ? 'الرمز البريدي' : 'Postal Code'}
+                      </Label>
+                      <Input
+                        id="postal-code"
+                        value={formData.company_address.postal_code}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, postal_code: e.target.value }
+                        }))}
+                        placeholder="12345"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="street" className="text-xs">
+                        {language === 'ar' ? 'الشارع' : 'Street'}
+                      </Label>
+                      <Input
+                        id="street"
+                        value={formData.company_address.street}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, street: e.target.value }
+                        }))}
+                        placeholder={language === 'ar' ? 'اسم الشارع' : 'Street name'}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="district" className="text-xs">
+                        {language === 'ar' ? 'الحي' : 'District'}
+                      </Label>
+                      <Input
+                        id="district"
+                        value={formData.company_address.district}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, district: e.target.value }
+                        }))}
+                        placeholder={language === 'ar' ? 'اسم الحي' : 'District name'}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="city" className="text-xs">
+                        {language === 'ar' ? 'المدينة' : 'City'}
+                      </Label>
+                      <Input
+                        id="city"
+                        value={formData.company_address.city}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, city: e.target.value }
+                        }))}
+                        placeholder={language === 'ar' ? 'المدينة' : 'City'}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="region" className="text-xs">
+                        {language === 'ar' ? 'المنطقة' : 'Region'}
+                      </Label>
+                      <Input
+                        id="region"
+                        value={formData.company_address.region}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, region: e.target.value }
+                        }))}
+                        placeholder={language === 'ar' ? 'المنطقة' : 'Region'}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="country" className="text-xs">
+                        {language === 'ar' ? 'الدولة' : 'Country'}
+                      </Label>
+                      <Input
+                        id="country"
+                        value={formData.company_address.country}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          company_address: { ...prev.company_address, country: e.target.value }
+                        }))}
+                        placeholder={language === 'ar' ? 'الدولة' : 'Country'}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-email">
