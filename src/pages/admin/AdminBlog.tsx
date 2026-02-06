@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, BarChart3 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, BarChart3, MessageCircle } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,6 +77,12 @@ const AdminBlog = () => {
               <Button variant="outline" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
                 {isAr ? 'التحليلات' : 'Analytics'}
+              </Button>
+            </Link>
+            <Link to="/admin/blog/comments">
+              <Button variant="outline" className="gap-2">
+                <MessageCircle className="h-4 w-4" />
+                {isAr ? 'التعليقات' : 'Comments'}
               </Button>
             </Link>
             <Button className="gap-2" onClick={handleOpenNew}>
