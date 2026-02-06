@@ -17,9 +17,11 @@ import {
 
 interface BlogCommentsProps {
   postId: string;
+  postTitle?: string;
+  postSlug?: string;
 }
 
-export function BlogComments({ postId }: BlogCommentsProps) {
+export function BlogComments({ postId, postTitle, postSlug }: BlogCommentsProps) {
   const { language } = useLanguage();
   const isAr = language === 'ar';
   const { user } = useAuth();
@@ -46,7 +48,14 @@ export function BlogComments({ postId }: BlogCommentsProps) {
     }
 
     createComment.mutate(
-      { postId, content: content.trim(), userId: user.id },
+      {
+        postId,
+        content: content.trim(),
+        userId: user.id,
+        postTitle,
+        postSlug,
+        commenterName: user.user_metadata?.full_name || user.email || undefined,
+      },
       { onSuccess: () => setContent('') }
     );
   };

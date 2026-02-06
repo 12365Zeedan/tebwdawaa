@@ -77,7 +77,21 @@ export function useCreateComment() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ postId, content, userId }: { postId: string; content: string; userId: string }) => {
+    mutationFn: async ({
+      postId,
+      content,
+      userId,
+      postTitle,
+      postSlug,
+      commenterName,
+    }: {
+      postId: string;
+      content: string;
+      userId: string;
+      postTitle?: string;
+      postSlug?: string;
+      commenterName?: string;
+    }) => {
       const validation = commentSchema.safeParse({ content });
       if (!validation.success) {
         throw new Error(validation.error.errors[0].message);
@@ -94,6 +108,22 @@ export function useCreateComment() {
         .single();
 
       if (error) throw error;
+
+      // Fire-and-forget notification to admins
+      supabase.functions
+        .invoke('notify-comment', {
+          body: {
+            commentId: data.id,
+            postTitle: postTitle || 'Untitled Post',
+            postSlug: postSlug || '',
+            commenterName: commenterName || 'User',
+            commentContent: validation.data.content,
+          },
+        })
+        .then(({ error: fnError }) => {
+          if (fnError) console.error('Comment notification failed:', fnError.message);
+        });
+
       return data;
     },
     onSuccess: (_, vars) => {
