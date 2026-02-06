@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, BarChart3 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useAdminBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogP
 import type { AdminBlogPost, BlogPostFormData } from '@/hooks/useAdminBlog';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBlogViewCounts } from '@/hooks/useViewTracking';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -25,6 +26,7 @@ const AdminBlog = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: posts, isLoading } = useAdminBlogPosts(search || undefined);
+  const { data: viewCounts } = useBlogViewCounts();
   const createPost = useCreateBlogPost();
   const updatePost = useUpdateBlogPost();
   const deletePost = useDeleteBlogPost();
@@ -109,6 +111,12 @@ const AdminBlog = () => {
                     {isAr ? 'الحالة' : 'Status'}
                   </th>
                   <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <BarChart3 className="h-3.5 w-3.5" />
+                      {isAr ? 'المشاهدات' : 'Views'}
+                    </div>
+                  </th>
+                  <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
                     {isAr ? 'الإجراءات' : 'Actions'}
                   </th>
                 </tr>
@@ -121,6 +129,7 @@ const AdminBlog = () => {
                       <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-6 w-20" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-6 w-20" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-4 w-12" /></td>
                       <td className="px-6 py-4"><Skeleton className="h-8 w-20" /></td>
                     </tr>
                   ))
@@ -129,6 +138,7 @@ const AdminBlog = () => {
                     const title = isAr ? post.title_ar : post.title;
                     const author = isAr ? post.author_name_ar : post.author_name;
                     const category = isAr ? post.category_ar : post.category;
+                    const postViews = viewCounts?.get(post.id) ?? 0;
 
                     return (
                       <tr key={post.id} className="border-b border-border last:border-0 hover:bg-muted/20">
@@ -161,6 +171,11 @@ const AdminBlog = () => {
                           )}
                         </td>
                         <td className="px-6 py-4">
+                          <span className="text-sm font-medium text-foreground">
+                            {postViews.toLocaleString()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(post)}>
                               <Edit className="h-4 w-4" />
@@ -175,7 +190,7 @@ const AdminBlog = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       {isAr ? 'لا توجد مقالات بعد' : 'No blog posts yet'}
                     </td>
                   </tr>

@@ -40,6 +40,7 @@ export interface BlogPost {
   category: string;
   categoryAr: string;
   readTime: number;
+  viewCount?: number;
 }
 
 export interface Order {

@@ -41,6 +41,44 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_post_views: {
+        Row: {
+          blog_post_id: string
+          created_at: string
+          id: string
+          referrer: string | null
+          user_agent: string | null
+          user_id: string | null
+          viewer_ip: string | null
+        }
+        Insert: {
+          blog_post_id: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewer_ip?: string | null
+        }
+        Update: {
+          blog_post_id?: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          viewer_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_views_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author_id: string | null
@@ -62,6 +100,7 @@ export type Database = {
           title: string
           title_ar: string
           updated_at: string
+          view_count: number
         }
         Insert: {
           author_id?: string | null
@@ -83,6 +122,7 @@ export type Database = {
           title: string
           title_ar: string
           updated_at?: string
+          view_count?: number
         }
         Update: {
           author_id?: string | null
@@ -104,6 +144,7 @@ export type Database = {
           title?: string
           title_ar?: string
           updated_at?: string
+          view_count?: number
         }
         Relationships: []
       }
@@ -605,6 +646,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      record_blog_view: {
+        Args: {
+          p_blog_post_id: string
+          p_referrer?: string
+          p_user_agent?: string
+          p_user_id?: string
+          p_viewer_ip?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

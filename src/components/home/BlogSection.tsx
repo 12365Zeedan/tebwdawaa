@@ -61,6 +61,7 @@ export function BlogSection() {
                   category: post.category || '',
                   categoryAr: post.category_ar || '',
                   readTime: post.read_time || 5,
+                  viewCount: (post as any).view_count || 0,
                 }} />
               </div>
             ))
