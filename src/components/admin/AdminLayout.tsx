@@ -1,23 +1,23 @@
-import React, { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  FileText, 
+import React, { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  FileText,
   Settings,
   Globe,
   LogOut,
   Menu,
   X,
   FolderTree,
-  Mail
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+  Mail,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -29,31 +29,29 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: '/admin', icon: LayoutDashboard, label: t('admin.dashboard') },
-    { href: '/admin/products', icon: Package, label: t('admin.products') },
-    { href: '/admin/categories', icon: FolderTree, label: language === 'ar' ? 'الفئات' : 'Categories' },
-    { href: '/admin/orders', icon: ShoppingCart, label: t('admin.orders') },
-    { href: '/admin/customers', icon: Users, label: t('admin.customers') },
-    { href: '/admin/blog', icon: FileText, label: t('admin.blog') },
-    { href: '/admin/newsletter', icon: Mail, label: language === 'ar' ? 'النشرة البريدية' : 'Newsletter' },
-    { href: '/admin/settings', icon: Settings, label: t('admin.settings') },
+    { href: "/admin", icon: LayoutDashboard, label: t("admin.dashboard") },
+    { href: "/admin/products", icon: Package, label: t("admin.products") },
+    { href: "/admin/categories", icon: FolderTree, label: language === "ar" ? "الفئات" : "Categories" },
+    { href: "/admin/orders", icon: ShoppingCart, label: t("admin.orders") },
+    { href: "/admin/customers", icon: Users, label: t("admin.customers") },
+    { href: "/admin/blog", icon: FileText, label: t("admin.blog post") },
+    { href: "/admin/newsletter", icon: Mail, label: language === "ar" ? "النشرة البريدية" : "Newsletter" },
+    { href: "/admin/settings", icon: Settings, label: t("admin.settings") },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/admin') return location.pathname === '/admin';
+    if (path === "/admin") return location.pathname === "/admin";
     return location.pathname.startsWith(path);
   };
 
   return (
-    <div className={cn('min-h-screen flex', direction === 'rtl' && 'font-arabic')}>
+    <div className={cn("min-h-screen flex", direction === "rtl" && "font-arabic")}>
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 z-50 flex w-64 flex-col bg-sidebar transition-transform duration-300 lg:relative lg:translate-x-0',
-          direction === 'rtl' ? 'right-0' : 'left-0',
-          sidebarOpen 
-            ? 'translate-x-0' 
-            : direction === 'rtl' ? 'translate-x-full' : '-translate-x-full'
+          "fixed inset-y-0 z-50 flex w-64 flex-col bg-sidebar transition-transform duration-300 lg:relative lg:translate-x-0",
+          direction === "rtl" ? "right-0" : "left-0",
+          sidebarOpen ? "translate-x-0" : direction === "rtl" ? "translate-x-full" : "-translate-x-full",
         )}
       >
         {/* Logo */}
@@ -63,7 +61,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <span className="text-sm font-bold text-sidebar-primary-foreground">P</span>
             </div>
             <span className="text-lg font-bold text-sidebar-foreground">
-              {language === 'ar' ? 'لوحة التحكم' : 'Admin'}
+              {language === "ar" ? "لوحة التحكم" : "Admin"}
             </span>
           </Link>
           <Button
@@ -85,10 +83,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive(item.href)
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                      : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -104,10 +102,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
           >
             <Globe className="h-5 w-5" />
-            {language === 'ar' ? 'English' : 'العربية'}
+            {language === "ar" ? "English" : "العربية"}
           </Button>
           <Link to="/">
             <Button
@@ -115,7 +113,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               className="w-full justify-start gap-3 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <LogOut className="h-5 w-5" />
-              {language === 'ar' ? 'العودة للموقع' : 'Back to Site'}
+              {language === "ar" ? "العودة للموقع" : "Back to Site"}
             </Button>
           </Link>
         </div>
@@ -123,22 +121,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
@@ -151,9 +141,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 bg-muted/30">
-          {children}
-        </main>
+        <main className="flex-1 p-6 bg-muted/30">{children}</main>
       </div>
     </div>
   );
