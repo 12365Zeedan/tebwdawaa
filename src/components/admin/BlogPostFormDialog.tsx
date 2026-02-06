@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +12,9 @@ import { ImageUpload } from '@/components/admin/ImageUpload';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBlogTags, useCreateBlogTag, usePostTags } from '@/hooks/useAdminBlog';
+import { useAutoSaveDraft } from '@/hooks/useAutoSaveDraft';
 import type { AdminBlogPost, BlogPostFormData } from '@/hooks/useAdminBlog';
-import { X, Plus, Loader2 } from 'lucide-react';
+import { X, Plus, Loader2, Save, Clock, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BlogPostFormDialogProps {
@@ -24,6 +25,16 @@ interface BlogPostFormDialogProps {
   isLoading?: boolean;
 }
 
+const emptyForm: BlogPostFormData = {
+  title: '', title_ar: '', slug: '', excerpt: '', excerpt_ar: '',
+  content: '', content_ar: '', image_url: null,
+  author_name: '', author_name_ar: '',
+  category: '', category_ar: '', read_time: 5,
+  is_published: false,
+  meta_title: '', meta_title_ar: '', meta_description: '', meta_description_ar: '',
+  tag_ids: [],
+};
+
 export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoading }: BlogPostFormDialogProps) {
   const { language, direction } = useLanguage();
   const isAr = language === 'ar';
@@ -32,22 +43,19 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
   const { data: existingTagIds = [] } = usePostTags(post?.id || '');
   const createTag = useCreateBlogTag();
 
-  const [form, setForm] = useState<BlogPostFormData>({
-    title: '', title_ar: '', slug: '', excerpt: '', excerpt_ar: '',
-    content: '', content_ar: '', image_url: null,
-    author_name: '', author_name_ar: '',
-    category: '', category_ar: '', read_time: 5,
-    is_published: false,
-    meta_title: '', meta_title_ar: '', meta_description: '', meta_description_ar: '',
-    tag_ids: [],
-  });
+  const { loadDraft, scheduleAutoSave, saveDraft, clearDraft, hasDraft, status: draftStatus, lastSaved } = useAutoSaveDraft(post?.id);
 
+  const [form, setForm] = useState<BlogPostFormData>({ ...emptyForm });
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [newTagNameAr, setNewTagNameAr] = useState('');
 
+  // Initialize form: check for draft on open
   useEffect(() => {
+    if (!open) return;
+
     if (post) {
-      setForm({
+      const postForm: BlogPostFormData = {
         title: post.title, title_ar: post.title_ar, slug: post.slug,
         excerpt: post.excerpt || '', excerpt_ar: post.excerpt_ar || '',
         content: post.content || '', content_ar: post.content_ar || '',
@@ -58,30 +66,61 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
         meta_title: post.meta_title || '', meta_title_ar: post.meta_title_ar || '',
         meta_description: post.meta_description || '', meta_description_ar: post.meta_description_ar || '',
         tag_ids: existingTagIds,
-      });
+      };
+
+      // Check if there's a newer draft
+      if (hasDraft()) {
+        setForm(postForm);
+        setShowDraftBanner(true);
+      } else {
+        setForm(postForm);
+        setShowDraftBanner(false);
+      }
     } else {
-      setForm({
-        title: '', title_ar: '', slug: '', excerpt: '', excerpt_ar: '',
-        content: '', content_ar: '', image_url: null,
-        author_name: '', author_name_ar: '',
-        category: '', category_ar: '', read_time: 5,
-        is_published: false,
-        meta_title: '', meta_title_ar: '', meta_description: '', meta_description_ar: '',
-        tag_ids: [],
-      });
+      // New post — try to restore draft
+      const draft = loadDraft();
+      if (draft) {
+        setForm(draft);
+        setShowDraftBanner(true);
+      } else {
+        setForm({ ...emptyForm });
+        setShowDraftBanner(false);
+      }
     }
-  }, [post, existingTagIds]);
+  }, [open, post, existingTagIds]);
+
+  // Auto-save on form changes
+  const updateForm = useCallback((updater: (prev: BlogPostFormData) => BlogPostFormData) => {
+    setForm(prev => {
+      const next = updater(prev);
+      scheduleAutoSave(next);
+      return next;
+    });
+  }, [scheduleAutoSave]);
+
+  const restoreDraft = () => {
+    const draft = loadDraft();
+    if (draft) {
+      setForm(draft);
+      setShowDraftBanner(false);
+    }
+  };
+
+  const discardDraft = () => {
+    clearDraft();
+    setShowDraftBanner(false);
+  };
 
   const generateSlug = (title: string) => {
     return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   };
 
   const handleTitleChange = (title: string) => {
-    setForm(prev => ({ ...prev, title, slug: generateSlug(title) }));
+    updateForm(prev => ({ ...prev, title, slug: generateSlug(title) }));
   };
 
   const toggleTag = (tagId: string) => {
-    setForm(prev => ({
+    updateForm(prev => ({
       ...prev,
       tag_ids: prev.tag_ids.includes(tagId)
         ? prev.tag_ids.filter(id => id !== tagId)
@@ -92,24 +131,94 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
   const handleAddTag = async () => {
     if (!newTagName.trim()) return;
     const result = await createTag.mutateAsync({ name: newTagName, name_ar: newTagNameAr || newTagName });
-    setForm(prev => ({ ...prev, tag_ids: [...prev.tag_ids, result.id] }));
+    updateForm(prev => ({ ...prev, tag_ids: [...prev.tag_ids, result.id] }));
     setNewTagName('');
     setNewTagNameAr('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Save one last time before submitting
+    saveDraft(form);
     onSubmit(form);
   };
 
+  const handleClose = (openState: boolean) => {
+    if (!openState) {
+      // Save draft when closing without submitting
+      saveDraft(form);
+    }
+    onOpenChange(openState);
+  };
+
+  const handleSuccessClose = () => {
+    clearDraft();
+    onOpenChange(false);
+  };
+
+  // Format last saved time
+  const getLastSavedText = () => {
+    if (!lastSaved) return null;
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - lastSaved.getTime()) / 1000);
+    if (diff < 5) return isAr ? 'تم الحفظ الآن' : 'Saved just now';
+    if (diff < 60) return isAr ? `تم الحفظ منذ ${diff} ثانية` : `Saved ${diff}s ago`;
+    const mins = Math.floor(diff / 60);
+    return isAr ? `تم الحفظ منذ ${mins} دقيقة` : `Saved ${mins}m ago`;
+  };
+
+  // Auto-save status indicator
+  const DraftStatusIndicator = () => {
+    if (draftStatus === 'idle') return null;
+
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        {draftStatus === 'saving' ? (
+          <>
+            <Loader2 className="h-3 w-3 animate-spin" />
+            <span>{isAr ? 'جاري الحفظ...' : 'Saving...'}</span>
+          </>
+        ) : draftStatus === 'saved' ? (
+          <>
+            <Save className="h-3 w-3 text-success" />
+            <span className="text-success">{getLastSavedText()}</span>
+          </>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle>
-            {post ? (isAr ? 'تعديل المقال' : 'Edit Post') : (isAr ? 'مقال جديد' : 'New Post')}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              {post ? (isAr ? 'تعديل المقال' : 'Edit Post') : (isAr ? 'مقال جديد' : 'New Post')}
+            </DialogTitle>
+            <DraftStatusIndicator />
+          </div>
         </DialogHeader>
+
+        {/* Draft Recovery Banner */}
+        {showDraftBanner && (
+          <div className="mx-6 flex items-center gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
+            <Clock className="h-4 w-4 text-warning shrink-0" />
+            <p className="text-sm text-foreground flex-1">
+              {isAr ? 'تم العثور على مسودة محفوظة. هل تريد استعادتها؟' : 'A saved draft was found. Would you like to restore it?'}
+            </p>
+            <div className="flex gap-2 shrink-0">
+              <Button type="button" size="sm" variant="outline" onClick={discardDraft} className="h-7 text-xs">
+                <X className="h-3 w-3 me-1" />
+                {isAr ? 'تجاهل' : 'Discard'}
+              </Button>
+              <Button type="button" size="sm" onClick={restoreDraft} className="h-7 text-xs">
+                <RotateCcw className="h-3 w-3 me-1" />
+                {isAr ? 'استعادة' : 'Restore'}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <ScrollArea className="max-h-[70vh] px-6">
@@ -130,65 +239,65 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
                   </div>
                   <div className="space-y-2">
                     <Label>العنوان (AR)</Label>
-                    <Input value={form.title_ar} onChange={e => setForm(p => ({ ...p, title_ar: e.target.value }))} dir="rtl" required />
+                    <Input value={form.title_ar} onChange={e => updateForm(p => ({ ...p, title_ar: e.target.value }))} dir="rtl" required />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Slug</Label>
-                  <Input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} required />
+                  <Input value={form.slug} onChange={e => updateForm(p => ({ ...p, slug: e.target.value }))} required />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Excerpt (EN)</Label>
-                    <Textarea value={form.excerpt} onChange={e => setForm(p => ({ ...p, excerpt: e.target.value }))} rows={3} />
+                    <Textarea value={form.excerpt} onChange={e => updateForm(p => ({ ...p, excerpt: e.target.value }))} rows={3} />
                   </div>
                   <div className="space-y-2">
                     <Label>المقتطف (AR)</Label>
-                    <Textarea value={form.excerpt_ar} onChange={e => setForm(p => ({ ...p, excerpt_ar: e.target.value }))} rows={3} dir="rtl" />
+                    <Textarea value={form.excerpt_ar} onChange={e => updateForm(p => ({ ...p, excerpt_ar: e.target.value }))} rows={3} dir="rtl" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Content (EN)</Label>
-                  <RichTextEditor content={form.content} onChange={val => setForm(p => ({ ...p, content: val }))} dir="ltr" />
+                  <RichTextEditor content={form.content} onChange={val => updateForm(p => ({ ...p, content: val }))} dir="ltr" />
                 </div>
 
                 <div className="space-y-2">
                   <Label>المحتوى (AR)</Label>
-                  <RichTextEditor content={form.content_ar} onChange={val => setForm(p => ({ ...p, content_ar: val }))} dir="rtl" />
+                  <RichTextEditor content={form.content_ar} onChange={val => updateForm(p => ({ ...p, content_ar: val }))} dir="rtl" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{isAr ? 'الكاتب (EN)' : 'Author (EN)'}</Label>
-                    <Input value={form.author_name} onChange={e => setForm(p => ({ ...p, author_name: e.target.value }))} />
+                    <Input value={form.author_name} onChange={e => updateForm(p => ({ ...p, author_name: e.target.value }))} />
                   </div>
                   <div className="space-y-2">
                     <Label>{isAr ? 'الكاتب (AR)' : 'Author (AR)'}</Label>
-                    <Input value={form.author_name_ar} onChange={e => setForm(p => ({ ...p, author_name_ar: e.target.value }))} dir="rtl" />
+                    <Input value={form.author_name_ar} onChange={e => updateForm(p => ({ ...p, author_name_ar: e.target.value }))} dir="rtl" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{isAr ? 'الفئة (EN)' : 'Category (EN)'}</Label>
-                    <Input value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+                    <Input value={form.category} onChange={e => updateForm(p => ({ ...p, category: e.target.value }))} />
                   </div>
                   <div className="space-y-2">
                     <Label>{isAr ? 'الفئة (AR)' : 'Category (AR)'}</Label>
-                    <Input value={form.category_ar} onChange={e => setForm(p => ({ ...p, category_ar: e.target.value }))} dir="rtl" />
+                    <Input value={form.category_ar} onChange={e => updateForm(p => ({ ...p, category_ar: e.target.value }))} dir="rtl" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{isAr ? 'وقت القراءة (دقائق)' : 'Read Time (min)'}</Label>
-                    <Input type="number" value={form.read_time} onChange={e => setForm(p => ({ ...p, read_time: parseInt(e.target.value) || 5 }))} min={1} />
+                    <Input type="number" value={form.read_time} onChange={e => updateForm(p => ({ ...p, read_time: parseInt(e.target.value) || 5 }))} min={1} />
                   </div>
                   <div className="flex items-center gap-3 pt-6">
-                    <Switch checked={form.is_published} onCheckedChange={val => setForm(p => ({ ...p, is_published: val }))} />
+                    <Switch checked={form.is_published} onCheckedChange={val => updateForm(p => ({ ...p, is_published: val }))} />
                     <Label>{isAr ? 'منشور' : 'Published'}</Label>
                   </div>
                 </div>
@@ -200,7 +309,7 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
                   <Label>{isAr ? 'صورة المقال الرئيسية' : 'Featured Image'}</Label>
                   <ImageUpload
                     value={form.image_url}
-                    onChange={url => setForm(p => ({ ...p, image_url: url }))}
+                    onChange={url => updateForm(p => ({ ...p, image_url: url }))}
                     bucket="blog-images"
                     folder="covers"
                   />
@@ -215,24 +324,24 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Meta Title (EN)</Label>
-                    <Input value={form.meta_title} onChange={e => setForm(p => ({ ...p, meta_title: e.target.value }))} placeholder={form.title} maxLength={60} />
+                    <Input value={form.meta_title} onChange={e => updateForm(p => ({ ...p, meta_title: e.target.value }))} placeholder={form.title} maxLength={60} />
                     <p className="text-xs text-muted-foreground">{form.meta_title.length}/60</p>
                   </div>
                   <div className="space-y-2">
                     <Label>عنوان الميتا (AR)</Label>
-                    <Input value={form.meta_title_ar} onChange={e => setForm(p => ({ ...p, meta_title_ar: e.target.value }))} dir="rtl" placeholder={form.title_ar} maxLength={60} />
+                    <Input value={form.meta_title_ar} onChange={e => updateForm(p => ({ ...p, meta_title_ar: e.target.value }))} dir="rtl" placeholder={form.title_ar} maxLength={60} />
                     <p className="text-xs text-muted-foreground">{form.meta_title_ar.length}/60</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Meta Description (EN)</Label>
-                    <Textarea value={form.meta_description} onChange={e => setForm(p => ({ ...p, meta_description: e.target.value }))} placeholder={form.excerpt} maxLength={160} rows={3} />
+                    <Textarea value={form.meta_description} onChange={e => updateForm(p => ({ ...p, meta_description: e.target.value }))} placeholder={form.excerpt} maxLength={160} rows={3} />
                     <p className="text-xs text-muted-foreground">{form.meta_description.length}/160</p>
                   </div>
                   <div className="space-y-2">
                     <Label>وصف الميتا (AR)</Label>
-                    <Textarea value={form.meta_description_ar} onChange={e => setForm(p => ({ ...p, meta_description_ar: e.target.value }))} dir="rtl" placeholder={form.excerpt_ar} maxLength={160} rows={3} />
+                    <Textarea value={form.meta_description_ar} onChange={e => updateForm(p => ({ ...p, meta_description_ar: e.target.value }))} dir="rtl" placeholder={form.excerpt_ar} maxLength={160} rows={3} />
                     <p className="text-xs text-muted-foreground">{form.meta_description_ar.length}/160</p>
                   </div>
                 </div>
@@ -278,14 +387,17 @@ export function BlogPostFormDialog({ open, onOpenChange, post, onSubmit, isLoadi
             </Tabs>
           </ScrollArea>
 
-          <div className="flex justify-end gap-3 px-6 py-4 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {isAr ? 'إلغاء' : 'Cancel'}
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
-              {post ? (isAr ? 'تحديث' : 'Update') : (isAr ? 'إنشاء' : 'Create')}
-            </Button>
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <DraftStatusIndicator />
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="h-4 w-4 me-2 animate-spin" />}
+                {post ? (isAr ? 'تحديث' : 'Update') : (isAr ? 'إنشاء' : 'Create')}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
