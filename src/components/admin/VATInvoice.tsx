@@ -35,9 +35,20 @@ interface OrderData {
   items: OrderItem[];
 }
 
+interface CompanyAddress {
+  building_no?: string;
+  secondary_no?: string;
+  postal_code?: string;
+  street?: string;
+  district?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+}
+
 interface CompanyInfo {
   company_name: string;
-  company_address: string;
+  company_address: string | CompanyAddress;
   cr_number: string;
   vat_number: string;
   company_email: string;
@@ -149,11 +160,31 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
                 <strong>{isAr ? 'الرقم الضريبي' : 'VAT No.'}:</strong> {companyInfo.vat_number}
               </p>
             )}
-            {companyInfo.company_address && (
-              <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
-                <strong>{isAr ? 'العنوان' : 'Address'}:</strong> {companyInfo.company_address}
-              </p>
-            )}
+            {companyInfo.company_address && (() => {
+              const addr = typeof companyInfo.company_address === 'string'
+                ? (() => { try { const p = JSON.parse(companyInfo.company_address); return typeof p === 'object' ? p : null; } catch { return null; } })()
+                : companyInfo.company_address;
+              if (addr && typeof addr === 'object') {
+                const line1 = [addr.building_no, addr.street, addr.district].filter(Boolean).join(', ');
+                const line2 = [addr.city, addr.region, addr.postal_code].filter(Boolean).join(', ');
+                const line3 = addr.country || '';
+                return (
+                  <div style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
+                    <strong>{isAr ? 'العنوان' : 'Address'}:</strong>
+                    {line1 && <span style={{ display: 'block' }}>{line1}</span>}
+                    {line2 && <span style={{ display: 'block' }}>{line2}</span>}
+                    {line3 && <span style={{ display: 'block' }}>{line3}</span>}
+                    {addr.secondary_no && <span style={{ display: 'block', fontSize: '12px', color: '#888' }}>{isAr ? 'الرقم الإضافي' : 'Secondary No.'}: {addr.secondary_no}</span>}
+                  </div>
+                );
+              }
+              // Fallback for legacy plain string
+              return (
+                <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
+                  <strong>{isAr ? 'العنوان' : 'Address'}:</strong> {String(companyInfo.company_address)}
+                </p>
+              );
+            })()}
             {companyInfo.company_phone && (
               <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
                 <strong>{isAr ? 'الهاتف' : 'Tel'}:</strong> {companyInfo.company_phone}
