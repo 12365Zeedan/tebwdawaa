@@ -35,8 +35,7 @@ import { PaymentStatusBadge, PaymentMethodBadge, paymentStatusConfig } from '@/c
 import { TransactionHistory } from '@/components/orders/TransactionHistory';
 import { cn } from '@/lib/utils';
 import VATInvoice from '@/components/admin/VATInvoice';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
   pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
@@ -60,37 +59,7 @@ const AdminOrders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { data: orderDetails, isLoading: detailsLoading } = useAdminOrderDetails(selectedOrderId);
-
-  // Fetch company info for VAT invoice
-  const { data: companySettings } = useQuery({
-    queryKey: ['company-settings-invoice'],
-    queryFn: async () => {
-      const keys = ['company_name', 'company_address', 'cr_number', 'vat_number', 'company_email', 'company_phone', 'site_url', 'store_name'];
-      const { data, error } = await supabase
-        .from('app_settings')
-        .select('key, value')
-        .in('key', keys);
-      if (error) throw error;
-      const settings: Record<string, string> = {};
-      data?.forEach((s) => {
-        try {
-          settings[s.key] = typeof s.value === 'string' ? JSON.parse(s.value) : String(s.value);
-        } catch {
-          settings[s.key] = String(s.value);
-        }
-      });
-      return {
-        company_name: settings.company_name || '',
-        company_address: settings.company_address || '',
-        cr_number: settings.cr_number || '',
-        vat_number: settings.vat_number || '',
-        company_email: settings.company_email || '',
-        company_phone: settings.company_phone || '',
-        site_url: settings.site_url || '',
-        store_name: settings.store_name || 'My Store',
-      };
-    },
-  });
+  const { data: companySettings } = useCompanyInfo();
 
   const getStatusConfig = (status: string) => {
     return statusConfig[status] || statusConfig.pending;

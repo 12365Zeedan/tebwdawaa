@@ -25,8 +25,11 @@ import { useCreateOrder } from '@/hooks/useOrders';
 import { useProfile } from '@/hooks/useProfile';
 import { useProcessPayment } from '@/hooks/usePayment';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
 import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
+import { calculateVAT, calculateTotalWithVAT } from '@/lib/vat';
+import { supabase } from '@/integrations/supabase/client';
  const checkoutSchema = z.object({
    customerName: z.string().min(2, 'Name must be at least 2 characters'),
    customerEmail: z.string().email('Invalid email address'),
@@ -49,6 +52,7 @@ const Checkout = () => {
   const processPayment = useProcessPayment();
   const { data: profile } = useProfile();
   const { data: settings } = useStoreSettings();
+  const { data: companyInfo } = useCompanyInfo();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
@@ -133,6 +137,80 @@ const Checkout = () => {
         customerName: data.customerName,
         customerPhone: data.customerPhone,
       });
+
+      // Step 3: Auto-send invoice email & WhatsApp (fire-and-forget, don't block checkout)
+      const orderItems = items.map((item) => ({
+        id: item.id,
+        product_name: item.name,
+        product_name_ar: item.nameAr || null,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.price * item.quantity,
+      }));
+
+      // Send invoice email in background
+      if (companyInfo) {
+        supabase.functions
+          .invoke('send-invoice-email', {
+            body: {
+              customerEmail: data.customerEmail,
+              customerName: data.customerName,
+              customerPhone: data.customerPhone || null,
+              orderNumber: order.order_number,
+              createdAt: new Date().toISOString(),
+              items: orderItems,
+              subtotal: totalPrice,
+              shippingCost,
+              total,
+              shippingAddress: {
+                street: data.street,
+                city: data.city,
+                country: data.country,
+                postalCode: data.postalCode,
+              },
+              companyInfo,
+            },
+          })
+          .then(({ error }) => {
+            if (error) console.error('Auto invoice email failed:', error);
+          });
+      }
+
+      // Open WhatsApp with invoice summary (if phone provided)
+      if (data.customerPhone) {
+        const vatAmount = calculateVAT(totalPrice);
+        const phone = data.customerPhone.replace(/[^0-9]/g, '');
+        const storeName = companyInfo?.company_name || companyInfo?.store_name || '';
+        const vatNo = companyInfo?.vat_number || '';
+        const message = [
+          `📄 VAT Invoice - ${order.order_number}`,
+          '',
+          `Customer: ${data.customerName}`,
+          `Date: ${new Date().toLocaleDateString('en-GB')}`,
+          '',
+          'Items:',
+          ...orderItems.map(
+            (item) =>
+              `• ${item.product_name} x${item.quantity} = ${item.total_price.toFixed(2)} SAR`
+          ),
+          '',
+          `Subtotal (Excl. VAT): ${totalPrice.toFixed(2)} SAR`,
+          `VAT (15%): ${vatAmount.toFixed(2)} SAR`,
+          `Shipping: ${shippingCost > 0 ? `${shippingCost.toFixed(2)} SAR` : 'Free'}`,
+          `Grand Total: ${(calculateTotalWithVAT(totalPrice) + shippingCost).toFixed(2)} SAR`,
+          '',
+          storeName,
+          vatNo ? `VAT No.: ${vatNo}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+
+        const encodedMessage = encodeURIComponent(message);
+        window.open(
+          `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`,
+          '_blank'
+        );
+      }
 
       setOrderNumber(order.order_number);
       setOrderComplete(true);
