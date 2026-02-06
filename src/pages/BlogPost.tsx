@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogTag } from '@/hooks/useAdminBlog';
 import { useRecordView } from '@/hooks/useViewTracking';
+import { BlogComments } from '@/components/blog/BlogComments';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -192,6 +193,9 @@ const BlogPostPage = () => {
               </div>
             </div>
           )}
+
+          {/* Comments Section */}
+          <BlogComments postId={post.id} />
         </div>
 
         {/* Related Articles */}
