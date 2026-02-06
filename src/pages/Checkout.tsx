@@ -27,9 +27,11 @@ import { useProcessPayment } from '@/hooks/usePayment';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
+import { DiscountCodeInput } from '@/components/checkout/DiscountCodeInput';
 import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
 import { calculateVAT, calculateTotalWithVAT } from '@/lib/vat';
 import { supabase } from '@/integrations/supabase/client';
+import { DiscountCode } from '@/hooks/useDiscounts';
  const checkoutSchema = z.object({
    customerName: z.string().min(2, 'Name must be at least 2 characters'),
    customerEmail: z.string().email('Invalid email address'),
@@ -56,6 +58,7 @@ const Checkout = () => {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: DiscountCode; amount: number } | null>(null);
  
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
@@ -65,7 +68,8 @@ const Checkout = () => {
   const freeShippingThreshold = settings?.freeShippingThreshold ?? 0;
   const isFreeShipping = totalPrice >= freeShippingThreshold;
   const shippingCost = isFreeShipping ? 0 : configuredShipping;
-  const total = totalPrice + shippingCost;
+  const discountAmount = appliedDiscount?.amount ?? 0;
+  const total = Math.max(0, totalPrice - discountAmount) + shippingCost;
   const maintenanceMode = settings?.maintenanceMode ?? false;
  
    const form = useForm<CheckoutFormData>({
@@ -212,8 +216,20 @@ const Checkout = () => {
         );
       }
 
+      // Step 4: Increment discount code usage if applied
+      if (appliedDiscount) {
+        supabase
+          .from('discount_codes')
+          .update({ usage_count: appliedDiscount.code.usage_count + 1 } as any)
+          .eq('id', appliedDiscount.code.id)
+          .then(({ error }) => {
+            if (error) console.error('Failed to increment discount usage:', error);
+          });
+      }
+
       setOrderNumber(order.order_number);
       setOrderComplete(true);
+      setAppliedDiscount(null);
       clearCart();
     } catch (error) {
       // Error handled in mutation
@@ -582,42 +598,59 @@ const Checkout = () => {
                  })}
                </div>
  
-               <Separator />
- 
-                {/* Totals */}
-                <div className="space-y-3">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{language === 'ar' ? 'السعر بدون ضريبة' : 'Price Excl. VAT'}</span>
-                    <span>
-                      {totalBasePrice.toFixed(2)} {currency}
-                    </span>
-                  </div>
-                  {totalVAT > 0 && (
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>{language === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'}</span>
-                      <span>
-                        {totalVAT.toFixed(2)} {currency}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
-                    {isFreeShipping ? (
-                      <span className="text-green-600">
-                        {language === 'ar' ? 'مجاني' : 'Free'}
-                      </span>
-                    ) : (
-                      <span>{shippingCost} {currency}</span>
-                    )}
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold text-foreground">
-                    <span>{t('cart.total')}</span>
-                    <span>
-                      {total.toFixed(2)} {currency}
-                    </span>
-                  </div>
-                </div>
+                <Separator />
+
+                {/* Discount Code */}
+                <DiscountCodeInput
+                  orderTotal={totalPrice}
+                  currency={currency}
+                  appliedDiscount={appliedDiscount}
+                  onApply={(discount) => setAppliedDiscount(discount)}
+                  onRemove={() => setAppliedDiscount(null)}
+                />
+
+                <Separator />
+
+                 {/* Totals */}
+                 <div className="space-y-3">
+                   <div className="flex justify-between text-muted-foreground">
+                     <span>{language === 'ar' ? 'السعر بدون ضريبة' : 'Price Excl. VAT'}</span>
+                     <span>
+                       {totalBasePrice.toFixed(2)} {currency}
+                     </span>
+                   </div>
+                   {totalVAT > 0 && (
+                     <div className="flex justify-between text-muted-foreground">
+                       <span>{language === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'}</span>
+                       <span>
+                         {totalVAT.toFixed(2)} {currency}
+                       </span>
+                     </div>
+                   )}
+                   {discountAmount > 0 && (
+                     <div className="flex justify-between text-green-600 dark:text-green-400">
+                       <span>{language === 'ar' ? 'الخصم' : 'Discount'}</span>
+                       <span>-{discountAmount.toFixed(2)} {currency}</span>
+                     </div>
+                   )}
+                   <div className="flex justify-between text-muted-foreground">
+                     <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
+                     {isFreeShipping ? (
+                       <span className="text-green-600">
+                         {language === 'ar' ? 'مجاني' : 'Free'}
+                       </span>
+                     ) : (
+                       <span>{shippingCost} {currency}</span>
+                     )}
+                   </div>
+                   <Separator />
+                   <div className="flex justify-between text-lg font-bold text-foreground">
+                     <span>{t('cart.total')}</span>
+                     <span>
+                       {total.toFixed(2)} {currency}
+                     </span>
+                   </div>
+                 </div>
  
                 {/* Submit Button - Desktop */}
                 <div className="hidden lg:block">
