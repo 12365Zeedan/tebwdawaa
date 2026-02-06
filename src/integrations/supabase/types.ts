@@ -339,6 +339,170 @@ export type Database = {
           },
         ]
       }
+      customer_loyalty_points: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          total_earned: number
+          total_redeemed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          total_earned?: number
+          total_redeemed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          influencer_name: string | null
+          influencer_name_ar: string | null
+          is_active: boolean
+          is_influencer: boolean
+          max_discount_amount: number | null
+          min_order_amount: number | null
+          starts_at: string | null
+          updated_at: string
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          influencer_name?: string | null
+          influencer_name_ar?: string | null
+          is_active?: boolean
+          is_influencer?: boolean
+          max_discount_amount?: number | null
+          min_order_amount?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          influencer_name?: string | null
+          influencer_name_ar?: string | null
+          is_active?: boolean
+          is_influencer?: boolean
+          max_discount_amount?: number | null
+          min_order_amount?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Relationships: []
+      }
+      loyalty_points_history: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_points_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_settings: {
+        Row: {
+          created_at: string
+          currency_per_point: number
+          id: string
+          is_active: boolean
+          min_redeem_points: number
+          points_per_currency: number
+          updated_at: string
+          welcome_bonus: number
+        }
+        Insert: {
+          created_at?: string
+          currency_per_point?: number
+          id?: string
+          is_active?: boolean
+          min_redeem_points?: number
+          points_per_currency?: number
+          updated_at?: string
+          welcome_bonus?: number
+        }
+        Update: {
+          created_at?: string
+          currency_per_point?: number
+          id?: string
+          is_active?: boolean
+          min_redeem_points?: number
+          points_per_currency?: number
+          updated_at?: string
+          welcome_bonus?: number
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmation_token: string | null
@@ -541,6 +705,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          discount_percentage: number | null
+          expires_at: string | null
+          group_price: number | null
+          id: string
+          is_active: boolean
+          min_quantity: number | null
+          name: string
+          name_ar: string
+          offer_type: string
+          product_ids: string[]
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          discount_percentage?: number | null
+          expires_at?: string | null
+          group_price?: number | null
+          id?: string
+          is_active?: boolean
+          min_quantity?: number | null
+          name: string
+          name_ar: string
+          offer_type: string
+          product_ids?: string[]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          discount_percentage?: number | null
+          expires_at?: string | null
+          group_price?: number | null
+          id?: string
+          is_active?: boolean
+          min_quantity?: number | null
+          name?: string
+          name_ar?: string
+          offer_type?: string
+          product_ids?: string[]
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       product_reviews: {
         Row: {
