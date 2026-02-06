@@ -34,9 +34,21 @@ const AdminBlog = () => {
 
   const handleSubmit = (data: BlogPostFormData) => {
     if (editingPost) {
-      updatePost.mutate({ id: editingPost.id, data }, { onSuccess: () => setDialogOpen(false) });
+      updatePost.mutate({ id: editingPost.id, data }, {
+        onSuccess: () => {
+          // Clear draft from localStorage on successful save
+          try { localStorage.removeItem(`blog-draft-${editingPost.id}`); } catch {}
+          setDialogOpen(false);
+        }
+      });
     } else {
-      createPost.mutate(data, { onSuccess: () => setDialogOpen(false) });
+      createPost.mutate(data, {
+        onSuccess: () => {
+          // Clear new post draft on successful save
+          try { localStorage.removeItem('blog-draft-new'); } catch {}
+          setDialogOpen(false);
+        }
+      });
     }
   };
 
