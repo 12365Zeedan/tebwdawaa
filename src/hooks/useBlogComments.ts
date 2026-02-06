@@ -10,11 +10,14 @@ export interface BlogComment {
   content: string;
   is_approved: boolean;
   is_rejected: boolean;
+  parent_comment_id: string | null;
   created_at: string;
   updated_at: string;
   // Joined fields
   user_name?: string;
   user_avatar?: string;
+  // Nested replies (built client-side)
+  replies?: BlogComment[];
 }
 
 const commentSchema = z.object({
@@ -29,7 +32,28 @@ export function validateComment(content: string) {
 }
 
 /**
- * Fetch approved comments for a blog post (public).
+ * Build a tree of comments from a flat list.
+ */
+function buildCommentTree(comments: BlogComment[]): BlogComment[] {
+  const map = new Map<string, BlogComment>();
+  const roots: BlogComment[] = [];
+
+  comments.forEach(c => map.set(c.id, { ...c, replies: [] }));
+
+  map.forEach(comment => {
+    if (comment.parent_comment_id && map.has(comment.parent_comment_id)) {
+      map.get(comment.parent_comment_id)!.replies!.push(comment);
+    } else {
+      roots.push(comment);
+    }
+  });
+
+  return roots;
+}
+
+/**
+ * Fetch comments for a blog post (public).
+ * Returns flat list; use buildCommentTree for nesting.
  */
 export function useBlogComments(postId: string | undefined) {
   return useQuery({
@@ -61,6 +85,7 @@ export function useBlogComments(postId: string | undefined) {
 
       return (comments || []).map(c => ({
         ...c,
+        parent_comment_id: (c as any).parent_comment_id ?? null,
         user_name: profileMap.get(c.user_id)?.full_name || undefined,
         user_avatar: profileMap.get(c.user_id)?.avatar_url || undefined,
       }));
@@ -69,8 +94,10 @@ export function useBlogComments(postId: string | undefined) {
   });
 }
 
+export { buildCommentTree };
+
 /**
- * Submit a new comment.
+ * Submit a new comment (optionally a reply).
  */
 export function useCreateComment() {
   const queryClient = useQueryClient();
@@ -81,6 +108,7 @@ export function useCreateComment() {
       postId,
       content,
       userId,
+      parentCommentId,
       postTitle,
       postSlug,
       commenterName,
@@ -88,6 +116,7 @@ export function useCreateComment() {
       postId: string;
       content: string;
       userId: string;
+      parentCommentId?: string | null;
       postTitle?: string;
       postSlug?: string;
       commenterName?: string;
@@ -97,13 +126,18 @@ export function useCreateComment() {
         throw new Error(validation.error.errors[0].message);
       }
 
+      const insertData: any = {
+        blog_post_id: postId,
+        user_id: userId,
+        content: validation.data.content,
+      };
+      if (parentCommentId) {
+        insertData.parent_comment_id = parentCommentId;
+      }
+
       const { data, error } = await supabase
         .from('blog_comments')
-        .insert({
-          blog_post_id: postId,
-          user_id: userId,
-          content: validation.data.content,
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -216,6 +250,7 @@ export function useAdminBlogComments(filter?: 'pending' | 'approved' | 'rejected
 
       return (comments || []).map(c => ({
         ...c,
+        parent_comment_id: (c as any).parent_comment_id ?? null,
         post_title: postMap.get(c.blog_post_id)?.title,
         post_slug: postMap.get(c.blog_post_id)?.slug,
         user_name: profileMap.get(c.user_id)?.full_name || undefined,

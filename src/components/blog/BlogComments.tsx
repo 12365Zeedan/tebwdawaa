@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Send, Trash2, Clock, User as UserIcon } from 'lucide-react';
+import { MessageCircle, Send, Clock, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,7 +13,9 @@ import {
   useCreateComment,
   useDeleteComment,
   validateComment,
+  buildCommentTree,
 } from '@/hooks/useBlogComments';
+import { CommentItem } from './CommentItem';
 
 interface BlogCommentsProps {
   postId: string;
@@ -32,8 +34,12 @@ export function BlogComments({ postId, postTitle, postSlug }: BlogCommentsProps)
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
 
-  const approvedComments = (comments || []).filter(c => c.is_approved);
-  const pendingComments = (comments || []).filter(c => !c.is_approved && !c.is_rejected && c.user_id === user?.id);
+  const allComments = comments || [];
+  const approvedComments = allComments.filter(c => c.is_approved);
+  const pendingComments = allComments.filter(c => !c.is_approved && !c.is_rejected && c.user_id === user?.id);
+
+  // Build threaded tree from approved comments
+  const commentTree = buildCommentTree(approvedComments);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,12 +65,6 @@ export function BlogComments({ postId, postTitle, postSlug }: BlogCommentsProps)
       { onSuccess: () => setContent('') }
     );
   };
-
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString(
-      isAr ? 'ar-SA' : 'en-US',
-      { year: 'numeric', month: 'short', day: 'numeric' }
-    );
 
   const getInitials = (name?: string) => {
     if (!name) return '?';
@@ -167,25 +167,22 @@ export function BlogComments({ postId, postTitle, postSlug }: BlogCommentsProps)
                   <Badge variant="outline" className="text-xs text-warning border-warning/30">
                     {isAr ? 'قيد المراجعة' : 'Pending'}
                   </Badge>
+                  {comment.parent_comment_id && (
+                    <Badge variant="secondary" className="text-xs">
+                      {isAr ? 'رد' : 'Reply'}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-sm text-foreground/80 whitespace-pre-wrap break-words">
                   {comment.content}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
-                onClick={() => deleteComment.mutate({ commentId: comment.id, postId })}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           ))}
         </div>
       )}
 
-      {/* Approved Comments */}
+      {/* Approved Comments (threaded) */}
       {isLoading ? (
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -199,41 +196,16 @@ export function BlogComments({ postId, postTitle, postSlug }: BlogCommentsProps)
             </div>
           ))}
         </div>
-      ) : approvedComments.length > 0 ? (
+      ) : commentTree.length > 0 ? (
         <div className="space-y-6">
-          {approvedComments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src={comment.user_avatar || undefined} />
-                <AvatarFallback className="bg-muted text-muted-foreground text-sm">
-                  {getInitials(comment.user_name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-foreground">
-                    {comment.user_name || (isAr ? 'مستخدم' : 'User')}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(comment.created_at)}
-                  </span>
-                </div>
-                <p className="text-sm text-foreground/80 whitespace-pre-wrap break-words">
-                  {comment.content}
-                </p>
-                {user?.id === comment.user_id && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-1 h-7 text-xs text-muted-foreground hover:text-destructive gap-1 px-2"
-                    onClick={() => deleteComment.mutate({ commentId: comment.id, postId })}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    {isAr ? 'حذف' : 'Delete'}
-                  </Button>
-                )}
-              </div>
-            </div>
+          {commentTree.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              postId={postId}
+              postTitle={postTitle}
+              postSlug={postSlug}
+            />
           ))}
         </div>
       ) : (

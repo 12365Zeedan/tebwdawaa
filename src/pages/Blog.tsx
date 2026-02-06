@@ -12,6 +12,7 @@ import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { NewsletterSubscription } from '@/components/blog/NewsletterSubscription';
 
 const Blog = () => {
   const { language, t, direction } = useLanguage();
@@ -202,6 +203,11 @@ const Blog = () => {
               {isAr ? 'لا توجد مقالات مطابقة' : 'No matching articles found'}
             </div>
           )}
+        </div>
+
+        {/* Newsletter Subscription */}
+        <div className="mt-16 max-w-2xl mx-auto">
+          <NewsletterSubscription />
         </div>
       </div>
     </MainLayout>
