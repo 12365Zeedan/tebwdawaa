@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_comments: {
         Row: {
           blog_post_id: string
@@ -91,6 +130,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      blog_pages: {
+        Row: {
+          content: string | null
+          content_ar: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          meta_description: string | null
+          meta_description_ar: string | null
+          meta_title: string | null
+          meta_title_ar: string | null
+          slug: string
+          sort_order: number | null
+          title: string
+          title_ar: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          meta_description?: string | null
+          meta_description_ar?: string | null
+          meta_title?: string | null
+          meta_title_ar?: string | null
+          slug: string
+          sort_order?: number | null
+          title: string
+          title_ar: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          meta_description?: string | null
+          meta_description_ar?: string | null
+          meta_title?: string | null
+          meta_title_ar?: string | null
+          slug?: string
+          sort_order?: number | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       blog_post_views: {
         Row: {
