@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Minus, Package, History, CheckSquare, Square, PackagePlus, Filter, FileSpreadsheet } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateStock, useStockHistory } from '@/hooks/useAdminProducts';
 import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
+import { ProductImportDialog } from '@/components/admin/ProductImportDialog';
 import { cn } from '@/lib/utils';
 import { sanitizeSearchInput } from '@/lib/sanitize';
 
@@ -71,6 +72,7 @@ const AdminProducts = () => {
   const [bulkStockValue, setBulkStockValue] = useState('');
   const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
@@ -344,10 +346,16 @@ const AdminProducts = () => {
                {language === 'ar' ? 'إدارة منتجات المتجر' : 'Manage store products'}
              </p>
            </div>
-           <Button className="gap-2" onClick={handleOpenCreate}>
-             <Plus className="h-4 w-4" />
-             {language === 'ar' ? 'إضافة منتج' : 'Add Product'}
-           </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
+                <FileSpreadsheet className="h-4 w-4" />
+                {language === 'ar' ? 'استيراد Excel' : 'Import Excel'}
+              </Button>
+              <Button className="gap-2" onClick={handleOpenCreate}>
+                <Plus className="h-4 w-4" />
+                {language === 'ar' ? 'إضافة منتج' : 'Add Product'}
+              </Button>
+            </div>
          </div>
  
           {/* Search and Filters */}
@@ -856,6 +864,12 @@ const AdminProducts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <ProductImportDialog
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+      />
     </AdminLayout>
   );
 };
