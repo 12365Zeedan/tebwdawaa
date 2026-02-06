@@ -17,7 +17,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Package, Bell, Store, Save, Loader2, Truck } from 'lucide-react';
+import { Settings, Package, Bell, Store, Save, Loader2, Truck, Building2 } from 'lucide-react';
 
 type SettingsData = {
   store_name: string;
@@ -30,6 +30,12 @@ type SettingsData = {
   guest_checkout_enabled: boolean;
   new_order_notifications: boolean;
   low_stock_notifications: boolean;
+  company_name: string;
+  company_address: string;
+  cr_number: string;
+  company_email: string;
+  company_phone: string;
+  site_url: string;
 };
 
 const defaultSettings: SettingsData = {
@@ -43,6 +49,12 @@ const defaultSettings: SettingsData = {
   guest_checkout_enabled: true,
   new_order_notifications: true,
   low_stock_notifications: true,
+  company_name: '',
+  company_address: '',
+  cr_number: '',
+  company_email: '',
+  company_phone: '',
+  site_url: '',
 };
 
 export default function AdminSettings() {
@@ -254,6 +266,116 @@ export default function AdminSettings() {
                   disabled={savingSection === 'store'}
                 >
                   {savingSection === 'store' ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  {language === 'ar' ? 'حفظ' : 'Save'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Company Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                {language === 'ar' ? 'معلومات الشركة' : 'Company Information'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'ar' 
+                  ? 'بيانات الشركة الرسمية للفواتير والتواصل' 
+                  : 'Official company details for invoices and communication'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="company-name">
+                    {language === 'ar' ? 'اسم الشركة' : 'Company Name'}
+                  </Label>
+                  <Input
+                    id="company-name"
+                    value={formData.company_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+                    placeholder={language === 'ar' ? 'اسم الشركة الرسمي' : 'Official company name'}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cr-number">
+                    {language === 'ar' ? 'رقم السجل التجاري' : 'C.R. No.'}
+                  </Label>
+                  <Input
+                    id="cr-number"
+                    value={formData.cr_number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cr_number: e.target.value }))}
+                    placeholder={language === 'ar' ? 'رقم السجل التجاري' : 'Commercial Registration Number'}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="company-address">
+                    {language === 'ar' ? 'العنوان الكامل' : 'Full Address'}
+                  </Label>
+                  <Input
+                    id="company-address"
+                    value={formData.company_address}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company_address: e.target.value }))}
+                    placeholder={language === 'ar' ? 'العنوان الكامل للشركة' : 'Full company address'}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company-email">
+                    {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  </Label>
+                  <Input
+                    id="company-email"
+                    type="email"
+                    value={formData.company_email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company_email: e.target.value }))}
+                    placeholder="info@company.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company-phone">
+                    {language === 'ar' ? 'رقم الهاتف' : 'Phone No.'}
+                  </Label>
+                  <Input
+                    id="company-phone"
+                    type="tel"
+                    value={formData.company_phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, company_phone: e.target.value }))}
+                    placeholder="+966 50 000 0000"
+                    dir="ltr"
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="site-url">
+                    {language === 'ar' ? 'رابط الموقع' : 'Site URL'}
+                  </Label>
+                  <Input
+                    id="site-url"
+                    type="url"
+                    value={formData.site_url}
+                    onChange={(e) => setFormData(prev => ({ ...prev, site_url: e.target.value }))}
+                    placeholder="https://www.example.com"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => handleSave('company', { 
+                    company_name: formData.company_name, 
+                    company_address: formData.company_address,
+                    cr_number: formData.cr_number,
+                    company_email: formData.company_email,
+                    company_phone: formData.company_phone,
+                    site_url: formData.site_url,
+                  })}
+                  disabled={savingSection === 'company'}
+                >
+                  {savingSection === 'company' ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Save className="h-4 w-4 mr-2" />
