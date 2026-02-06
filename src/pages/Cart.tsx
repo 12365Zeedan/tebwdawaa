@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 const Cart = () => {
   const { language, t, direction } = useLanguage();
-  const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, totalPrice, totalBasePrice, totalVAT, clearCart } = useCart();
   const { data: settings, isLoading: settingsLoading } = useStoreSettings();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
 
@@ -122,9 +122,15 @@ const Cart = () => {
 
               <div className="space-y-3">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>{language === 'ar' ? 'المجموع الفرعي' : 'Subtotal'}</span>
-                  <span>{totalPrice} {currency}</span>
+                  <span>{language === 'ar' ? 'السعر بدون ضريبة' : 'Price Excl. VAT'}</span>
+                  <span>{totalBasePrice.toFixed(2)} {currency}</span>
                 </div>
+                {totalVAT > 0 && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{language === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'}</span>
+                    <span>{totalVAT.toFixed(2)} {currency}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-muted-foreground">
                   <span>{language === 'ar' ? 'التوصيل' : 'Shipping'}</span>
                   {isFreeShipping ? (
@@ -136,14 +142,14 @@ const Cart = () => {
                 {!isFreeShipping && freeShippingThreshold > 0 && (
                   <p className="text-xs text-muted-foreground">
                     {language === 'ar'
-                      ? `أضف ${freeShippingThreshold - totalPrice} ${currency} للحصول على شحن مجاني`
-                      : `Add ${freeShippingThreshold - totalPrice} ${currency} for free shipping`}
+                      ? `أضف ${(freeShippingThreshold - totalPrice).toFixed(2)} ${currency} للحصول على شحن مجاني`
+                      : `Add ${(freeShippingThreshold - totalPrice).toFixed(2)} ${currency} for free shipping`}
                   </p>
                 )}
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between text-lg font-bold text-foreground">
                     <span>{t('cart.total')}</span>
-                    <span>{total} {currency}</span>
+                    <span>{total.toFixed(2)} {currency}</span>
                   </div>
                 </div>
               </div>

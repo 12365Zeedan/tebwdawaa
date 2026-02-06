@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProductComparison } from '@/hooks/useProductComparison';
 import { useProducts } from '@/hooks/useProducts';
+import { getDisplayPrice } from '@/lib/vat';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -34,7 +35,9 @@ export default function Compare() {
       id: product.id,
       name: product.name,
       nameAr: product.name_ar,
-      price: product.price,
+      price: getDisplayPrice(product.price, product.vat_enabled).totalPrice,
+      basePrice: product.price,
+      vatEnabled: product.vat_enabled,
       image: product.image_url || '/placeholder.svg',
     });
 

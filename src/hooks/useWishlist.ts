@@ -18,6 +18,7 @@ interface WishlistItem {
     in_stock: boolean;
     rating: number;
     review_count: number;
+    vat_enabled: boolean;
   };
 }
 
@@ -47,7 +48,8 @@ export function useWishlist() {
             image_url,
             in_stock,
             rating,
-            review_count
+            review_count,
+            vat_enabled
           )
         `)
         .eq('user_id', user.id)

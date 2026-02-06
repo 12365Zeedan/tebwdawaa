@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { calculateVAT } from '@/lib/vat';
 
 export interface CartItem {
   id: string;
   name: string;
   nameAr: string;
   price: number;
+  basePrice: number;
+  vatEnabled: boolean;
   quantity: number;
   image: string;
 }
@@ -17,6 +20,8 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  totalBasePrice: number;
+  totalVAT: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -69,6 +74,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalBasePrice = items.reduce((sum, item) => sum + item.basePrice * item.quantity, 0);
+  const totalVAT = items.reduce((sum, item) => {
+    if (item.vatEnabled) {
+      return sum + calculateVAT(item.basePrice) * item.quantity;
+    }
+    return sum;
+  }, 0);
 
   return (
     <CartContext.Provider
@@ -80,6 +92,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         totalItems,
         totalPrice,
+        totalBasePrice,
+        totalVAT,
       }}
     >
       {children}

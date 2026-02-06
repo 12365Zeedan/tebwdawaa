@@ -220,22 +220,7 @@ const Products = () => {
                 className="animate-fade-in"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <ProductCard product={{
-                  id: product.id,
-                  name: product.name,
-                  nameAr: product.name_ar,
-                  description: product.description || '',
-                  descriptionAr: product.description_ar || '',
-                  price: Number(product.price),
-                  originalPrice: product.original_price ? Number(product.original_price) : undefined,
-                  image: product.image_url || '/placeholder.svg',
-                  category: product.category?.name || '',
-                  categoryAr: product.category?.name_ar || '',
-                  inStock: product.in_stock,
-                  requiresPrescription: product.requires_prescription,
-                  rating: Number(product.rating),
-                  reviewCount: product.review_count
-                }} />
+                <ProductCard product={product} />
               </div>
             ))
           )}
