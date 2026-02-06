@@ -22,10 +22,12 @@ export function BlogCard({ post }: BlogCardProps) {
     { year: 'numeric', month: 'long', day: 'numeric' }
   );
 
+  const slug = post.slug || post.id;
+
   return (
     <article className="blog-card group bg-card rounded-2xl overflow-hidden border border-border/50 shadow-soft">
       {/* Image */}
-      <Link to={`/blog/${post.id}`} className="block relative aspect-video overflow-hidden">
+      <Link to={`/blog/${slug}`} className="block relative aspect-video overflow-hidden">
         <img
           src={post.image}
           alt={title}
@@ -55,7 +57,7 @@ export function BlogCard({ post }: BlogCardProps) {
         </div>
 
         {/* Title */}
-        <Link to={`/blog/${post.id}`}>
+        <Link to={`/blog/${slug}`}>
           <h3 className="text-xl font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
             {title}
           </h3>
@@ -70,7 +72,7 @@ export function BlogCard({ post }: BlogCardProps) {
         <div className="flex items-center justify-between pt-4 border-t border-border/50">
           <span className="text-sm font-medium text-foreground">{author}</span>
           <Link
-            to={`/blog/${post.id}`}
+            to={`/blog/${slug}`}
             className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             {t('blog.readMore')}
