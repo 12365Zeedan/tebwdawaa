@@ -65,7 +65,7 @@ const AdminOrders = () => {
   const { data: companySettings } = useQuery({
     queryKey: ['company-settings-invoice'],
     queryFn: async () => {
-      const keys = ['company_name', 'company_address', 'cr_number', 'company_email', 'company_phone', 'site_url', 'store_name'];
+      const keys = ['company_name', 'company_address', 'cr_number', 'vat_number', 'company_email', 'company_phone', 'site_url', 'store_name'];
       const { data, error } = await supabase
         .from('app_settings')
         .select('key, value')
@@ -83,6 +83,7 @@ const AdminOrders = () => {
         company_name: settings.company_name || '',
         company_address: settings.company_address || '',
         cr_number: settings.cr_number || '',
+        vat_number: settings.vat_number || '',
         company_email: settings.company_email || '',
         company_phone: settings.company_phone || '',
         site_url: settings.site_url || '',
