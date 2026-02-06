@@ -456,6 +456,12 @@ const AdminProducts = () => {
                       {language === 'ar' ? 'الفئة' : 'Category'}
                     </th>
                     <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'السعر بدون ضريبة' : 'Price Excl. VAT'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
+                      {language === 'ar' ? 'الضريبة' : 'VAT'}
+                    </th>
+                    <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
                       {language === 'ar' ? 'السعر' : 'Price'}
                     </th>
                     <th className="text-start px-6 py-3 text-sm font-medium text-muted-foreground">
@@ -491,9 +497,9 @@ const AdminProducts = () => {
                    ))
                   ) : products?.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
-                        {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
-                      </td>
+                       <td colSpan={9} className="px-6 py-12 text-center text-muted-foreground">
+                         {language === 'ar' ? 'لا توجد منتجات' : 'No products found'}
+                       </td>
                     </tr>
                   ) : products?.map((product) => {
                     const name = language === 'ar' ? product.name_ar : product.name;
@@ -526,26 +532,25 @@ const AdminProducts = () => {
                          </div>
                        </td>
                        <td className="px-6 py-4 text-sm text-foreground">{category}</td>
-                       <td className="px-6 py-4 text-sm font-medium text-foreground">
-                         <div>
-                           {product.vat_enabled ? (
-                             <>
-                               <span>{getDisplayPrice(product.price, true).totalPrice} {t('common.currency')}</span>
-                               <span className="block text-xs text-muted-foreground">
-                                 {language === 'ar' ? 'شامل الضريبة' : 'Incl. VAT'}
-                               </span>
-                             </>
-                           ) : (
-                             <span>{product.price} {t('common.currency')}</span>
-                           )}
-                           {product.original_price && (
-                             <span className="text-xs text-muted-foreground line-through ms-2">
-                               {product.original_price}
-                             </span>
-                           )}
-                         </div>
-                       </td>
-                       <td className="px-6 py-4 text-sm text-foreground">
+                        <td className="px-6 py-4 text-sm font-medium text-foreground">
+                          {product.price} {t('common.currency')}
+                          {product.original_price && (
+                            <span className="block text-xs text-muted-foreground line-through">
+                              {product.original_price}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground">
+                          {product.vat_enabled ? (
+                            <span>{getDisplayPrice(product.price, true).vatAmount} {t('common.currency')}</span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-foreground">
+                          {getDisplayPrice(product.price, product.vat_enabled).totalPrice} {t('common.currency')}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-foreground">
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button 
