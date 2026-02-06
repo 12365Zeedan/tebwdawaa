@@ -36,6 +36,7 @@ type SettingsData = {
   company_email: string;
   company_phone: string;
   site_url: string;
+  vat_number: string;
 };
 
 const defaultSettings: SettingsData = {
@@ -55,6 +56,7 @@ const defaultSettings: SettingsData = {
   company_email: '',
   company_phone: '',
   site_url: '',
+  vat_number: '',
 };
 
 export default function AdminSettings() {
@@ -313,6 +315,17 @@ export default function AdminSettings() {
                     placeholder={language === 'ar' ? 'رقم السجل التجاري' : 'Commercial Registration Number'}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vat-number">
+                    {language === 'ar' ? 'الرقم الضريبي' : 'VAT No.'}
+                  </Label>
+                  <Input
+                    id="vat-number"
+                    value={formData.vat_number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, vat_number: e.target.value }))}
+                    placeholder={language === 'ar' ? 'رقم التسجيل الضريبي' : 'VAT Registration Number'}
+                  />
+                </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="company-address">
                     {language === 'ar' ? 'العنوان الكامل' : 'Full Address'}
@@ -372,6 +385,7 @@ export default function AdminSettings() {
                     company_email: formData.company_email,
                     company_phone: formData.company_phone,
                     site_url: formData.site_url,
+                    vat_number: formData.vat_number,
                   })}
                   disabled={savingSection === 'company'}
                 >

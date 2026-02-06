@@ -39,6 +39,7 @@ interface CompanyInfo {
   company_name: string;
   company_address: string;
   cr_number: string;
+  vat_number: string;
   company_email: string;
   company_phone: string;
   site_url: string;
@@ -64,7 +65,7 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
   // Generate ZATCA QR data
   const qrData = generateZATCAQRData({
     sellerName: companyInfo.company_name || companyInfo.store_name,
-    vatRegistrationNumber: companyInfo.cr_number || '',
+    vatRegistrationNumber: companyInfo.vat_number || companyInfo.cr_number || '',
     invoiceTimestamp: new Date(order.created_at).toISOString(),
     invoiceTotal: grandTotal,
     vatAmount: vatAmount,
@@ -140,22 +141,22 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
             </h2>
             {companyInfo.cr_number && (
               <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
-                <strong>{isAr ? 'الرقم الضريبي' : 'VAT No.'}:</strong> {companyInfo.cr_number}
+                <strong>{isAr ? 'السجل التجاري' : 'C.R. No.'}:</strong> {companyInfo.cr_number}
+              </p>
+            )}
+            {companyInfo.vat_number && (
+              <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
+                <strong>{isAr ? 'الرقم الضريبي' : 'VAT No.'}:</strong> {companyInfo.vat_number}
               </p>
             )}
             {companyInfo.company_address && (
               <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
-                {companyInfo.company_address}
+                <strong>{isAr ? 'العنوان' : 'Address'}:</strong> {companyInfo.company_address}
               </p>
             )}
             {companyInfo.company_phone && (
               <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
                 <strong>{isAr ? 'الهاتف' : 'Tel'}:</strong> {companyInfo.company_phone}
-              </p>
-            )}
-            {companyInfo.company_email && (
-              <p style={{ margin: '2px 0', color: '#555', fontSize: '13px' }}>
-                {companyInfo.company_email}
               </p>
             )}
           </div>
