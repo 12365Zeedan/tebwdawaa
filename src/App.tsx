@@ -34,6 +34,7 @@ import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminBlogAnalytics from "./pages/admin/AdminBlogAnalytics";
 import AdminBlogComments from "./pages/admin/AdminBlogComments";
+import AdminNewsletter from "./pages/admin/AdminNewsletter";
 import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
@@ -74,6 +75,7 @@ const App = () => (
                 <Route path="/admin/blog" element={<AdminBlog />} />
                 <Route path="/admin/blog/analytics" element={<AdminBlogAnalytics />} />
                 <Route path="/admin/blog/comments" element={<AdminBlogComments />} />
+                <Route path="/admin/newsletter" element={<AdminNewsletter />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 {/* Catch-all */}
