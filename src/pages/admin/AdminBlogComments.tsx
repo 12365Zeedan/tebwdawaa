@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CheckCircle, XCircle, Trash2, MessageCircle, Clock, Filter,
-  ExternalLink, ArrowLeft, ArrowRight,
+  ExternalLink, ArrowLeft, ArrowRight, Reply,
 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -163,6 +163,13 @@ const AdminBlogComments = () => {
                         {comment.post_title}
                         <ExternalLink className="h-3 w-3" />
                       </Link>
+                    )}
+
+                    {comment.parent_comment_id && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                        <Reply className="h-3 w-3" />
+                        {isAr ? 'رد على تعليق' : 'Reply to a comment'}
+                      </div>
                     )}
 
                     <p className="text-sm text-foreground/80 whitespace-pre-wrap break-words mb-4">

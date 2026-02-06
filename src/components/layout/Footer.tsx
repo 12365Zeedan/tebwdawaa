@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useNewsletterSubscribe } from '@/hooks/useNewsletter';
 
 export function Footer() {
   const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
   const { data: settings } = useStoreSettings();
+  const subscribe = useNewsletterSubscribe();
+  const [footerEmail, setFooterEmail] = useState('');
+  const [footerSubscribed, setFooterSubscribed] = useState(false);
 
   const storeName = language === 'ar' 
     ? (settings?.storeNameAr || 'صيدلية') 
@@ -98,7 +104,56 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-link/20">
+        {/* Newsletter in Footer */}
+        <div className="mt-10 pt-8 border-t border-link/20">
+          <div className="max-w-md mx-auto text-center">
+            <h3 className="text-lg font-semibold mb-2">
+              {language === 'ar' ? 'اشترك في النشرة البريدية' : 'Stay Updated'}
+            </h3>
+            <p className="text-sm text-link/80 mb-4">
+              {language === 'ar'
+                ? 'احصل على أحدث المقالات والعروض'
+                : 'Get the latest articles and offers delivered to your inbox'}
+            </p>
+            {footerSubscribed ? (
+              <p className="text-sm text-link/80">
+                ✓ {language === 'ar' ? 'تم الاشتراك بنجاح!' : 'Successfully subscribed!'}
+              </p>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!footerEmail.trim()) return;
+                  subscribe.mutate(
+                    { email: footerEmail.trim() },
+                    { onSuccess: () => setFooterSubscribed(true) }
+                  );
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  type="email"
+                  value={footerEmail}
+                  onChange={(e) => setFooterEmail(e.target.value)}
+                  placeholder={language === 'ar' ? 'بريدك الإلكتروني' : 'Your email'}
+                  className="flex-1 bg-link/10 border-link/20 text-link placeholder:text-link/50"
+                  required
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="gap-2 shrink-0"
+                  disabled={subscribe.isPending}
+                >
+                  <Send className="h-4 w-4" />
+                  {language === 'ar' ? 'اشترك' : 'Subscribe'}
+                </Button>
+              </form>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-link/20">
           <p className="text-center text-sm text-link/80">
             © {currentYear} {storeName}. {t('footer.rights')}
           </p>
