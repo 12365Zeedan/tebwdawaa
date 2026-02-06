@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, BarChart3 } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -71,10 +72,18 @@ const AdminBlog = () => {
               {isAr ? 'إدارة مقالات المدونة' : 'Manage blog posts'}
             </p>
           </div>
-          <Button className="gap-2" onClick={handleOpenNew}>
-            <Plus className="h-4 w-4" />
-            {isAr ? 'إضافة مقال' : 'Add Post'}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link to="/admin/blog/analytics">
+              <Button variant="outline" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                {isAr ? 'التحليلات' : 'Analytics'}
+              </Button>
+            </Link>
+            <Button className="gap-2" onClick={handleOpenNew}>
+              <Plus className="h-4 w-4" />
+              {isAr ? 'إضافة مقال' : 'Add Post'}
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
