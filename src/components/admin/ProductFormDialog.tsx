@@ -1,9 +1,9 @@
- import React, { useState, useEffect } from 'react';
- import { useForm } from 'react-hook-form';
- import { zodResolver } from '@hookform/resolvers/zod';
- import { z } from 'zod';
- import { Loader2 } from 'lucide-react';
- import {
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Loader2, Info } from 'lucide-react';
+import {
    Dialog,
    DialogContent,
    DialogHeader,
@@ -31,8 +31,9 @@
  import { useLanguage } from '@/contexts/LanguageContext';
  import { useCategories } from '@/hooks/useCategories';
  import { Product } from '@/hooks/useProducts';
- import { ImageUpload } from './ImageUpload';
- import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ImageUpload } from './ImageUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getDisplayPrice, VAT_RATE } from '@/lib/vat';
  
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -51,6 +52,7 @@ const productSchema = z.object({
   is_new_arrival: z.boolean(),
   is_best_seller: z.boolean(),
   is_active: z.boolean(),
+  vat_enabled: z.boolean(),
 });
  
  type ProductFormData = z.infer<typeof productSchema>;
@@ -92,8 +94,9 @@ const productSchema = z.object({
       is_featured: false,
       is_new_arrival: false,
       is_best_seller: false,
-      is_active: true,
-    },
+       is_active: true,
+       vat_enabled: false,
+     },
   });
  
    useEffect(() => {
@@ -114,7 +117,8 @@ const productSchema = z.object({
           is_featured: product.is_featured,
           is_new_arrival: product.is_new_arrival ?? false,
           is_best_seller: product.is_best_seller ?? false,
-          is_active: product.is_active,
+           is_active: product.is_active,
+           vat_enabled: (product as any).vat_enabled ?? false,
         });
      } else {
         form.reset({
@@ -133,8 +137,9 @@ const productSchema = z.object({
           is_featured: false,
           is_new_arrival: false,
           is_best_seller: false,
-          is_active: true,
-        });
+           is_active: true,
+           vat_enabled: false,
+         });
       }
    }, [product, form]);
  
@@ -248,42 +253,79 @@ const productSchema = z.object({
                />
              </div>
  
-             {/* Price & Original Price */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <FormField
-                 control={form.control}
-                 name="price"
-                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>{language === 'ar' ? 'السعر' : 'Price'}</FormLabel>
-                     <FormControl>
-                       <Input type="number" step="0.01" {...field} />
-                     </FormControl>
-                     <FormMessage />
-                   </FormItem>
-                 )}
-               />
- 
-               <FormField
-                 control={form.control}
-                 name="original_price"
-                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>{language === 'ar' ? 'السعر الأصلي' : 'Original Price'}</FormLabel>
-                     <FormControl>
-                       <Input
-                         type="number"
-                         step="0.01"
-                         {...field}
-                         value={field.value ?? ''}
-                         onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                       />
-                     </FormControl>
-                     <FormMessage />
-                   </FormItem>
-                 )}
-               />
-             </div>
+            {/* Price & Original Price */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{language === 'ar' ? 'السعر (بدون ضريبة)' : 'Price (Excl. VAT)'}</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="original_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{language === 'ar' ? 'السعر الأصلي (بدون ضريبة)' : 'Original Price (Excl. VAT)'}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* VAT Toggle */}
+            <FormField
+              control={form.control}
+              name="vat_enabled"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-primary" />
+                    <FormLabel className="text-sm font-medium">
+                      {language === 'ar' ? 'تطبيق ضريبة القيمة المضافة (15%)' : 'Apply VAT (15%)'}
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* VAT Price Preview */}
+            {form.watch('vat_enabled') && form.watch('price') > 0 && (
+              <div className="rounded-lg border bg-muted/50 p-3 space-y-1.5 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{language === 'ar' ? 'السعر بدون ضريبة' : 'Price excl. VAT'}</span>
+                  <span>{form.watch('price')} {language === 'ar' ? 'ر.س' : 'SAR'}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{language === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'}</span>
+                  <span>{getDisplayPrice(form.watch('price'), true).vatAmount} {language === 'ar' ? 'ر.س' : 'SAR'}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-foreground border-t pt-1.5">
+                  <span>{language === 'ar' ? 'الإجمالي شامل الضريبة' : 'Total incl. VAT'}</span>
+                  <span>{getDisplayPrice(form.watch('price'), true).totalPrice} {language === 'ar' ? 'ر.س' : 'SAR'}</span>
+                </div>
+              </div>
+            )}
  
              {/* Category & Stock Quantity */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

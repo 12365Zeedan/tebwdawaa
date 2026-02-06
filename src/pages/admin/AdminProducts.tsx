@@ -47,6 +47,7 @@ import { ProductFormDialog } from '@/components/admin/ProductFormDialog';
 import { ProductImportDialog } from '@/components/admin/ProductImportDialog';
 import { cn } from '@/lib/utils';
 import { sanitizeSearchInput } from '@/lib/sanitize';
+import { getDisplayPrice } from '@/lib/vat';
 
 interface AdminCategory {
   id: string;
@@ -526,12 +527,23 @@ const AdminProducts = () => {
                        </td>
                        <td className="px-6 py-4 text-sm text-foreground">{category}</td>
                        <td className="px-6 py-4 text-sm font-medium text-foreground">
-                         {product.price} {t('common.currency')}
-                         {product.original_price && (
-                           <span className="text-xs text-muted-foreground line-through ms-2">
-                             {product.original_price}
-                           </span>
-                         )}
+                         <div>
+                           {product.vat_enabled ? (
+                             <>
+                               <span>{getDisplayPrice(product.price, true).totalPrice} {t('common.currency')}</span>
+                               <span className="block text-xs text-muted-foreground">
+                                 {language === 'ar' ? 'شامل الضريبة' : 'Incl. VAT'}
+                               </span>
+                             </>
+                           ) : (
+                             <span>{product.price} {t('common.currency')}</span>
+                           )}
+                           {product.original_price && (
+                             <span className="text-xs text-muted-foreground line-through ms-2">
+                               {product.original_price}
+                             </span>
+                           )}
+                         </div>
                        </td>
                        <td className="px-6 py-4 text-sm text-foreground">
                         <Popover>

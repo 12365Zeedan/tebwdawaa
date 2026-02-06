@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { WishlistButton } from './WishlistButton';
 import { CompareButton } from './CompareButton';
 import { QuickViewModal } from './QuickViewModal';
+import { getDisplayPrice } from '@/lib/vat';
 
 interface ProductCardProps {
   product: LegacyProduct | DBProduct;
@@ -47,6 +48,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const isNewArrival = isDBProduct(product) ? product.is_new_arrival : false;
   const isBestSeller = isDBProduct(product) ? product.is_best_seller : false;
   const isFeatured = isDBProduct(product) ? product.is_featured : false;
+  const vatEnabled = isDBProduct(product) ? product.vat_enabled : false;
+  const pricing = getDisplayPrice(product.price, vatEnabled);
 
   const handleAddToCart = () => {
    // Check if out of stock
@@ -65,7 +68,7 @@ export function ProductCard({ product }: ProductCardProps) {
       id: product.id,
       name: product.name,
        nameAr: nameAr,
-      price: product.price,
+      price: pricing.totalPrice,
        image: image,
     });
      
@@ -180,13 +183,20 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Price & Action */}
         <div className="flex items-center justify-between pt-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-foreground">
-              {product.price} {t('common.currency')}
-            </span>
-             {originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                 {originalPrice}
+          <div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-foreground">
+                {pricing.totalPrice} {t('common.currency')}
+              </span>
+              {originalPrice && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {vatEnabled ? getDisplayPrice(originalPrice, true).totalPrice : originalPrice}
+                </span>
+              )}
+            </div>
+            {vatEnabled && (
+              <span className="text-xs text-muted-foreground">
+                {language === 'ar' ? 'شامل الضريبة' : 'Incl. VAT'}
               </span>
             )}
           </div>

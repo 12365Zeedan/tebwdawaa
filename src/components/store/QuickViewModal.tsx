@@ -11,6 +11,7 @@ import { WishlistButton } from './WishlistButton';
 import { CompareButton } from './CompareButton';
 import { Product } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
+import { getDisplayPrice } from '@/lib/vat';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -41,6 +42,8 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
     ? Math.round((1 - product.price / product.original_price) * 100)
     : 0;
 
+  const pricing = getDisplayPrice(product.price, product.vat_enabled);
+
   const handleAddToCart = () => {
     if (!product.in_stock) {
       toast({
@@ -55,7 +58,7 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
         id: product.id,
         name: product.name,
         nameAr: product.name_ar,
-        price: product.price,
+        price: pricing.totalPrice,
         image: product.image_url || '/placeholder.svg',
       });
     }
@@ -172,14 +175,21 @@ export function QuickViewModal({ product, open, onOpenChange }: QuickViewModalPr
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 mb-4">
-              <span className="text-2xl font-bold text-foreground">
-                {product.price} {t('common.currency')}
-              </span>
-              {product.original_price && (
-                <span className="text-lg text-muted-foreground line-through">
-                  {product.original_price} {t('common.currency')}
+            <div className="mb-4">
+              <div className="flex items-baseline gap-3">
+                <span className="text-2xl font-bold text-foreground">
+                  {pricing.totalPrice} {t('common.currency')}
                 </span>
+                {product.original_price && (
+                  <span className="text-lg text-muted-foreground line-through">
+                    {getDisplayPrice(product.original_price, product.vat_enabled).totalPrice} {t('common.currency')}
+                  </span>
+                )}
+              </div>
+              {product.vat_enabled && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {language === 'ar' ? 'شامل ضريبة القيمة المضافة 15%' : 'Includes 15% VAT'}
+                </p>
               )}
             </div>
 

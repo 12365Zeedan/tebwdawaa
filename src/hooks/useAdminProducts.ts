@@ -19,6 +19,7 @@ interface ProductInput {
   is_new_arrival: boolean;
   is_best_seller: boolean;
   is_active: boolean;
+  vat_enabled: boolean;
 }
  
  export function useCreateProduct() {
@@ -45,6 +46,7 @@ interface ProductInput {
             is_new_arrival: product.is_new_arrival,
             is_best_seller: product.is_best_seller,
             is_active: product.is_active,
+            vat_enabled: product.vat_enabled,
           })
           .select()
           .single();
@@ -58,7 +60,6 @@ interface ProductInput {
      },
    });
  }
-
 export function useUpdateStock() {
   const queryClient = useQueryClient();
 
@@ -184,6 +185,7 @@ export function useStockHistory(productId: string | null) {
             is_new_arrival: product.is_new_arrival,
             is_best_seller: product.is_best_seller,
             is_active: product.is_active,
+            vat_enabled: product.vat_enabled,
           })
           .eq('id', id)
           .select()

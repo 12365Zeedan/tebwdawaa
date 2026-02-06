@@ -16,6 +16,7 @@ import { WishlistButton } from '@/components/store/WishlistButton';
 import { CompareButton } from '@/components/store/CompareButton';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { cn } from '@/lib/utils';
+import { getDisplayPrice } from '@/lib/vat';
  
  export default function ProductDetail() {
    const { slug } = useParams<{ slug: string }>();
@@ -34,18 +35,20 @@ import { cn } from '@/lib/utils';
     }
   }, [product?.id, addToRecentlyViewed]);
  
-   const handleAddToCart = () => {
-     if (!product) return;
-     
-     for (let i = 0; i < quantity; i++) {
-       addToCart({
-         id: product.id,
-         name: product.name,
-         nameAr: product.name_ar,
-         price: product.price,
-         image: product.image_url || '/placeholder.svg',
-       });
-     }
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    const pricing = getDisplayPrice(product.price, product.vat_enabled);
+    
+    for (let i = 0; i < quantity; i++) {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        nameAr: product.name_ar,
+        price: pricing.totalPrice,
+        image: product.image_url || '/placeholder.svg',
+      });
+    }
      
      toast({
        title: language === 'ar' ? 'تمت الإضافة للسلة' : 'Added to Cart',
@@ -245,17 +248,38 @@ import { cn } from '@/lib/utils';
                </span>
              </div>
  
-             {/* Price */}
-             <div className="flex items-baseline gap-3">
-               <span className="text-3xl font-bold text-foreground">
-                 {product.price} {t('common.currency')}
-               </span>
-               {product.original_price && (
-                 <span className="text-xl text-muted-foreground line-through">
-                   {product.original_price} {t('common.currency')}
-                 </span>
-               )}
-             </div>
+            {/* Price */}
+            <div className="space-y-2">
+              {product.vat_enabled ? (
+                <>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-bold text-foreground">
+                      {getDisplayPrice(product.price, true).totalPrice} {t('common.currency')}
+                    </span>
+                    {product.original_price && (
+                      <span className="text-xl text-muted-foreground line-through">
+                        {getDisplayPrice(product.original_price, true).totalPrice} {t('common.currency')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-0.5">
+                    <p>{language === 'ar' ? 'السعر بدون ضريبة:' : 'Price excl. VAT:'} {product.price} {t('common.currency')}</p>
+                    <p>{language === 'ar' ? 'ضريبة القيمة المضافة (15%):' : 'VAT (15%):'} {getDisplayPrice(product.price, true).vatAmount} {t('common.currency')}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl font-bold text-foreground">
+                    {product.price} {t('common.currency')}
+                  </span>
+                  {product.original_price && (
+                    <span className="text-xl text-muted-foreground line-through">
+                      {product.original_price} {t('common.currency')}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
  
              {/* Stock Status */}
              <div className="flex items-center gap-2">
