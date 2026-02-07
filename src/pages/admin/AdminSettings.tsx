@@ -17,7 +17,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Package, Bell, Store, Save, Loader2, Building2 } from 'lucide-react';
+import { Settings, Package, Bell, Store, Save, Loader2, Building2, Palette } from 'lucide-react';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 
 type CompanyAddress = {
   building_no: string;
@@ -46,6 +47,9 @@ type SettingsData = {
   company_phone: string;
   site_url: string;
   vat_number: string;
+  logo_white_bg: string;
+  logo_transparent: string;
+  branding_colors: string[];
 };
 
 const defaultAddress: CompanyAddress = {
@@ -58,6 +62,8 @@ const defaultAddress: CompanyAddress = {
   region: '',
   country: 'Saudi Arabia',
 };
+
+const DEFAULT_BRANDING_COLORS = ['#1B98E0', '#E74C3C', '#01012D', '#DFF2F3', '#FFFFFF', '#1E9ED8'];
 
 const defaultSettings: SettingsData = {
   store_name: 'My Store',
@@ -75,6 +81,9 @@ const defaultSettings: SettingsData = {
   company_phone: '',
   site_url: '',
   vat_number: '',
+  logo_white_bg: '',
+  logo_transparent: '',
+  branding_colors: [...DEFAULT_BRANDING_COLORS],
 };
 
 export default function AdminSettings() {
@@ -100,7 +109,7 @@ export default function AdminSettings() {
   // Parse settings into form data
   useEffect(() => {
     if (settings) {
-      const parsed: Record<string, string | number | boolean | CompanyAddress> = {};
+      const parsed: Record<string, string | number | boolean | CompanyAddress | string[]> = {};
       settings.forEach((setting) => {
         const value = setting.value;
         const key = setting.key as keyof SettingsData;
@@ -115,12 +124,32 @@ export default function AdminSettings() {
                 if (typeof addressObj === 'object' && addressObj !== null) {
                   parsed[key] = { ...defaultAddress, ...addressObj };
                 } else {
-                  // Legacy single string address — put into street
                   parsed[key] = { ...defaultAddress, street: String(addressObj) };
                 }
               } catch {
                 parsed[key] = { ...defaultAddress, street: value.replace(/"/g, '') };
               }
+            }
+          } else if (key === 'branding_colors') {
+            // Parse branding colors array
+            try {
+              if (Array.isArray(value)) {
+                parsed[key] = value as string[];
+              } else if (typeof value === 'string') {
+                const colorsArr = JSON.parse(value.replace(/^"|"$/g, ''));
+                parsed[key] = Array.isArray(colorsArr) ? colorsArr : [...DEFAULT_BRANDING_COLORS];
+              } else {
+                parsed[key] = [...DEFAULT_BRANDING_COLORS];
+              }
+            } catch {
+              parsed[key] = [...DEFAULT_BRANDING_COLORS];
+            }
+          } else if (key === 'logo_white_bg' || key === 'logo_transparent') {
+            // Parse logo URLs
+            if (typeof value === 'string') {
+              parsed[key] = value.replace(/^"|"$/g, '');
+            } else {
+              parsed[key] = String(value || '').replace(/^"|"$/g, '');
             }
           } else {
             const defaultVal = defaultSettings[key];
@@ -143,7 +172,9 @@ export default function AdminSettings() {
     mutationFn: async (updates: Partial<SettingsData>) => {
       const promises = Object.entries(updates).map(async ([key, value]) => {
         let jsonValue: string;
-        if (typeof value === 'object' && value !== null) {
+        if (Array.isArray(value)) {
+          jsonValue = JSON.stringify(value);
+        } else if (typeof value === 'object' && value !== null) {
           jsonValue = JSON.stringify(value);
         } else if (typeof value === 'string') {
           jsonValue = `"${value}"`;
@@ -152,8 +183,7 @@ export default function AdminSettings() {
         }
         const { error } = await supabase
           .from('app_settings')
-          .update({ value: jsonValue })
-          .eq('key', key);
+          .upsert({ key, value: jsonValue }, { onConflict: 'key' });
         if (error) throw error;
       });
       await Promise.all(promises);
@@ -269,7 +299,106 @@ export default function AdminSettings() {
                   </Select>
                 </div>
               </div>
-              
+
+              <Separator />
+
+              {/* Company Logos */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  {language === 'ar' ? 'شعار الشركة' : 'Company Logo'}
+                </Label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-sm">
+                      {language === 'ar' ? 'الشعار (خلفية بيضاء)' : 'Logo (White Background)'}
+                    </Label>
+                    <ImageUpload
+                      value={formData.logo_white_bg || null}
+                      onChange={(url) => setFormData(prev => ({ ...prev, logo_white_bg: url || '' }))}
+                      bucket="branding"
+                      folder="logos"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">
+                      {language === 'ar' ? 'الشعار (بدون خلفية)' : 'Logo (Transparent)'}
+                    </Label>
+                    <ImageUpload
+                      value={formData.logo_transparent || null}
+                      onChange={(url) => setFormData(prev => ({ ...prev, logo_transparent: url || '' }))}
+                      bucket="branding"
+                      folder="logos"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Branding Colors */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  {language === 'ar' ? 'ألوان العلامة التجارية' : 'Brand Colors'}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ar'
+                    ? 'حدد من 4 إلى 6 ألوان تمثل علامتك التجارية'
+                    : 'Define 4-6 colors that represent your brand identity'}
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {formData.branding_colors.map((color, index) => (
+                    <div key={index} className="space-y-1.5">
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...formData.branding_colors];
+                            newColors[index] = e.target.value;
+                            setFormData(prev => ({ ...prev, branding_colors: newColors }));
+                          }}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <div
+                          className="w-full h-12 rounded-lg border-2 border-border shadow-sm cursor-pointer transition-transform hover:scale-105"
+                          style={{ backgroundColor: color }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground font-mono text-center">{color.toUpperCase()}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  {formData.branding_colors.length < 6 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        branding_colors: [...prev.branding_colors, '#000000'],
+                      }))}
+                    >
+                      {language === 'ar' ? '+ إضافة لون' : '+ Add Color'}
+                    </Button>
+                  )}
+                  {formData.branding_colors.length > 4 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        branding_colors: prev.branding_colors.slice(0, -1),
+                      }))}
+                    >
+                      {language === 'ar' ? 'إزالة آخر لون' : 'Remove Last'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <Separator />
               
               <div className="flex items-center justify-between">
@@ -307,7 +436,10 @@ export default function AdminSettings() {
                   onClick={() => handleSave('store', { 
                     store_name: formData.store_name, 
                     store_name_ar: formData.store_name_ar,
-                    currency: formData.currency 
+                    currency: formData.currency,
+                    logo_white_bg: formData.logo_white_bg,
+                    logo_transparent: formData.logo_transparent,
+                    branding_colors: formData.branding_colors,
                   })}
                   disabled={savingSection === 'store'}
                 >
