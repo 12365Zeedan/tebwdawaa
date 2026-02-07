@@ -17,7 +17,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Package, Bell, Store, Save, Loader2, Truck, Building2 } from 'lucide-react';
+import { Settings, Package, Bell, Store, Save, Loader2, Building2 } from 'lucide-react';
 import { CheckoutPaymentSettings } from '@/components/admin/settings/CheckoutPaymentSettings';
 
 type CompanyAddress = {
@@ -36,8 +36,6 @@ type SettingsData = {
   store_name_ar: string;
   currency: string;
   low_stock_threshold: number;
-  shipping_cost: number;
-  free_shipping_threshold: number;
   maintenance_mode: boolean;
   guest_checkout_enabled: boolean;
   new_order_notifications: boolean;
@@ -76,8 +74,6 @@ const defaultSettings: SettingsData = {
   store_name_ar: 'متجري',
   currency: 'SAR',
   low_stock_threshold: 10,
-  shipping_cost: 15,
-  free_shipping_threshold: 200,
   maintenance_mode: false,
   guest_checkout_enabled: true,
   new_order_notifications: true,
@@ -565,75 +561,6 @@ export default function AdminSettings() {
                   disabled={savingSection === 'company'}
                 >
                   {savingSection === 'company' ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
-                  {language === 'ar' ? 'حفظ' : 'Save'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Shipping Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5" />
-                {language === 'ar' ? 'إعدادات الشحن' : 'Shipping Settings'}
-              </CardTitle>
-              <CardDescription>
-                {language === 'ar' 
-                  ? 'تكوين تكاليف الشحن والحدود' 
-                  : 'Configure shipping costs and thresholds'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="shipping-cost">
-                    {language === 'ar' ? 'تكلفة الشحن الافتراضية' : 'Default Shipping Cost'}
-                  </Label>
-                  <Input
-                    id="shipping-cost"
-                    type="number"
-                    min="0"
-                    value={formData.shipping_cost}
-                    onChange={(e) => setFormData(prev => ({ ...prev, shipping_cost: parseFloat(e.target.value) || 0 }))}
-                    placeholder="15"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'ar' ? `بالعملة: ${formData.currency}` : `In ${formData.currency}`}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="free-shipping">
-                    {language === 'ar' ? 'حد الشحن المجاني' : 'Free Shipping Threshold'}
-                  </Label>
-                  <Input
-                    id="free-shipping"
-                    type="number"
-                    min="0"
-                    value={formData.free_shipping_threshold}
-                    onChange={(e) => setFormData(prev => ({ ...prev, free_shipping_threshold: parseFloat(e.target.value) || 0 }))}
-                    placeholder="200"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'ar' 
-                      ? 'الطلبات فوق هذا المبلغ تحصل على شحن مجاني' 
-                      : 'Orders above this amount get free shipping'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button 
-                  onClick={() => handleSave('shipping', { 
-                    shipping_cost: formData.shipping_cost, 
-                    free_shipping_threshold: formData.free_shipping_threshold 
-                  })}
-                  disabled={savingSection === 'shipping'}
-                >
-                  {savingSection === 'shipping' ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Save className="h-4 w-4 mr-2" />
