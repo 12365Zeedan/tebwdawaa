@@ -193,7 +193,7 @@ export default {
   					transform: 'scale(1)'
   				}
   			},
-  			'float': {
+  			float: {
   				'0%, 100%': {
   					transform: 'translateY(0)'
   				},
@@ -209,7 +209,7 @@ export default {
   			'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
   			'slide-in-left': 'slide-in-left 0.5s ease-out forwards',
   			'scale-in': 'scale-in 0.3s ease-out forwards',
-  			'float': 'float 3s ease-in-out infinite'
+  			float: 'float 3s ease-in-out infinite'
   		}
   	}
   },
