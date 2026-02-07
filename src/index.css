@@ -81,8 +81,8 @@
     /* Header/Footer background - #01012D */
     --header-background: 240 96% 9%;
 
-    /* Button colors - #000000 */
-    --button: 0 0% 0%;
+    /* Button colors - #E74C3C Red */
+    --button: 6 78% 57%;
     --button-foreground: 0 0% 100%;
 
     --radius: 0.375rem;
