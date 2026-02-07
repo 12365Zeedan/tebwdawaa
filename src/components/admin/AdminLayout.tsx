@@ -15,6 +15,7 @@ import {
   Mail,
   Tag,
   Paintbrush,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -37,6 +38,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/orders", icon: ShoppingCart, label: t("admin.orders") },
     { href: "/admin/customers", icon: Users, label: t("admin.customers") },
     { href: "/admin/discounts", icon: Tag, label: language === "ar" ? "الخصومات والعروض" : "Discounts" },
+    { href: "/admin/shipping", icon: Truck, label: language === "ar" ? "الشحن" : "Shipping" },
     { href: "/admin/blog", icon: FileText, label: "Blog" },
     { href: "/admin/newsletter", icon: Mail, label: language === "ar" ? "النشرة البريدية" : "Newsletter" },
     { href: "/admin/theme", icon: Paintbrush, label: language === "ar" ? "المظهر" : "Theme" },

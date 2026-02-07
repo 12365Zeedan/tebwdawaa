@@ -38,6 +38,7 @@ import AdminNewsletter from "./pages/admin/AdminNewsletter";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminDiscounts from "./pages/admin/AdminDiscounts";
 import AdminTheme from "./pages/admin/AdminTheme";
+import AdminShipping from "./pages/admin/AdminShipping";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const App = () => (
                 <Route path="/admin/blog/comments" element={<AdminBlogComments />} />
                 <Route path="/admin/newsletter" element={<AdminNewsletter />} />
                 <Route path="/admin/discounts" element={<AdminDiscounts />} />
+                <Route path="/admin/shipping" element={<AdminShipping />} />
                 <Route path="/admin/theme" element={<AdminTheme />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
