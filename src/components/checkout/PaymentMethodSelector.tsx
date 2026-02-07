@@ -12,6 +12,7 @@ import {
   LucideIcon 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 
 interface PaymentMethodSelectorProps {
   value: PaymentMethod;
@@ -32,6 +33,24 @@ export function PaymentMethodSelector({
   disabled = false,
 }: PaymentMethodSelectorProps) {
   const { language } = useLanguage();
+  const { data: paymentSettings } = usePaymentSettings();
+
+  // Merge admin settings with static config
+  const methods = PAYMENT_METHODS.map((method) => ({
+    ...method,
+    enabled: paymentSettings?.paymentMethodsEnabled[method.id] ?? method.enabled,
+  }));
+
+  // If current value is disabled, auto-select first enabled method
+  React.useEffect(() => {
+    const currentEnabled = methods.find(m => m.id === value)?.enabled;
+    if (!currentEnabled) {
+      const firstEnabled = methods.find(m => m.enabled);
+      if (firstEnabled) {
+        onChange(firstEnabled.id);
+      }
+    }
+  }, [paymentSettings]);
 
   return (
     <div className="space-y-4">
@@ -45,9 +64,8 @@ export function PaymentMethodSelector({
         disabled={disabled}
         className="grid gap-3"
       >
-        {PAYMENT_METHODS.map((method) => {
+        {methods.filter(m => m.enabled).map((method) => {
           const Icon = iconMap[method.icon] || CreditCard;
-          const isEnabled = method.enabled;
           const isSelected = value === method.id;
 
           return (
@@ -57,14 +75,13 @@ export function PaymentMethodSelector({
                 className={cn(
                   'flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all',
                   isSelected && 'border-primary bg-primary/5 ring-1 ring-primary',
-                  !isEnabled && 'opacity-50 cursor-not-allowed',
-                  isEnabled && !isSelected && 'hover:border-primary/50 hover:bg-muted/50'
+                  !isSelected && 'hover:border-primary/50 hover:bg-muted/50'
                 )}
               >
                 <RadioGroupItem
                   value={method.id}
                   id={method.id}
-                  disabled={!isEnabled || disabled}
+                  disabled={disabled}
                   className="shrink-0"
                 />
                 
@@ -77,16 +94,9 @@ export function PaymentMethodSelector({
                   </div>
                   
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">
-                        {language === 'ar' ? method.nameAr : method.name}
-                      </span>
-                      {!isEnabled && (
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {language === 'ar' ? 'قريباً' : 'Coming Soon'}
-                        </Badge>
-                      )}
-                    </div>
+                    <span className="font-medium truncate block">
+                      {language === 'ar' ? method.nameAr : method.name}
+                    </span>
                     <p className="text-sm text-muted-foreground truncate">
                       {language === 'ar' ? method.descriptionAr : method.description}
                     </p>
