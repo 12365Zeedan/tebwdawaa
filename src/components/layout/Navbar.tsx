@@ -63,7 +63,7 @@ export function Navbar() {
             <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" />
           ) : (
             <>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
                 <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
               </div>
               <span className="text-xl font-bold text-link">{storeName}</span>
