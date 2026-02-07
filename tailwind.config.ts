@@ -107,6 +107,10 @@ export default {
   			header: {
   				DEFAULT: 'hsl(var(--header-background))'
   			},
+  			button: {
+  				DEFAULT: 'hsl(var(--button))',
+  				foreground: 'hsl(var(--button-foreground))'
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
