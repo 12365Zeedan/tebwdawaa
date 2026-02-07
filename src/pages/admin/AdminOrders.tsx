@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard, FileText } from 'lucide-react';
+import { Search, Eye, Clock, Package, Truck, CheckCircle, XCircle, Loader2, CreditCard, FileText, MapPinned } from 'lucide-react';
 import { format } from 'date-fns';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,8 @@ import { TransactionHistory } from '@/components/orders/TransactionHistory';
 import { cn } from '@/lib/utils';
 import VATInvoice from '@/components/admin/VATInvoice';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { OrderTrackingTimeline } from '@/components/orders/OrderTrackingTimeline';
+import { AddTrackingEventForm } from '@/components/orders/AddTrackingEventForm';
 
 const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
   pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
@@ -320,10 +322,14 @@ const AdminOrders = () => {
                 <Separator />
 
                 <Tabs defaultValue="details" className="w-full">
-                  <TabsList className="w-full grid grid-cols-4">
+                  <TabsList className="w-full grid grid-cols-5">
                     <TabsTrigger value="details" className="gap-1">
                       <Package className="h-4 w-4" />
                       {language === 'ar' ? 'التفاصيل' : 'Details'}
+                    </TabsTrigger>
+                    <TabsTrigger value="tracking" className="gap-1">
+                      <MapPinned className="h-4 w-4" />
+                      {language === 'ar' ? 'التتبع' : 'Tracking'}
                     </TabsTrigger>
                     <TabsTrigger value="items" className="gap-1">
                       <Package className="h-4 w-4" />
@@ -380,6 +386,17 @@ const AdminOrders = () => {
                         </div>
                       </>
                     )}
+                  </TabsContent>
+
+                  <TabsContent value="tracking" className="mt-4 space-y-4">
+                    <OrderTrackingTimeline
+                      orderId={orderDetails.id}
+                      currentStatus={orderDetails.status || 'pending'}
+                    />
+                    <AddTrackingEventForm
+                      orderId={orderDetails.id}
+                      currentStatus={orderDetails.status || 'pending'}
+                    />
                   </TabsContent>
 
                   <TabsContent value="items" className="mt-4">

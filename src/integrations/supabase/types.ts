@@ -593,6 +593,47 @@ export type Database = {
           },
         ]
       }
+      order_tracking_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          order_id: string
+          status: string
+          tracking_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          order_id: string
+          status: string
+          tracking_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          order_id?: string
+          status?: string
+          tracking_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
