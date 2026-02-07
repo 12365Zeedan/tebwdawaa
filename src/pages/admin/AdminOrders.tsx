@@ -486,7 +486,16 @@ const AdminOrders = () => {
                   </TabsContent>
 
                   <TabsContent value="invoice" className="mt-4">
-                    {companySettings && orderDetails.items ? (
+                    {['failed', 'cancelled'].includes(orderDetails.payment_status || '') ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center space-y-2">
+                        <XCircle className="h-10 w-10 text-destructive" />
+                        <p className="text-muted-foreground font-medium">
+                          {language === 'ar'
+                            ? 'لا يمكن إصدار فاتورة لطلب بحالة دفع فاشلة أو ملغاة'
+                            : 'Invoice cannot be issued for orders with failed or cancelled payment'}
+                        </p>
+                      </div>
+                    ) : companySettings && orderDetails.items ? (
                       <VATInvoice
                         order={{
                           ...orderDetails,

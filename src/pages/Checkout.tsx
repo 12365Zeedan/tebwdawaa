@@ -181,6 +181,16 @@ const Checkout = () => {
       });
 
       // Step 3: Auto-send invoice email & WhatsApp (fire-and-forget, don't block checkout)
+      // Only send invoice if payment was not failed or cancelled
+      const orderAfterPayment = await supabase
+        .from('orders')
+        .select('payment_status')
+        .eq('id', order.id)
+        .single();
+
+      const paymentStatus = orderAfterPayment.data?.payment_status;
+      const invoiceBlocked = ['failed', 'cancelled'].includes(paymentStatus || '');
+
       const orderItems = items.map((item) => ({
         id: item.id,
         product_name: item.name,
@@ -190,8 +200,8 @@ const Checkout = () => {
         total_price: item.price * item.quantity,
       }));
 
-      // Send invoice email in background
-      if (companyInfo) {
+      // Send invoice email in background only if payment succeeded
+      if (companyInfo && !invoiceBlocked) {
         supabase.functions
           .invoke('send-invoice-email', {
             body: {
@@ -218,8 +228,8 @@ const Checkout = () => {
           });
       }
 
-      // Open WhatsApp with invoice summary (if phone provided)
-      if (data.customerPhone) {
+      // Open WhatsApp with invoice summary (if phone provided and payment not blocked)
+      if (data.customerPhone && !invoiceBlocked) {
         const vatAmount = calculateVAT(totalPrice);
         const phone = data.customerPhone.replace(/[^0-9]/g, '');
         const storeName = companyInfo?.company_name || companyInfo?.store_name || '';
