@@ -983,6 +983,51 @@ export type Database = {
         }
         Relationships: []
       }
+      shipping_zones: {
+        Row: {
+          created_at: string
+          estimated_days_max: number | null
+          estimated_days_min: number | null
+          free_shipping_threshold: number | null
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          regions: string[]
+          shipping_rate: number
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_days_max?: number | null
+          estimated_days_min?: number | null
+          free_shipping_threshold?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          regions?: string[]
+          shipping_rate?: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_days_max?: number | null
+          estimated_days_min?: number | null
+          free_shipping_threshold?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          regions?: string[]
+          shipping_rate?: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_history: {
         Row: {
           change_amount: number
