@@ -72,39 +72,20 @@ class MockPaymentGateway {
   private async processOnlinePayment(request: PaymentRequest): Promise<PaymentResponse> {
     const transactionId = this.generateTransactionId();
 
-    // Simulate random success/failure for testing (80% success rate)
-    const isSuccessful = Math.random() > 0.2;
+    console.log('[MockGateway] Online payment successful:', transactionId);
 
-    if (isSuccessful) {
-      console.log('[MockGateway] Online payment successful:', transactionId);
-
-      return {
-        success: true,
-        transactionId,
-        status: 'completed',
-        gatewayReference: `${request.paymentMethod.toUpperCase()}-${transactionId}`,
-        gatewayResponse: {
-          method: request.paymentMethod,
-          message: 'Payment processed successfully',
-          timestamp: new Date().toISOString(),
-          authCode: this.generateAuthCode(),
-        },
-      };
-    } else {
-      console.log('[MockGateway] Online payment failed:', transactionId);
-
-      return {
-        success: false,
-        transactionId,
-        status: 'failed',
-        errorMessage: 'Payment declined. Please try again or use a different payment method.',
-        gatewayResponse: {
-          method: request.paymentMethod,
-          errorCode: 'DECLINED',
-          timestamp: new Date().toISOString(),
-        },
-      };
-    }
+    return {
+      success: true,
+      transactionId,
+      status: 'completed',
+      gatewayReference: `${request.paymentMethod.toUpperCase()}-${transactionId}`,
+      gatewayResponse: {
+        method: request.paymentMethod,
+        message: 'Payment processed successfully',
+        timestamp: new Date().toISOString(),
+        authCode: this.generateAuthCode(),
+      },
+    };
   }
 
   /**

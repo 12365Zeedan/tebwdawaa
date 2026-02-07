@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2, Wallet } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShoppingBag, CreditCard, MapPin, User, Loader2, Wallet, Lock } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +28,7 @@ import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
+import { CardDetailsForm, CardDetails, validateCardDetails } from '@/components/checkout/CardDetailsForm';
 import { DiscountCodeInput } from '@/components/checkout/DiscountCodeInput';
 import { PaymentMethod, PAYMENT_METHODS } from '@/types/payment';
 import { calculateVAT, calculateTotalWithVAT } from '@/lib/vat';
@@ -61,6 +62,15 @@ const Checkout = () => {
   const [orderNumber, setOrderNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [appliedDiscount, setAppliedDiscount] = useState<{ code: DiscountCode; amount: number } | null>(null);
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: '',
+  });
+  const [cardErrors, setCardErrors] = useState<Partial<Record<keyof CardDetails, string>> | null>(null);
+
+  const isCardPayment = paymentMethod !== 'cod' && paymentMethod !== 'stc_pay';
  
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const BackArrow = direction === 'rtl' ? ArrowRight : ArrowLeft;
@@ -128,6 +138,16 @@ const Checkout = () => {
     // Validate minimum order amount
     if (minOrderAmount > 0 && totalPrice < minOrderAmount) {
       return; // Button should already be disabled, this is a safety check
+    }
+
+    // Validate card details for card payments
+    if (isCardPayment) {
+      const errors = validateCardDetails(cardDetails, language);
+      if (errors) {
+        setCardErrors(errors);
+        return;
+      }
+      setCardErrors(null);
     }
 
     try {
@@ -551,13 +571,30 @@ const Checkout = () => {
                   )}
 
                   {/* Payment Method Selection */}
-                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft">
-                    <PaymentMethodSelector
-                      value={paymentMethod}
-                      onChange={setPaymentMethod}
-                      disabled={isProcessing}
-                    />
-                  </div>
+                   <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
+                     <PaymentMethodSelector
+                       value={paymentMethod}
+                       onChange={(method) => {
+                         setPaymentMethod(method);
+                         setCardErrors(null);
+                       }}
+                       disabled={isProcessing}
+                     />
+
+                     {/* Card Details Form */}
+                     {isCardPayment && (
+                       <div className="mt-4">
+                         <CardDetailsForm
+                           value={cardDetails}
+                           onChange={(details) => {
+                             setCardDetails(details);
+                             if (cardErrors) setCardErrors(null);
+                           }}
+                           disabled={isProcessing}
+                         />
+                       </div>
+                     )}
+                   </div>
 
                   {/* Submit Button - Mobile */}
                   <div className="lg:hidden">
