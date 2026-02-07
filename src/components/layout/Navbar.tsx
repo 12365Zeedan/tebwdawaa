@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { useBranding } from "@/hooks/useBranding";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 export function Navbar() {
@@ -34,7 +35,9 @@ export function Navbar() {
   const {
     data: settings
   } = useStoreSettings();
+  const { data: branding } = useBranding();
   const storeName = language === "ar" ? settings?.storeNameAr || "صيدلية" : settings?.storeName || "PharmaCare";
+  const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
   const navLinks = [{
     href: "/",
     label: t("nav.home")
@@ -56,10 +59,16 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-            <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
-          </div>
-          <span className="text-xl font-bold text-link">{storeName}</span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" />
+          ) : (
+            <>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+                <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
+              </div>
+              <span className="text-xl font-bold text-link">{storeName}</span>
+            </>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

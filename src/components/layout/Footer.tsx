@@ -3,14 +3,18 @@ import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { useBranding } from '@/hooks/useBranding';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNewsletterSubscribe } from '@/hooks/useNewsletter';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
 export function Footer() {
   const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
   const { data: settings } = useStoreSettings();
+  const { data: branding } = useBranding();
+  const { data: companyInfo } = useCompanyInfo();
   const subscribe = useNewsletterSubscribe();
   const [footerEmail, setFooterEmail] = useState('');
   const [footerSubscribed, setFooterSubscribed] = useState(false);
@@ -18,6 +22,7 @@ export function Footer() {
   const storeName = language === 'ar' 
     ? (settings?.storeNameAr || 'صيدلية') 
     : (settings?.storeName || 'PharmaCare');
+  const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
 
   return (
     <footer className="bg-header text-link">
@@ -26,12 +31,18 @@ export function Footer() {
           {/* About */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
-                <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
-              </div>
-              <span className="text-xl font-bold">
-                {storeName}
-              </span>
+              {logoUrl ? (
+                <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert" />
+              ) : (
+                <>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary">
+                    <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <span className="text-xl font-bold">
+                    {storeName}
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-sm text-link/80 leading-relaxed">
               {t('footer.aboutText')}
@@ -88,17 +99,23 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t('footer.contact')}</h3>
             <div className="space-y-3">
-              <a href="tel:+966500000000" className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
+              <a href={`tel:${companyInfo?.company_phone || '+966500000000'}`} className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
                 <Phone className="h-4 w-4 rtl-flip" />
-                <span dir="ltr">+966 50 000 0000</span>
+                <span dir="ltr">{companyInfo?.company_phone || '+966 50 000 0000'}</span>
               </a>
-              <a href="mailto:info@pharmacare.com" className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
+              <a href={`mailto:${companyInfo?.company_email || 'info@store.com'}`} className="flex items-center gap-3 text-sm text-link/80 hover:text-link-hover transition-colors">
                 <Mail className="h-4 w-4" />
-                <span>info@pharmacare.com</span>
+                <span>{companyInfo?.company_email || 'info@store.com'}</span>
               </a>
               <div className="flex items-start gap-3 text-sm text-link/80">
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>{language === 'ar' ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}</span>
+                <span>
+                  {companyInfo?.company_address
+                    ? (typeof companyInfo.company_address === 'object'
+                        ? `${(companyInfo.company_address as any).city || ''}, ${(companyInfo.company_address as any).country || ''}`
+                        : String(companyInfo.company_address))
+                    : (language === 'ar' ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia')}
+                </span>
               </div>
             </div>
           </div>
