@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Package, ChevronRight, ChevronLeft, Clock, CheckCircle, Truck, XCircle, Loader2, CreditCard } from 'lucide-react';
+import { Package, ChevronRight, ChevronLeft, Clock, CheckCircle, Truck, XCircle, Loader2, CreditCard, MapPinned } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserOrders, useOrderDetails } from '@/hooks/useUserOrders';
 import { PaymentStatusBadge, PaymentMethodBadge } from '@/components/orders/PaymentStatusBadge';
 import { TransactionHistory } from '@/components/orders/TransactionHistory';
+import { OrderTrackingTimeline } from '@/components/orders/OrderTrackingTimeline';
  
  const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
    pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
@@ -172,17 +173,28 @@ import { TransactionHistory } from '@/components/orders/TransactionHistory';
  
                   <Separator />
 
-                  <Tabs defaultValue="items" className="w-full">
-                    <TabsList className="w-full grid grid-cols-2">
-                      <TabsTrigger value="items" className="gap-1">
-                        <Package className="h-4 w-4" />
-                        {language === 'ar' ? 'المنتجات' : 'Items'}
-                      </TabsTrigger>
-                      <TabsTrigger value="payment" className="gap-1">
-                        <CreditCard className="h-4 w-4" />
-                        {language === 'ar' ? 'الدفع' : 'Payment'}
-                      </TabsTrigger>
-                    </TabsList>
+                   <Tabs defaultValue="tracking" className="w-full">
+                     <TabsList className="w-full grid grid-cols-3">
+                       <TabsTrigger value="tracking" className="gap-1">
+                         <MapPinned className="h-4 w-4" />
+                         {language === 'ar' ? 'التتبع' : 'Tracking'}
+                       </TabsTrigger>
+                       <TabsTrigger value="items" className="gap-1">
+                         <Package className="h-4 w-4" />
+                         {language === 'ar' ? 'المنتجات' : 'Items'}
+                       </TabsTrigger>
+                       <TabsTrigger value="payment" className="gap-1">
+                         <CreditCard className="h-4 w-4" />
+                         {language === 'ar' ? 'الدفع' : 'Payment'}
+                       </TabsTrigger>
+                     </TabsList>
+
+                     <TabsContent value="tracking" className="mt-4">
+                       <OrderTrackingTimeline
+                         orderId={orderDetails.id}
+                         currentStatus={orderDetails.status || 'pending'}
+                       />
+                     </TabsContent>
 
                     <TabsContent value="items" className="mt-4">
                       {/* Items */}
