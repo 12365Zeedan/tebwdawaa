@@ -1,0 +1,309 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+
+// ── Types ──────────────────────────────────────────
+export interface ThemeColors {
+  background: string;
+  foreground: string;
+  primary: string;
+  primaryForeground: string;
+  secondary: string;
+  secondaryForeground: string;
+  accent: string;
+  accentForeground: string;
+  muted: string;
+  mutedForeground: string;
+  card: string;
+  cardForeground: string;
+  headerBackground: string;
+  button: string;
+  buttonForeground: string;
+  link: string;
+  linkHover: string;
+  border: string;
+  success: string;
+  warning: string;
+  destructive: string;
+}
+
+export interface ThemeTypography {
+  fontFamily: string;
+  fontFamilyArabic: string;
+}
+
+export interface SectionConfig {
+  id: string;
+  visible: boolean;
+}
+
+export interface ThemeLayout {
+  sections: SectionConfig[];
+}
+
+export interface ThemeComponents {
+  borderRadius: number;
+  cardShadow: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  buttonStyle: 'default' | 'rounded' | 'pill' | 'sharp';
+}
+
+export interface ThemeSettings {
+  colors: ThemeColors;
+  typography: ThemeTypography;
+  layout: ThemeLayout;
+  components: ThemeComponents;
+}
+
+// ── Defaults (matching index.css) ───────────────────
+export const DEFAULT_COLORS: ThemeColors = {
+  background: '183 47% 91%',
+  foreground: '240 96% 9%',
+  primary: '200 75% 49%',
+  primaryForeground: '0 0% 100%',
+  secondary: '183 47% 95%',
+  secondaryForeground: '240 96% 9%',
+  accent: '6 78% 57%',
+  accentForeground: '0 0% 100%',
+  muted: '183 30% 93%',
+  mutedForeground: '240 10% 40%',
+  card: '0 0% 100%',
+  cardForeground: '240 96% 9%',
+  headerBackground: '240 96% 9%',
+  button: '6 78% 57%',
+  buttonForeground: '0 0% 100%',
+  link: '0 0% 100%',
+  linkHover: '198 73% 48%',
+  border: '183 20% 85%',
+  success: '142 76% 36%',
+  warning: '45 93% 47%',
+  destructive: '6 78% 57%',
+};
+
+export const DEFAULT_TYPOGRAPHY: ThemeTypography = {
+  fontFamily: 'Inter',
+  fontFamilyArabic: 'Cairo',
+};
+
+export const DEFAULT_SECTIONS: SectionConfig[] = [
+  { id: 'hero', visible: true },
+  { id: 'featured', visible: true },
+  { id: 'newArrivals', visible: true },
+  { id: 'bestSellers', visible: true },
+  { id: 'recentlyViewed', visible: true },
+  { id: 'categories', visible: true },
+  { id: 'blog', visible: true },
+];
+
+export const DEFAULT_COMPONENTS: ThemeComponents = {
+  borderRadius: 0.375,
+  cardShadow: 'md',
+  buttonStyle: 'default',
+};
+
+export const DEFAULT_THEME: ThemeSettings = {
+  colors: { ...DEFAULT_COLORS },
+  typography: { ...DEFAULT_TYPOGRAPHY },
+  layout: { sections: DEFAULT_SECTIONS.map(s => ({ ...s })) },
+  components: { ...DEFAULT_COMPONENTS },
+};
+
+// ── CSS Variable Mapping ───────────────────────────
+const COLOR_VAR_MAP: Record<keyof ThemeColors, string> = {
+  background: '--background',
+  foreground: '--foreground',
+  primary: '--primary',
+  primaryForeground: '--primary-foreground',
+  secondary: '--secondary',
+  secondaryForeground: '--secondary-foreground',
+  accent: '--accent',
+  accentForeground: '--accent-foreground',
+  muted: '--muted',
+  mutedForeground: '--muted-foreground',
+  card: '--card',
+  cardForeground: '--card-foreground',
+  headerBackground: '--header-background',
+  button: '--button',
+  buttonForeground: '--button-foreground',
+  link: '--link',
+  linkHover: '--link-hover',
+  border: '--border',
+  success: '--success',
+  warning: '--warning',
+  destructive: '--destructive',
+};
+
+// ── Section labels ─────────────────────────────────
+export const SECTION_LABELS: Record<string, { en: string; ar: string }> = {
+  hero: { en: 'Hero Banner', ar: 'البانر الرئيسي' },
+  featured: { en: 'Featured Products', ar: 'المنتجات المميزة' },
+  newArrivals: { en: 'New Arrivals', ar: 'وصل حديثاً' },
+  bestSellers: { en: 'Best Sellers', ar: 'الأكثر مبيعاً' },
+  recentlyViewed: { en: 'Recently Viewed', ar: 'شوهد مؤخراً' },
+  categories: { en: 'Categories', ar: 'الفئات' },
+  blog: { en: 'Blog', ar: 'المدونة' },
+};
+
+// ── Font options ───────────────────────────────────
+export const FONT_OPTIONS = [
+  { value: 'Inter', label: 'Inter', style: 'sans-serif' },
+  { value: 'Poppins', label: 'Poppins', style: 'sans-serif' },
+  { value: 'DM Sans', label: 'DM Sans', style: 'sans-serif' },
+  { value: 'Work Sans', label: 'Work Sans', style: 'sans-serif' },
+  { value: 'Roboto', label: 'Roboto', style: 'sans-serif' },
+  { value: 'Lora', label: 'Lora', style: 'serif' },
+  { value: 'Merriweather', label: 'Merriweather', style: 'serif' },
+  { value: 'Crimson Pro', label: 'Crimson Pro', style: 'serif' },
+];
+
+export const ARABIC_FONT_OPTIONS = [
+  { value: 'Cairo', label: 'Cairo' },
+];
+
+// ── Context ────────────────────────────────────────
+interface ThemeContextValue {
+  theme: ThemeSettings;
+  updateColor: (key: keyof ThemeColors, value: string) => void;
+  updateTypography: (key: keyof ThemeTypography, value: string) => void;
+  updateSectionVisibility: (sectionId: string, visible: boolean) => void;
+  reorderSections: (sections: SectionConfig[]) => void;
+  updateComponent: <K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => void;
+  resetToDefaults: () => void;
+  hasChanges: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+const STORAGE_KEY = 'theme-settings';
+
+function loadTheme(): ThemeSettings {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        colors: { ...DEFAULT_COLORS, ...parsed.colors },
+        typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
+        layout: {
+          sections: parsed.layout?.sections?.length
+            ? parsed.layout.sections
+            : DEFAULT_SECTIONS.map(s => ({ ...s })),
+        },
+        components: { ...DEFAULT_COMPONENTS, ...parsed.components },
+      };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_THEME));
+}
+
+function applyThemeToDOM(theme: ThemeSettings) {
+  const root = document.documentElement;
+
+  // Apply colors
+  Object.entries(COLOR_VAR_MAP).forEach(([key, cssVar]) => {
+    const value = theme.colors[key as keyof ThemeColors];
+    if (value) {
+      root.style.setProperty(cssVar, value);
+    }
+  });
+
+  // Sync input & ring with border & primary
+  root.style.setProperty('--input', theme.colors.border);
+  root.style.setProperty('--ring', theme.colors.primary);
+  root.style.setProperty('--destructive-foreground', theme.colors.accentForeground);
+
+  // Apply typography
+  const fontStack = `'${theme.typography.fontFamily}', ui-sans-serif, system-ui, sans-serif`;
+  const arabicStack = `'${theme.typography.fontFamilyArabic}', '${theme.typography.fontFamily}', system-ui, sans-serif`;
+  root.style.setProperty('--font-sans', fontStack);
+  root.style.setProperty('--font-arabic', arabicStack);
+
+  // Apply border radius
+  root.style.setProperty('--radius', `${theme.components.borderRadius}rem`);
+}
+
+// ── Provider ───────────────────────────────────────
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<ThemeSettings>(loadTheme);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Apply to DOM on mount and whenever theme changes
+  useEffect(() => {
+    applyThemeToDOM(theme);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
+  }, [theme]);
+
+  const updateColor = useCallback((key: keyof ThemeColors, value: string) => {
+    setTheme(prev => ({
+      ...prev,
+      colors: { ...prev.colors, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
+  const updateTypography = useCallback((key: keyof ThemeTypography, value: string) => {
+    setTheme(prev => ({
+      ...prev,
+      typography: { ...prev.typography, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
+  const updateSectionVisibility = useCallback((sectionId: string, visible: boolean) => {
+    setTheme(prev => ({
+      ...prev,
+      layout: {
+        ...prev.layout,
+        sections: prev.layout.sections.map(s =>
+          s.id === sectionId ? { ...s, visible } : s
+        ),
+      },
+    }));
+    setHasChanges(true);
+  }, []);
+
+  const reorderSections = useCallback((sections: SectionConfig[]) => {
+    setTheme(prev => ({
+      ...prev,
+      layout: { ...prev.layout, sections },
+    }));
+    setHasChanges(true);
+  }, []);
+
+  const updateComponent = useCallback(<K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => {
+    setTheme(prev => ({
+      ...prev,
+      components: { ...prev.components, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
+  const resetToDefaults = useCallback(() => {
+    const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
+    setTheme(defaults);
+    setHasChanges(false);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme,
+        updateColor,
+        updateTypography,
+        updateSectionVisibility,
+        reorderSections,
+        updateComponent,
+        resetToDefaults,
+        hasChanges,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
+}
