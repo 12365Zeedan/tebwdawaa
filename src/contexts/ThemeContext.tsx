@@ -45,11 +45,33 @@ export interface ThemeComponents {
   buttonStyle: 'default' | 'rounded' | 'pill' | 'sharp';
 }
 
+export interface NewsBannerItem {
+  id: string;
+  textEn: string;
+  textAr: string;
+  emoji: string;
+}
+
+export interface HeroBadge {
+  id: string;
+  textEn: string;
+  textAr: string;
+}
+
+export interface ThemeContent {
+  newsBanner: {
+    visible: boolean;
+    items: NewsBannerItem[];
+  };
+  heroBadges: HeroBadge[];
+}
+
 export interface ThemeSettings {
   colors: ThemeColors;
   typography: ThemeTypography;
   layout: ThemeLayout;
   components: ThemeComponents;
+  content: ThemeContent;
 }
 
 // ── Defaults (matching index.css) ───────────────────
@@ -98,11 +120,33 @@ export const DEFAULT_COMPONENTS: ThemeComponents = {
   buttonStyle: 'default',
 };
 
+export const DEFAULT_NEWS_BANNER_ITEMS: NewsBannerItem[] = [
+  { id: '1', textEn: '20% OFF on all skincare products', textAr: 'خصم 20% على جميع منتجات العناية بالبشرة', emoji: '🔥' },
+  { id: '2', textEn: 'Free delivery on orders over 200 SAR', textAr: 'توصيل مجاني للطلبات فوق 200 ريال', emoji: '🚚' },
+  { id: '3', textEn: 'New products now available', textAr: 'منتجات جديدة متوفرة الآن', emoji: '💊' },
+  { id: '4', textEn: 'Join our loyalty program and earn points with every order', textAr: 'انضم لبرنامج الولاء واحصل على نقاط مع كل طلب', emoji: '⭐' },
+];
+
+export const DEFAULT_HERO_BADGES: HeroBadge[] = [
+  { id: '1', textEn: 'Fast Delivery', textAr: 'توصيل سريع' },
+  { id: '2', textEn: 'Genuine Products', textAr: 'منتجات أصلية' },
+  { id: '3', textEn: '24/7 Support', textAr: 'دعم 24/7' },
+];
+
+export const DEFAULT_CONTENT: ThemeContent = {
+  newsBanner: {
+    visible: true,
+    items: DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
+  },
+  heroBadges: DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+};
+
 export const DEFAULT_THEME: ThemeSettings = {
   colors: { ...DEFAULT_COLORS },
   typography: { ...DEFAULT_TYPOGRAPHY },
   layout: { sections: DEFAULT_SECTIONS.map(s => ({ ...s })) },
   components: { ...DEFAULT_COMPONENTS },
+  content: JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
 };
 
 // ── CSS Variable Mapping ───────────────────────────
@@ -165,6 +209,7 @@ interface ThemeContextValue {
   updateSectionVisibility: (sectionId: string, visible: boolean) => void;
   reorderSections: (sections: SectionConfig[]) => void;
   updateComponent: <K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => void;
+  updateContent: (content: ThemeContent) => void;
   resetToDefaults: () => void;
   hasChanges: boolean;
 }
@@ -187,6 +232,19 @@ function loadTheme(): ThemeSettings {
             : DEFAULT_SECTIONS.map(s => ({ ...s })),
         },
         components: { ...DEFAULT_COMPONENTS, ...parsed.components },
+        content: parsed.content
+          ? {
+              newsBanner: {
+                visible: parsed.content.newsBanner?.visible ?? true,
+                items: parsed.content.newsBanner?.items?.length
+                  ? parsed.content.newsBanner.items
+                  : DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
+              },
+              heroBadges: parsed.content.heroBadges?.length
+                ? parsed.content.heroBadges
+                : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+            }
+          : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
       };
     }
   } catch {
@@ -277,6 +335,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setHasChanges(true);
   }, []);
 
+  const updateContent = useCallback((content: ThemeContent) => {
+    setTheme(prev => ({
+      ...prev,
+      content,
+    }));
+    setHasChanges(true);
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
     setTheme(defaults);
@@ -293,6 +359,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         updateSectionVisibility,
         reorderSections,
         updateComponent,
+        updateContent,
         resetToDefaults,
         hasChanges,
       }}

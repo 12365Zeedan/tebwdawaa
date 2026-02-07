@@ -4,11 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
 import { ComponentSettings } from '@/components/admin/theme/ComponentSettings';
+import { ContentSettings } from '@/components/admin/theme/ContentSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
 import { useToast } from '@/hooks/use-toast';
 
@@ -54,7 +55,7 @@ export default function AdminTheme() {
           {/* Settings tabs */}
           <div>
             <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsList className="w-full grid grid-cols-5 mb-4">
                 <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
                   <Palette className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'الألوان' : 'Colors'}
@@ -71,6 +72,10 @@ export default function AdminTheme() {
                   <Layers className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'العناصر' : 'Styles'}
                 </TabsTrigger>
+                <TabsTrigger value="content" className="gap-1.5 text-xs sm:text-sm">
+                  <FileText className="h-3.5 w-3.5 hidden sm:block" />
+                  {language === 'ar' ? 'المحتوى' : 'Content'}
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="colors">
@@ -84,6 +89,9 @@ export default function AdminTheme() {
               </TabsContent>
               <TabsContent value="components">
                 <ComponentSettings />
+              </TabsContent>
+              <TabsContent value="content">
+                <ContentSettings />
               </TabsContent>
             </Tabs>
           </div>
