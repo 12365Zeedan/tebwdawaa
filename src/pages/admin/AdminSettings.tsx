@@ -18,7 +18,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, Package, Bell, Store, Save, Loader2, Building2 } from 'lucide-react';
-import { CheckoutPaymentSettings } from '@/components/admin/settings/CheckoutPaymentSettings';
 
 type CompanyAddress = {
   building_no: string;
@@ -47,15 +46,6 @@ type SettingsData = {
   company_phone: string;
   site_url: string;
   vat_number: string;
-  payment_cod_enabled: boolean;
-  payment_mada_enabled: boolean;
-  payment_visa_enabled: boolean;
-  payment_mastercard_enabled: boolean;
-  payment_apple_pay_enabled: boolean;
-  payment_stc_pay_enabled: boolean;
-  min_order_amount: number;
-  require_phone_checkout: boolean;
-  checkout_notes_enabled: boolean;
 };
 
 const defaultAddress: CompanyAddress = {
@@ -85,15 +75,6 @@ const defaultSettings: SettingsData = {
   company_phone: '',
   site_url: '',
   vat_number: '',
-  payment_cod_enabled: true,
-  payment_mada_enabled: false,
-  payment_visa_enabled: false,
-  payment_mastercard_enabled: false,
-  payment_apple_pay_enabled: false,
-  payment_stc_pay_enabled: false,
-  min_order_amount: 0,
-  require_phone_checkout: false,
-  checkout_notes_enabled: true,
 };
 
 export default function AdminSettings() {
@@ -570,25 +551,6 @@ export default function AdminSettings() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Checkout & Payment Settings */}
-          <CheckoutPaymentSettings
-            formData={{
-              payment_cod_enabled: formData.payment_cod_enabled,
-              payment_mada_enabled: formData.payment_mada_enabled,
-              payment_visa_enabled: formData.payment_visa_enabled,
-              payment_mastercard_enabled: formData.payment_mastercard_enabled,
-              payment_apple_pay_enabled: formData.payment_apple_pay_enabled,
-              payment_stc_pay_enabled: formData.payment_stc_pay_enabled,
-              min_order_amount: formData.min_order_amount,
-              require_phone_checkout: formData.require_phone_checkout,
-              checkout_notes_enabled: formData.checkout_notes_enabled,
-            }}
-            onFormChange={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
-            onToggle={(key, value) => handleToggle(key as keyof SettingsData, value)}
-            onSave={(section, updates) => handleSave(section, updates as Partial<SettingsData>)}
-            savingSection={savingSection}
-          />
 
           {/* Inventory Settings */}
           <Card>
