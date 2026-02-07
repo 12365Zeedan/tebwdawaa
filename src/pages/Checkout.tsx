@@ -25,6 +25,7 @@ import { useCreateOrder } from '@/hooks/useOrders';
 import { useProfile } from '@/hooks/useProfile';
 import { useProcessPayment } from '@/hooks/usePayment';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { usePaymentSettings } from '@/hooks/usePaymentSettings';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 import { PaymentMethodSelector } from '@/components/checkout/PaymentMethodSelector';
 import { DiscountCodeInput } from '@/components/checkout/DiscountCodeInput';
@@ -54,6 +55,7 @@ const Checkout = () => {
   const processPayment = useProcessPayment();
   const { data: profile } = useProfile();
   const { data: settings } = useStoreSettings();
+  const { data: paymentSettings } = usePaymentSettings();
   const { data: companyInfo } = useCompanyInfo();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -71,6 +73,9 @@ const Checkout = () => {
   const discountAmount = appliedDiscount?.amount ?? 0;
   const total = Math.max(0, totalPrice - discountAmount) + shippingCost;
   const maintenanceMode = settings?.maintenanceMode ?? false;
+  const minOrderAmount = paymentSettings?.minOrderAmount ?? 0;
+  const requirePhone = paymentSettings?.requirePhoneCheckout ?? false;
+  const checkoutNotesEnabled = paymentSettings?.checkoutNotesEnabled ?? true;
  
    const form = useForm<CheckoutFormData>({
      resolver: zodResolver(checkoutSchema),
@@ -112,6 +117,19 @@ const Checkout = () => {
   const isProcessing = createOrder.isPending || processPayment.isPending;
 
   const onSubmit = async (data: CheckoutFormData) => {
+    // Validate phone if required
+    if (requirePhone && !data.customerPhone?.trim()) {
+      form.setError('customerPhone', { 
+        message: language === 'ar' ? 'رقم الهاتف مطلوب' : 'Phone number is required' 
+      });
+      return;
+    }
+
+    // Validate minimum order amount
+    if (minOrderAmount > 0 && totalPrice < minOrderAmount) {
+      return; // Button should already be disabled, this is a safety check
+    }
+
     try {
       // Step 1: Create the order
       const order = await createOrder.mutateAsync({
@@ -414,19 +432,23 @@ const Checkout = () => {
                      />
                    </div>
  
-                   <FormField
-                     control={form.control}
-                     name="customerPhone"
-                     render={({ field }) => (
-                       <FormItem>
-                         <FormLabel>{language === 'ar' ? 'رقم الهاتف (اختياري)' : 'Phone (optional)'}</FormLabel>
-                         <FormControl>
-                           <Input placeholder="+966 5XX XXX XXXX" {...field} />
-                         </FormControl>
-                         <FormMessage />
-                       </FormItem>
-                     )}
-                   />
+                    <FormField
+                      control={form.control}
+                      name="customerPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {language === 'ar' 
+                              ? `رقم الهاتف ${requirePhone ? '' : '(اختياري)'}` 
+                              : `Phone ${requirePhone ? '(required)' : '(optional)'}`}
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="+966 5XX XXX XXXX" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                  </div>
  
                  {/* Shipping Address */}
@@ -500,31 +522,33 @@ const Checkout = () => {
                  </div>
  
                 {/* Order Notes */}
-                  <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
-                    <h2 className="text-xl font-semibold text-foreground">
-                      {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
-                    </h2>
-                    <FormField
-                      control={form.control}
-                      name="notes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Textarea
-                              placeholder={
-                                language === 'ar'
-                                  ? 'أي ملاحظات خاصة بالتوصيل...'
-                                  : 'Any special delivery instructions...'
-                              }
-                              className="min-h-[100px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  {checkoutNotesEnabled && (
+                   <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft space-y-4">
+                     <h2 className="text-xl font-semibold text-foreground">
+                       {language === 'ar' ? 'ملاحظات الطلب (اختياري)' : 'Order Notes (optional)'}
+                     </h2>
+                     <FormField
+                       control={form.control}
+                       name="notes"
+                       render={({ field }) => (
+                         <FormItem>
+                           <FormControl>
+                             <Textarea
+                               placeholder={
+                                 language === 'ar'
+                                   ? 'أي ملاحظات خاصة بالتوصيل...'
+                                   : 'Any special delivery instructions...'
+                               }
+                               className="min-h-[100px]"
+                               {...field}
+                             />
+                           </FormControl>
+                           <FormMessage />
+                         </FormItem>
+                       )}
+                     />
+                   </div>
+                  )}
 
                   {/* Payment Method Selection */}
                   <div className="bg-card rounded-xl border border-border/50 p-6 shadow-soft">
@@ -541,7 +565,7 @@ const Checkout = () => {
                       type="submit"
                       className="w-full gap-2 shadow-glow"
                       size="lg"
-                      disabled={isProcessing}
+                      disabled={isProcessing || (minOrderAmount > 0 && totalPrice < minOrderAmount)}
                     >
                       {isProcessing ? (
                         <>
@@ -650,17 +674,28 @@ const Checkout = () => {
                        {total.toFixed(2)} {currency}
                      </span>
                    </div>
-                 </div>
+                  </div>
+
+                {/* Minimum Order Warning */}
+                {minOrderAmount > 0 && totalPrice < minOrderAmount && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                    <p className="text-sm text-destructive">
+                      {language === 'ar'
+                        ? `الحد الأدنى لقيمة الطلب هو ${minOrderAmount} ${currency}`
+                        : `Minimum order amount is ${minOrderAmount} ${currency}`}
+                    </p>
+                  </div>
+                )}
  
-                {/* Submit Button - Desktop */}
-                <div className="hidden lg:block">
-                  <Button
-                    type="submit"
-                    className="w-full gap-2 shadow-glow"
-                    size="lg"
-                    disabled={isProcessing}
-                    onClick={form.handleSubmit(onSubmit)}
-                  >
+                 {/* Submit Button - Desktop */}
+                 <div className="hidden lg:block">
+                   <Button
+                     type="submit"
+                     className="w-full gap-2 shadow-glow"
+                     size="lg"
+                     disabled={isProcessing || (minOrderAmount > 0 && totalPrice < minOrderAmount)}
+                     onClick={form.handleSubmit(onSubmit)}
+                   >
                     {isProcessing ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
