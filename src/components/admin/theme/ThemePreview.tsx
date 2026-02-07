@@ -21,6 +21,23 @@ export function ThemePreview() {
       <div className="border-2 border-border rounded-xl overflow-hidden shadow-lg">
         {/* Scaled preview container */}
         <div className="origin-top-left" style={{ fontSize: '10px' }}>
+          {/* News Banner */}
+          {theme.content.newsBanner.visible && theme.content.newsBanner.items.length > 0 && (
+            <div
+              className="px-2 py-1 text-center overflow-hidden"
+              style={{ backgroundColor: hslToHex(c.accent), color: hslToHex(c.accentForeground) }}
+            >
+              <div className="text-[8px] font-medium truncate">
+                {theme.content.newsBanner.items.slice(0, 2).map((item, i) => (
+                  <span key={item.id}>
+                    {i > 0 && ' · '}
+                    {item.emoji} {language === 'ar' ? item.textAr : item.textEn}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Navbar */}
           <div
             className="flex items-center justify-between px-4 py-2.5"

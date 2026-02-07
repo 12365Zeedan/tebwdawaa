@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export function HeroSection() {
   const { language, t, direction } = useLanguage();
+  const { theme } = useTheme();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
+  const heroBadges = theme.content.heroBadges;
 
   return (
     <section className="relative overflow-hidden bg-gradient-hero">
@@ -45,18 +48,12 @@ export function HeroSection() {
 
             {/* Trust Badges */}
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-sm text-muted-foreground animate-fade-in stagger-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <span>{language === 'ar' ? 'توصيل سريع' : 'Fast Delivery'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <span>{language === 'ar' ? 'منتجات أصلية' : 'Genuine Products'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <span>{language === 'ar' ? 'دعم 24/7' : '24/7 Support'}</span>
-              </div>
+              {heroBadges.map(badge => (
+                <div key={badge.id} className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-success" />
+                  <span>{language === 'ar' ? badge.textAr : badge.textEn}</span>
+                </div>
+              ))}
             </div>
           </div>
 
