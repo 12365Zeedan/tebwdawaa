@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-export type AnalysisType = 'trending_keywords' | 'trending_products' | 'keyword_analysis' | 'market_overview';
+export type AnalysisType = 'trending_keywords' | 'trending_products' | 'keyword_analysis' | 'market_overview' | 'competitor_analysis';
 
 export interface TrendingKeyword {
   keyword: string;
@@ -56,18 +57,54 @@ export interface MarketOverview {
   recommendations: string[];
 }
 
+export interface Competitor {
+  name: string;
+  name_ar: string;
+  type: 'online_store' | 'pharmacy_chain' | 'marketplace' | 'brand_direct' | 'social_seller';
+  categories: string[];
+  price_positioning: 'budget' | 'mid_range' | 'premium' | 'luxury';
+  strengths: string[];
+  weaknesses: string[];
+  estimated_market_share?: string;
+  popular_products?: string[];
+  pricing_strategy: string;
+  online_presence?: Record<string, string>;
+  threat_level: 'high' | 'medium' | 'low';
+}
+
+export interface CompetitorAnalysis {
+  competitors: Competitor[];
+  market_gaps: string[];
+  pricing_insights: string[];
+  differentiation_ideas: string[];
+  summary: string;
+}
+
+export interface TrendReport {
+  id: string;
+  analysis_type: string;
+  query: string | null;
+  language: string;
+  result: any;
+  summary: string | null;
+  triggered_by: string;
+  created_at: string;
+}
+
 export function useTrendsAgent() {
   const [isLoading, setIsLoading] = useState(false);
   const [trendingKeywords, setTrendingKeywords] = useState<{ keywords: TrendingKeyword[]; summary: string } | null>(null);
   const [trendingProducts, setTrendingProducts] = useState<{ products: TrendingProduct[]; summary: string } | null>(null);
   const [keywordAnalysis, setKeywordAnalysis] = useState<KeywordAnalysis | null>(null);
   const [marketOverview, setMarketOverview] = useState<MarketOverview | null>(null);
+  const [competitorAnalysis, setCompetitorAnalysis] = useState<CompetitorAnalysis | null>(null);
+  const queryClient = useQueryClient();
 
-  const analyze = async (type: AnalysisType, query?: string, language: string = 'en') => {
+  const analyze = async (type: AnalysisType, query?: string, language: string = 'en', saveToHistory: boolean | string = false) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-trends', {
-        body: { type, query, language },
+        body: { type, query, language, saveToHistory: saveToHistory || undefined },
       });
 
       if (error) throw error;
@@ -96,6 +133,13 @@ export function useTrendsAgent() {
         case 'market_overview':
           setMarketOverview(result);
           break;
+        case 'competitor_analysis':
+          setCompetitorAnalysis(result);
+          break;
+      }
+
+      if (saveToHistory) {
+        queryClient.invalidateQueries({ queryKey: ['trend-reports'] });
       }
 
       toast.success('Analysis complete!');
@@ -113,6 +157,37 @@ export function useTrendsAgent() {
     trendingProducts,
     keywordAnalysis,
     marketOverview,
+    competitorAnalysis,
     analyze,
+  };
+}
+
+export function useTrendReports() {
+  return useQuery({
+    queryKey: ['trend-reports'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trend_reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return data as TrendReport[];
+    },
+  });
+}
+
+export function useDeleteTrendReport() {
+  const queryClient = useQueryClient();
+
+  return async (id: string) => {
+    const { error } = await supabase.from('trend_reports').delete().eq('id', id);
+    if (error) {
+      toast.error('Failed to delete report');
+      throw error;
+    }
+    queryClient.invalidateQueries({ queryKey: ['trend-reports'] });
+    toast.success('Report deleted');
   };
 }

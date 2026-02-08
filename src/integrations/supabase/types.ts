@@ -1324,6 +1324,39 @@ export type Database = {
           },
         ]
       }
+      trend_reports: {
+        Row: {
+          analysis_type: string
+          created_at: string
+          id: string
+          language: string
+          query: string | null
+          result: Json
+          summary: string | null
+          triggered_by: string
+        }
+        Insert: {
+          analysis_type: string
+          created_at?: string
+          id?: string
+          language?: string
+          query?: string | null
+          result: Json
+          summary?: string | null
+          triggered_by?: string
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string
+          id?: string
+          language?: string
+          query?: string | null
+          result?: Json
+          summary?: string | null
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
