@@ -9,6 +9,7 @@ import {
   Archive,
   Shield,
   CheckCircle2,
+  RotateCcw,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useBackups, BackupScope } from "@/hooks/useBackups";
 import { BackupScheduleCard } from "@/components/admin/backup/BackupScheduleCard";
 import { BackupHistoryCard } from "@/components/admin/backup/BackupHistoryCard";
+import { BackupRestoreCard } from "@/components/admin/backup/BackupRestoreCard";
 import { StatCard } from "@/components/admin/StatCard";
 import { cn } from "@/lib/utils";
 
@@ -64,8 +66,11 @@ export default function AdminBackups() {
     isLoadingBackups,
     isRunning,
     backupProgress,
+    isRestoring,
+    restoreProgress,
     schedule,
     runBackup,
+    restoreBackup,
     saveSchedule,
     deleteBackup,
   } = useBackups();
@@ -257,6 +262,13 @@ export default function AdminBackups() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Restore Backup */}
+            <BackupRestoreCard
+              onRestore={restoreBackup}
+              isRestoring={isRestoring}
+              restoreProgress={restoreProgress}
+            />
 
             {/* Backup History */}
             <BackupHistoryCard

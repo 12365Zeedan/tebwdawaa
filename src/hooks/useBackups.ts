@@ -36,6 +36,8 @@ export function useBackups() {
   const queryClient = useQueryClient();
   const [isRunning, setIsRunning] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [restoreProgress, setRestoreProgress] = useState(0);
 
   // Fetch backup history
   const { data: backups = [], isLoading: isLoadingBackups } = useQuery({
@@ -219,13 +221,102 @@ export function useBackups() {
     },
   });
 
+  // Restore from backup
+  const restoreBackup = useCallback(
+    async (
+      selectedTables: string[],
+      backupData: { tables: Record<string, unknown[]> }
+    ) => {
+      setIsRestoring(true);
+      setRestoreProgress(0);
+
+      const startTime = Date.now();
+      let restoredCount = 0;
+      let failedTables: string[] = [];
+
+      for (let i = 0; i < selectedTables.length; i++) {
+        const table = selectedTables[i];
+        const rows = backupData.tables[table];
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          restoredCount++;
+          setRestoreProgress(
+            Math.round(((i + 1) / selectedTables.length) * 100)
+          );
+          continue;
+        }
+
+        await new Promise((r) => setTimeout(r, 150));
+
+        try {
+          // Delete existing data
+          const { error: deleteError } = await supabase
+            .from(table as any)
+            .delete()
+            .neq("id", "00000000-0000-0000-0000-000000000000"); // delete all rows
+
+          if (deleteError) {
+            console.error(`Failed to clear ${table}:`, deleteError);
+            failedTables.push(table);
+            setRestoreProgress(
+              Math.round(((i + 1) / selectedTables.length) * 100)
+            );
+            continue;
+          }
+
+          // Insert backup data in batches of 100
+          const batchSize = 100;
+          for (let j = 0; j < rows.length; j += batchSize) {
+            const batch = rows.slice(j, j + batchSize);
+            const { error: insertError } = await supabase
+              .from(table as any)
+              .insert(batch as any);
+
+            if (insertError) {
+              console.error(`Failed to insert into ${table}:`, insertError);
+              failedTables.push(table);
+              break;
+            }
+          }
+
+          restoredCount++;
+        } catch (err) {
+          console.error(`Error restoring ${table}:`, err);
+          failedTables.push(table);
+        }
+
+        setRestoreProgress(
+          Math.round(((i + 1) / selectedTables.length) * 100)
+        );
+      }
+
+      setIsRestoring(false);
+      queryClient.invalidateQueries();
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      if (failedTables.length === 0) {
+        toast.success(
+          `Restore completed! ${restoredCount} tables restored in ${duration}s`
+        );
+      } else {
+        toast.warning(
+          `Restore finished with ${failedTables.length} errors. ${restoredCount - failedTables.length} tables restored, ${failedTables.length} failed.`
+        );
+      }
+    },
+    [queryClient]
+  );
+
   return {
     backups,
     isLoadingBackups,
     isRunning,
     backupProgress,
+    isRestoring,
+    restoreProgress,
     schedule,
     runBackup,
+    restoreBackup,
     saveSchedule,
     deleteBackup,
   };
