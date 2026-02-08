@@ -96,12 +96,28 @@ function runHealthCheck(checkId: string): HealthCheckResult {
       message: "Robots.txt is properly configured",
       value: "Found",
     }),
-    "seo-structured-data": () => ({
-      checkId,
-      status: "warning",
-      message: "Structured data (JSON-LD) is missing on product pages",
-      recommendation: "Add JSON-LD schema markup for products, breadcrumbs, and organization",
-    }),
+    "seo-structured-data": () => {
+      const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      const hasProductSchema = Array.from(jsonLdScripts).some((script) => {
+        try {
+          const data = JSON.parse(script.textContent || "");
+          return data["@type"] === "Product";
+        } catch {
+          return false;
+        }
+      });
+      return {
+        checkId,
+        status: hasProductSchema ? "passed" : "warning",
+        message: hasProductSchema
+          ? "JSON-LD Product structured data is active"
+          : "Structured data (JSON-LD) is missing on product pages",
+        value: hasProductSchema ? `${jsonLdScripts.length} schema(s)` : "Not found",
+        recommendation: !hasProductSchema
+          ? "Enable JSON-LD schema markup for products — visit a product page to verify, or apply the auto-fix"
+          : undefined,
+      };
+    },
     "seo-canonical": () => ({
       checkId,
       status: "warning",

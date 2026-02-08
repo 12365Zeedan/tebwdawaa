@@ -292,6 +292,36 @@ export function useSeoFixes() {
   }, []);
 
   /**
+   * Enable JSON-LD structured data on product pages.
+   * The ProductJsonLd component is already embedded; this persists the setting.
+   */
+  const fixStructuredData = useCallback(async () => {
+    try {
+      await supabase.from("app_settings").upsert(
+        {
+          key: "seo_jsonld_enabled",
+          value: JSON.stringify(true),
+          description: "Enable JSON-LD structured data on product pages",
+        },
+        { onConflict: "key" }
+      );
+
+      // Verify by checking if the component is active on current page
+      const existing = document.getElementById("product-jsonld");
+      if (existing) {
+        toast.success("JSON-LD structured data is already active on this product page");
+      } else {
+        toast.success("JSON-LD structured data enabled — active on all product pages");
+      }
+      return true;
+    } catch (err) {
+      console.error("Failed to enable structured data:", err);
+      toast.error("Failed to enable structured data");
+      return false;
+    }
+  }, []);
+
+  /**
    * Run an auto-fix by check ID.
    */
   const applyFix = useCallback(
@@ -305,12 +335,14 @@ export function useSeoFixes() {
           return fixRobotsTxt();
         case "seo-canonical":
           return fixCanonicalUrls();
+        case "seo-structured-data":
+          return fixStructuredData();
         default:
           toast.error("No auto-fix available for this check");
           return false;
       }
     },
-    [fixMetaTags, fixSitemap, fixRobotsTxt, fixCanonicalUrls]
+    [fixMetaTags, fixSitemap, fixRobotsTxt, fixCanonicalUrls, fixStructuredData]
   );
 
   return { applyFix };

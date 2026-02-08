@@ -170,7 +170,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من ترميز البيانات المنظمة على صفحات المنتجات",
     category: "seo",
     severity: "warning",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Enable JSON-LD structured data on product pages",
   },
   {
     id: "seo-canonical",
