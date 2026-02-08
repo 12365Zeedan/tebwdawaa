@@ -42,6 +42,7 @@ import AdminShipping from "./pages/admin/AdminShipping";
 import AdminCheckoutPayment from "./pages/admin/AdminCheckoutPayment";
 import AdminPlugins from "./pages/admin/AdminPlugins";
 import AdminSiteHealth from "./pages/admin/AdminSiteHealth";
+import AdminBackups from "./pages/admin/AdminBackups";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => (
                 <Route path="/admin/theme" element={<AdminTheme />} />
                 <Route path="/admin/plugins" element={<AdminPlugins />} />
                 <Route path="/admin/site-health" element={<AdminSiteHealth />} />
+                <Route path="/admin/backups" element={<AdminBackups />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 {/* Catch-all */}

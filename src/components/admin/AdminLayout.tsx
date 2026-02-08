@@ -19,6 +19,7 @@ import {
   CreditCard,
   Puzzle,
   Activity,
+  HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -48,6 +49,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/theme", icon: Paintbrush, label: language === "ar" ? "المظهر" : "Theme" },
     { href: "/admin/plugins", icon: Puzzle, label: language === "ar" ? "الإضافات" : "Plugins" },
     { href: "/admin/site-health", icon: Activity, label: language === "ar" ? "صحة الموقع" : "Site Health" },
+    { href: "/admin/backups", icon: HardDrive, label: language === "ar" ? "النسخ الاحتياطي" : "Backups" },
     { href: "/admin/settings", icon: Settings, label: t("admin.settings") },
   ];
 
