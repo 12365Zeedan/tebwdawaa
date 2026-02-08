@@ -1055,6 +1055,84 @@ export type Database = {
         }
         Relationships: []
       }
+      site_health_scans: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          issues_fixed: number
+          issues_found: number
+          overall_score: number
+          results: Json
+          scan_duration_ms: number | null
+          scan_type: string
+          status: string
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          issues_fixed?: number
+          issues_found?: number
+          overall_score?: number
+          results?: Json
+          scan_duration_ms?: number | null
+          scan_type?: string
+          status?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          issues_fixed?: number
+          issues_found?: number
+          overall_score?: number
+          results?: Json
+          scan_duration_ms?: number | null
+          scan_type?: string
+          status?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
+      site_health_schedules: {
+        Row: {
+          check_categories: string[]
+          created_at: string
+          frequency: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          next_run_at: string | null
+          notify_on_issues: boolean
+          updated_at: string
+        }
+        Insert: {
+          check_categories?: string[]
+          created_at?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          notify_on_issues?: boolean
+          updated_at?: string
+        }
+        Update: {
+          check_categories?: string[]
+          created_at?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          notify_on_issues?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stock_history: {
         Row: {
           change_amount: number
