@@ -7,11 +7,15 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
+  Mail,
+  Send,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteHealth } from "@/hooks/useSiteHealth";
 import { healthChecks, HealthCheckCategory } from "@/data/healthChecks";
@@ -33,9 +37,14 @@ export default function AdminSiteHealth() {
     runScan,
     saveSchedule,
     deleteScan,
+    applyFix,
+    isFixing,
+    sendScanNotification,
   } = useSiteHealth();
 
   const [selectedCategory, setSelectedCategory] = useState<HealthCheckCategory | "all">("all");
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Compute stats from latest results
   const stats = useMemo(() => {
@@ -81,6 +90,13 @@ export default function AdminSiteHealth() {
 
   // Check which checks are currently running
   const completedCheckIds = new Set(currentResults.map((r) => r.checkId));
+
+  const handleSendNotification = async () => {
+    if (!notifyEmail || !notifyEmail.includes("@")) return;
+    setIsSendingEmail(true);
+    await sendScanNotification(notifyEmail);
+    setIsSendingEmail(false);
+  };
 
   return (
     <AdminLayout>
@@ -205,6 +221,8 @@ export default function AdminSiteHealth() {
                         check={check}
                         result={result}
                         isRunning={isRunning && completedCheckIds.size >= filteredChecks.indexOf(check)}
+                        onApplyFix={applyFix}
+                        isFixing={isFixing}
                       />
                     );
                   })}
@@ -224,8 +242,54 @@ export default function AdminSiteHealth() {
             </Card>
           </div>
 
-          {/* Right: Schedule + History */}
+          {/* Right: Schedule + Notification + History */}
           <div className="space-y-4">
+            {/* Email Notification Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">
+                    {language === "ar" ? "إرسال تقرير بالبريد" : "Email Report"}
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  {language === "ar"
+                    ? "أرسل نتائج آخر فحص إلى بريدك الإلكتروني"
+                    : "Send the latest scan results to your email"}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="notify-email" className="text-sm">
+                    {language === "ar" ? "البريد الإلكتروني" : "Email Address"}
+                  </Label>
+                  <Input
+                    id="notify-email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={notifyEmail}
+                    onChange={(e) => setNotifyEmail(e.target.value)}
+                  />
+                </div>
+                <Button
+                  className="w-full gap-2"
+                  size="sm"
+                  onClick={handleSendNotification}
+                  disabled={isSendingEmail || currentResults.length === 0 || !notifyEmail}
+                >
+                  {isSendingEmail ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {isSendingEmail
+                    ? language === "ar" ? "جاري الإرسال..." : "Sending..."
+                    : language === "ar" ? "إرسال التقرير" : "Send Report"}
+                </Button>
+              </CardContent>
+            </Card>
+
             <ScheduleCard
               schedule={schedule}
               onSave={(data) => saveSchedule.mutate(data)}

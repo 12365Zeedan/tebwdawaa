@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { healthChecks, HealthCheckResult, HealthCheckCategory } from "@/data/healthChecks";
 import { toast } from "sonner";
+import { useSeoFixes } from "./useSeoFixes";
 
 // Simulated health check runner (client-side analysis)
 function runHealthCheck(checkId: string): HealthCheckResult {
@@ -197,6 +198,8 @@ export function useSiteHealth() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [currentResults, setCurrentResults] = useState<HealthCheckResult[]>([]);
+  const [isFixing, setIsFixing] = useState(false);
+  const { applyFix: applySeoFix } = useSeoFixes();
 
   // Fetch scan history
   const { data: scanHistory = [], isLoading: isLoadingHistory } = useQuery({
@@ -317,6 +320,98 @@ export function useSiteHealth() {
     },
   });
 
+  // Apply an auto-fix
+  const applyFix = useCallback(
+    async (checkId: string): Promise<boolean> => {
+      setIsFixing(true);
+      try {
+        const success = await applySeoFix(checkId);
+        if (success) {
+          // Update the result in current results to show fix applied
+          setCurrentResults((prev) =>
+            prev.map((r) =>
+              r.checkId === checkId ? { ...r, fixApplied: true } : r
+            )
+          );
+        }
+        return success;
+      } finally {
+        setIsFixing(false);
+      }
+    },
+    [applySeoFix]
+  );
+
+  // Send scan notification email
+  const sendScanNotification = useCallback(
+    async (email: string) => {
+      if (currentResults.length === 0) {
+        toast.error("Run a scan first before sending notifications");
+        return;
+      }
+
+      const passed = currentResults.filter((r) => r.status === "passed").length;
+      const warnings = currentResults.filter((r) => r.status === "warning").length;
+      const failed = currentResults.filter((r) => r.status === "failed").length;
+      const overallScore = Math.round((passed / currentResults.length) * 100);
+
+      const issues = currentResults
+        .filter((r) => r.status === "failed" || r.status === "warning")
+        .map((r) => {
+          const check = healthChecks.find((c) => c.id === r.checkId);
+          return {
+            name: check?.name || r.checkId,
+            status: r.status,
+            message: r.message,
+            recommendation: r.recommendation,
+          };
+        });
+
+      // Fetch store name
+      const { data: storeData } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "store_name")
+        .maybeSingle();
+
+      const storeName = storeData?.value
+        ? typeof storeData.value === "string"
+          ? JSON.parse(storeData.value)
+          : String(storeData.value)
+        : "My Store";
+
+      try {
+        const { error } = await supabase.functions.invoke("send-scan-notification", {
+          body: {
+            email,
+            overallScore,
+            issuesFound: warnings + failed,
+            totalChecks: currentResults.length,
+            passed,
+            warnings,
+            failed,
+            issues,
+            scanDate: new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            storeName,
+          },
+        });
+
+        if (error) throw error;
+        toast.success("Scan report emailed successfully");
+      } catch (err) {
+        console.error("Failed to send notification:", err);
+        toast.error("Failed to send notification email");
+      }
+    },
+    [currentResults]
+  );
+
   return {
     isScanning,
     scanProgress,
@@ -327,5 +422,8 @@ export function useSiteHealth() {
     runScan,
     saveSchedule,
     deleteScan,
+    applyFix,
+    isFixing,
+    sendScanNotification,
   };
 }

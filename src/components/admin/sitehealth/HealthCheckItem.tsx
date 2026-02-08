@@ -7,6 +7,7 @@ import {
   Wrench,
   ChevronDown,
   ChevronUp,
+  Check,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -19,11 +20,20 @@ interface HealthCheckItemProps {
   check: HealthCheck;
   result?: HealthCheckResult;
   isRunning?: boolean;
+  onApplyFix?: (checkId: string) => Promise<boolean>;
+  isFixing?: boolean;
 }
 
-export function HealthCheckItem({ check, result, isRunning }: HealthCheckItemProps) {
+export function HealthCheckItem({
+  check,
+  result,
+  isRunning,
+  onApplyFix,
+  isFixing,
+}: HealthCheckItemProps) {
   const { language } = useLanguage();
   const [expanded, setExpanded] = useState(false);
+  const [fixApplied, setFixApplied] = useState(result?.fixApplied ?? false);
 
   const statusConfig = {
     passed: { icon: CheckCircle2, color: "text-green-500", bg: "bg-green-500/10" },
@@ -37,11 +47,24 @@ export function HealthCheckItem({ check, result, isRunning }: HealthCheckItemPro
   const config = statusConfig[status];
   const Icon = config.icon;
 
+  const canFix =
+    check.autoFixable &&
+    result &&
+    (result.status === "failed" || result.status === "warning") &&
+    !fixApplied;
+
+  const handleFix = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onApplyFix) return;
+    const success = await onApplyFix(check.id);
+    if (success) setFixApplied(true);
+  };
+
   return (
     <div
       className={cn(
         "border rounded-lg transition-all",
-        result?.status === "failed" && "border-red-500/30",
+        result?.status === "failed" && "border-destructive/30",
         result?.status === "warning" && "border-yellow-500/30"
       )}
     >
@@ -64,7 +87,13 @@ export function HealthCheckItem({ check, result, isRunning }: HealthCheckItemPro
             <p className="text-sm font-medium truncate">
               {language === "ar" ? check.nameAr : check.name}
             </p>
-            {check.autoFixable && result && (result.status === "failed" || result.status === "warning") && (
+            {fixApplied && (
+              <Badge variant="outline" className="text-xs gap-1 shrink-0 border-green-500/40 text-green-600">
+                <Check className="h-3 w-3" />
+                {language === "ar" ? "تم الإصلاح" : "Fixed"}
+              </Badge>
+            )}
+            {canFix && !fixApplied && (
               <Badge variant="outline" className="text-xs gap-1 shrink-0">
                 <Wrench className="h-3 w-3" />
                 {language === "ar" ? "قابل للإصلاح" : "Auto-fixable"}
@@ -104,11 +133,27 @@ export function HealthCheckItem({ check, result, isRunning }: HealthCheckItemPro
               <p className="text-xs text-muted-foreground">{result.recommendation}</p>
             </div>
           )}
-          {check.autoFixable && (result.status === "failed" || result.status === "warning") && (
-            <Button size="sm" variant="outline" className="gap-1.5 text-xs h-7">
-              <Wrench className="h-3 w-3" />
+          {canFix && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs h-7"
+              onClick={handleFix}
+              disabled={isFixing}
+            >
+              {isFixing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Wrench className="h-3 w-3" />
+              )}
               {check.fixDescription || (language === "ar" ? "إصلاح تلقائي" : "Apply Fix")}
             </Button>
+          )}
+          {fixApplied && (
+            <p className="text-xs text-green-600 flex items-center gap-1">
+              <Check className="h-3 w-3" />
+              {language === "ar" ? "تم تطبيق الإصلاح بنجاح" : "Fix applied successfully"}
+            </p>
           )}
         </div>
       )}
