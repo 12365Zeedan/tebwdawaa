@@ -50,7 +50,6 @@ export function Footer() {
             <p className="text-sm text-link/80 leading-relaxed">
               {language === 'ar' ? footerContent.aboutTextAr : footerContent.aboutTextEn}
             </p>
-            </p>
             <div className="flex gap-4">
               {footerContent.socialLinks.facebook && (
                 <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
@@ -184,6 +183,7 @@ export function Footer() {
             )}
           </div>
         </div>
+        )}
 
         <div className="mt-8 pt-8 border-t border-link/20">
           <p className="text-center text-sm text-link/80">
