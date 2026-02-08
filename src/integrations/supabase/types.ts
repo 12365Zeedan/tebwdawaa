@@ -763,6 +763,66 @@ export type Database = {
         }
         Relationships: []
       }
+      page_seo_scores: {
+        Row: {
+          created_at: string
+          details: Json | null
+          has_alt_texts: boolean
+          has_canonical: boolean
+          has_h1: boolean
+          has_meta_description: boolean
+          has_meta_title: boolean
+          has_og_tags: boolean
+          has_structured_data: boolean
+          heading_hierarchy_valid: boolean
+          id: string
+          missing_alt_count: number
+          overall_score: number
+          page_path: string
+          page_title: string | null
+          scanned_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          has_alt_texts?: boolean
+          has_canonical?: boolean
+          has_h1?: boolean
+          has_meta_description?: boolean
+          has_meta_title?: boolean
+          has_og_tags?: boolean
+          has_structured_data?: boolean
+          heading_hierarchy_valid?: boolean
+          id?: string
+          missing_alt_count?: number
+          overall_score?: number
+          page_path: string
+          page_title?: string | null
+          scanned_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          has_alt_texts?: boolean
+          has_canonical?: boolean
+          has_h1?: boolean
+          has_meta_description?: boolean
+          has_meta_title?: boolean
+          has_og_tags?: boolean
+          has_structured_data?: boolean
+          heading_hierarchy_valid?: boolean
+          id?: string
+          missing_alt_count?: number
+          overall_score?: number
+          page_path?: string
+          page_title?: string | null
+          scanned_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number

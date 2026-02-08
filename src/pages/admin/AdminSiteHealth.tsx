@@ -25,6 +25,7 @@ import { ScanHistoryCard } from "@/components/admin/sitehealth/ScanHistoryCard";
 import { ScheduleCard } from "@/components/admin/sitehealth/ScheduleCard";
 import { CategoryFilter } from "@/components/admin/sitehealth/CategoryFilter";
 import { HealthScoreTrendChart } from "@/components/admin/sitehealth/HealthScoreTrendChart";
+import { PageSeoBreakdown } from "@/components/admin/sitehealth/PageSeoBreakdown";
 import { StatCard } from "@/components/admin/StatCard";
 
 export default function AdminSiteHealth() {
@@ -185,6 +186,9 @@ export default function AdminSiteHealth() {
         {scanHistory.length >= 2 && (
           <HealthScoreTrendChart scans={scanHistory} />
         )}
+
+        {/* Per-Page SEO Breakdown */}
+        <PageSeoBreakdown />
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
