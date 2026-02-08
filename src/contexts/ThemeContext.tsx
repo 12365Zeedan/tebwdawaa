@@ -112,6 +112,14 @@ export interface FooterContent {
   };
 }
 
+export interface WeatherBarSettings {
+  visible: boolean;
+  showHijriDate: boolean;
+  defaultCityName: string;
+  defaultCityLat: number;
+  defaultCityLon: number;
+}
+
 export interface ThemeContent {
   newsBanner: {
     visible: boolean;
@@ -122,6 +130,7 @@ export interface ThemeContent {
   sectionHeadings: Record<string, SectionHeading>;
   aboutPage: AboutPageContent;
   footer: FooterContent;
+  weatherBar: WeatherBarSettings;
 }
 
 export interface ThemeSettings {
@@ -245,6 +254,14 @@ export const DEFAULT_FOOTER_CONTENT: FooterContent = {
   },
 };
 
+export const DEFAULT_WEATHER_BAR: WeatherBarSettings = {
+  visible: true,
+  showHijriDate: true,
+  defaultCityName: 'Riyadh',
+  defaultCityLat: 24.7136,
+  defaultCityLon: 46.6753,
+};
+
 export const DEFAULT_CONTENT: ThemeContent = {
   newsBanner: {
     visible: true,
@@ -255,6 +272,7 @@ export const DEFAULT_CONTENT: ThemeContent = {
   sectionHeadings: JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
   aboutPage: JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
   footer: JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)),
+  weatherBar: { ...DEFAULT_WEATHER_BAR },
 };
 
 export const DEFAULT_THEME: ThemeSettings = {
@@ -374,6 +392,7 @@ function loadTheme(): ThemeSettings {
                   }
                 : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
               footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
+              weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
             }
           : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
       };
