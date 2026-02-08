@@ -432,6 +432,33 @@ export type Database = {
         }
         Relationships: []
       }
+      installed_plugins: {
+        Row: {
+          id: string
+          installed_at: string
+          is_active: boolean
+          plugin_key: string
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          installed_at?: string
+          is_active?: boolean
+          plugin_key: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          installed_at?: string
+          is_active?: boolean
+          plugin_key?: string
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loyalty_points_history: {
         Row: {
           created_at: string
