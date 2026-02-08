@@ -10,6 +10,7 @@ import { ComparisonBar } from '@/components/store/ComparisonBar';
 import { CanonicalUrl } from '@/components/seo/CanonicalUrl';
 import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd';
 import { BreadcrumbJsonLd } from '@/components/seo/BreadcrumbJsonLd';
+import { useAutoSeoTracker } from '@/hooks/useAutoSeoTracker';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const { direction } = useLanguage();
+  useAutoSeoTracker();
 
   return (
     <div className={cn('min-h-screen flex flex-col', direction === 'rtl' && 'font-arabic')}>
