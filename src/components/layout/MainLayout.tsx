@@ -7,6 +7,8 @@ import { WeatherDateBar } from './WeatherDateBar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ComparisonBar } from '@/components/store/ComparisonBar';
+import { CanonicalUrl } from '@/components/seo/CanonicalUrl';
+
 interface MainLayoutProps {
   children: ReactNode;
 }
@@ -16,6 +18,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className={cn('min-h-screen flex flex-col', direction === 'rtl' && 'font-arabic')}>
+      <CanonicalUrl />
       <WeatherDateBar />
       <NewsBanner />
       <MaintenanceBanner />
