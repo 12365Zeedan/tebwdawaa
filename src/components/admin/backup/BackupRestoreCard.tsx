@@ -37,8 +37,14 @@ export interface ParsedBackup {
   tables: Record<string, unknown[]>;
 }
 
+export interface RestoreOptions {
+  tables: string[];
+  data: ParsedBackup;
+  selectedColumns?: Record<string, string[]>;
+}
+
 interface BackupRestoreCardProps {
-  onRestore: (tables: string[], data: ParsedBackup) => Promise<void>;
+  onRestore: (options: RestoreOptions) => Promise<void>;
   isRestoring: boolean;
   restoreProgress: number;
 }
@@ -54,6 +60,8 @@ export function BackupRestoreCard({
   const [parseError, setParseError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<Record<string, string[]>>({});
+  const [expandedTable, setExpandedTable] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -66,6 +74,37 @@ export function BackupRestoreCard({
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [parsedBackup]);
+
+  // Get columns for a given table from backup data
+  const getTableColumns = (tableName: string): string[] => {
+    if (!parsedBackup) return [];
+    const rows = parsedBackup.tables[tableName];
+    if (!Array.isArray(rows) || rows.length === 0) return [];
+    return Object.keys(rows[0] as Record<string, unknown>);
+  };
+
+  const toggleColumn = (tableName: string, column: string) => {
+    setSelectedColumns((prev) => {
+      const current = prev[tableName] || getTableColumns(tableName);
+      const updated = current.includes(column)
+        ? current.filter((c) => c !== column)
+        : [...current, column];
+      return { ...prev, [tableName]: updated };
+    });
+  };
+
+  const selectAllColumns = (tableName: string) => {
+    const allCols = getTableColumns(tableName);
+    const current = selectedColumns[tableName] || allCols;
+    setSelectedColumns((prev) => ({
+      ...prev,
+      [tableName]: current.length === allCols.length ? [] : allCols,
+    }));
+  };
+
+  const getSelectedColumnsForTable = (tableName: string): string[] => {
+    return selectedColumns[tableName] || getTableColumns(tableName);
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,7 +172,20 @@ export function BackupRestoreCard({
   const handleRestore = async () => {
     setShowConfirmDialog(false);
     if (parsedBackup && selectedTables.length > 0) {
-      await onRestore(selectedTables, parsedBackup);
+      // Build column selections only for tables with partial selection
+      const colSelections: Record<string, string[]> = {};
+      for (const table of selectedTables) {
+        const allCols = getTableColumns(table);
+        const selected = getSelectedColumnsForTable(table);
+        if (selected.length < allCols.length && selected.length > 0) {
+          colSelections[table] = selected;
+        }
+      }
+      await onRestore({
+        tables: selectedTables,
+        data: parsedBackup,
+        selectedColumns: Object.keys(colSelections).length > 0 ? colSelections : undefined,
+      });
     }
   };
 
@@ -142,6 +194,8 @@ export function BackupRestoreCard({
     setParseError(null);
     setFileName(null);
     setSelectedTables([]);
+    setSelectedColumns({});
+    setExpandedTable(null);
   };
 
   const totalSelectedRows = tableEntries
@@ -287,32 +341,100 @@ export function BackupRestoreCard({
                 </button>
 
                 {showDetails && (
-                  <div className="max-h-60 overflow-y-auto space-y-1 border rounded-lg p-2">
-                    {tableEntries.map((table) => (
-                      <div
-                        key={table.name}
-                        className={cn(
-                          "flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors cursor-pointer",
-                          selectedTables.includes(table.name)
-                            ? "bg-primary/5"
-                            : "hover:bg-muted/50"
-                        )}
-                        onClick={() => toggleTable(table.name)}
-                      >
-                        <Checkbox
-                          checked={selectedTables.includes(table.name)}
-                          onCheckedChange={() => toggleTable(table.name)}
-                          className="pointer-events-none"
-                        />
-                        <span className="text-sm flex-1 font-mono">
-                          {table.name}
-                        </span>
-                        <Badge variant="secondary" className="text-[10px] h-5">
-                          {table.rowCount}{" "}
-                          {language === "ar" ? "صف" : "rows"}
-                        </Badge>
-                      </div>
-                    ))}
+                  <div className="max-h-72 overflow-y-auto space-y-1 border rounded-lg p-2">
+                    {tableEntries.map((table) => {
+                      const isSelected = selectedTables.includes(table.name);
+                      const isExpanded = expandedTable === table.name;
+                      const columns = getTableColumns(table.name);
+                      const selectedCols = getSelectedColumnsForTable(table.name);
+                      const isPartial = isSelected && selectedCols.length < columns.length && selectedCols.length > 0;
+
+                      return (
+                        <div key={table.name}>
+                          <div
+                            className={cn(
+                              "flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors cursor-pointer",
+                              isSelected ? "bg-primary/5" : "hover:bg-muted/50"
+                            )}
+                          >
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleTable(table.name)}
+                            />
+                            <span
+                              className="text-sm flex-1 font-mono"
+                              onClick={() => toggleTable(table.name)}
+                            >
+                              {table.name}
+                            </span>
+                            {isPartial && (
+                              <Badge variant="outline" className="text-[10px] h-5 border-primary/40 text-primary">
+                                {selectedCols.length}/{columns.length}
+                              </Badge>
+                            )}
+                            <Badge variant="secondary" className="text-[10px] h-5">
+                              {table.rowCount} {language === "ar" ? "صف" : "rows"}
+                            </Badge>
+                            {isSelected && columns.length > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 shrink-0"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedTable(isExpanded ? null : table.name);
+                                }}
+                              >
+                                {isExpanded ? (
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                ) : (
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+
+                          {/* Column selection */}
+                          {isExpanded && isSelected && columns.length > 0 && (
+                            <div className="ml-6 mt-1 mb-2 p-2 rounded-md bg-muted/30 border space-y-1">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                                  {language === "ar" ? "الأعمدة" : "Columns"}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 text-[10px] px-1.5"
+                                  onClick={() => selectAllColumns(table.name)}
+                                >
+                                  {selectedCols.length === columns.length
+                                    ? language === "ar" ? "إلغاء الكل" : "Deselect All"
+                                    : language === "ar" ? "تحديد الكل" : "Select All"}
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-0.5">
+                                {columns.map((col) => (
+                                  <div
+                                    key={col}
+                                    className="flex items-center gap-1.5 px-1.5 py-1 rounded cursor-pointer hover:bg-muted/50"
+                                    onClick={() => toggleColumn(table.name, col)}
+                                  >
+                                    <Checkbox
+                                      checked={selectedCols.includes(col)}
+                                      onCheckedChange={() => toggleColumn(table.name, col)}
+                                      className="pointer-events-none h-3 w-3"
+                                    />
+                                    <span className="text-[11px] font-mono truncate">
+                                      {col}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 

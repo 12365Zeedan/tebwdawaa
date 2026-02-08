@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { RestoreOptions } from "@/components/admin/backup/BackupRestoreCard";
 
 const DB_TABLES = [
   "products",
@@ -223,10 +224,8 @@ export function useBackups() {
 
   // Restore from backup
   const restoreBackup = useCallback(
-    async (
-      selectedTables: string[],
-      backupData: { tables: Record<string, unknown[]> }
-    ) => {
+    async (options: RestoreOptions) => {
+      const { tables: selectedTables, data: backupData, selectedColumns } = options;
       setIsRestoring(true);
       setRestoreProgress(0);
 
@@ -249,33 +248,58 @@ export function useBackups() {
         await new Promise((r) => setTimeout(r, 150));
 
         try {
-          // Delete existing data
-          const { error: deleteError } = await supabase
-            .from(table as any)
-            .delete()
-            .neq("id", "00000000-0000-0000-0000-000000000000"); // delete all rows
+          const columnsForTable = selectedColumns?.[table];
+          const isPartialRestore = columnsForTable && columnsForTable.length > 0;
 
-          if (deleteError) {
-            console.error(`Failed to clear ${table}:`, deleteError);
-            failedTables.push(table);
-            setRestoreProgress(
-              Math.round(((i + 1) / selectedTables.length) * 100)
-            );
-            continue;
-          }
+          if (isPartialRestore) {
+            // Partial column restore: update only selected columns per row
+            for (let j = 0; j < rows.length; j++) {
+              const row = rows[j] as Record<string, unknown>;
+              if (!row.id) continue;
 
-          // Insert backup data in batches of 100
-          const batchSize = 100;
-          for (let j = 0; j < rows.length; j += batchSize) {
-            const batch = rows.slice(j, j + batchSize);
-            const { error: insertError } = await supabase
+              const updateData: Record<string, unknown> = {};
+              for (const col of columnsForTable) {
+                if (col !== "id" && col in row) {
+                  updateData[col] = row[col];
+                }
+              }
+
+              if (Object.keys(updateData).length > 0) {
+                await supabase
+                  .from(table as any)
+                  .update(updateData as any)
+                  .eq("id", row.id as string);
+              }
+            }
+          } else {
+            // Full table restore: delete existing, insert all
+            const { error: deleteError } = await supabase
               .from(table as any)
-              .insert(batch as any);
+              .delete()
+              .neq("id", "00000000-0000-0000-0000-000000000000");
 
-            if (insertError) {
-              console.error(`Failed to insert into ${table}:`, insertError);
+            if (deleteError) {
+              console.error(`Failed to clear ${table}:`, deleteError);
               failedTables.push(table);
-              break;
+              setRestoreProgress(
+                Math.round(((i + 1) / selectedTables.length) * 100)
+              );
+              continue;
+            }
+
+            // Insert backup data in batches of 100
+            const batchSize = 100;
+            for (let j = 0; j < rows.length; j += batchSize) {
+              const batch = rows.slice(j, j + batchSize);
+              const { error: insertError } = await supabase
+                .from(table as any)
+                .insert(batch as any);
+
+              if (insertError) {
+                console.error(`Failed to insert into ${table}:`, insertError);
+                failedTables.push(table);
+                break;
+              }
             }
           }
 
