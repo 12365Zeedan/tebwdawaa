@@ -5,6 +5,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { PrayerTimesDisplay } from "./PrayerTimesDisplay";
+import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 
 interface WeatherData {
   temperature: number;
@@ -83,6 +85,12 @@ export function WeatherDateBar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const { prayerTimes, nextPrayer, loading: prayerLoading } = usePrayerTimes(
+    city.latitude,
+    city.longitude,
+    settings.showPrayerTimes
+  );
 
   // Sync default city from admin settings
   useEffect(() => {
@@ -191,8 +199,23 @@ export function WeatherDateBar() {
           )}
         </div>
 
-        {/* Weather + City */}
-        <div className="flex items-center gap-2">
+        {/* Prayer Times + Weather + City */}
+        <div className="flex items-center gap-1.5">
+          {/* Prayer times */}
+          {settings.showPrayerTimes && (
+            <PrayerTimesDisplay
+              prayerTimes={prayerTimes}
+              nextPrayer={nextPrayer}
+              loading={prayerLoading}
+            />
+          )}
+
+          {/* Divider */}
+          {settings.showPrayerTimes && weather && !loading && (
+            <span className="text-link/30 hidden sm:inline">|</span>
+          )}
+
+          {/* Weather display */}
           {weather && !loading && (
             <div className="flex items-center gap-1.5 text-link/90">
               {getWeatherIcon(weather.weatherCode)}

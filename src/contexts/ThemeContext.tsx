@@ -115,6 +115,7 @@ export interface FooterContent {
 export interface WeatherBarSettings {
   visible: boolean;
   showHijriDate: boolean;
+  showPrayerTimes: boolean;
   defaultCityName: string;
   defaultCityLat: number;
   defaultCityLon: number;
@@ -257,6 +258,7 @@ export const DEFAULT_FOOTER_CONTENT: FooterContent = {
 export const DEFAULT_WEATHER_BAR: WeatherBarSettings = {
   visible: true,
   showHijriDate: true,
+  showPrayerTimes: true,
   defaultCityName: 'Riyadh',
   defaultCityLat: 24.7136,
   defaultCityLon: 46.6753,

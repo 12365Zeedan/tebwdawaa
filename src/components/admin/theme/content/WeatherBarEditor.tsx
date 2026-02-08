@@ -84,6 +84,12 @@ export function WeatherBarEditor() {
         <Switch checked={settings.showHijriDate} onCheckedChange={(v) => update({ showHijriDate: v })} />
       </div>
 
+      {/* Prayer times toggle */}
+      <div className="flex items-center justify-between">
+        <Label>{language === 'ar' ? 'عرض أوقات الصلاة' : 'Show Prayer Times'}</Label>
+        <Switch checked={settings.showPrayerTimes} onCheckedChange={(v) => update({ showPrayerTimes: v })} />
+      </div>
+
       {/* Default city */}
       <div className="space-y-2">
         <Label>{language === 'ar' ? 'المدينة الافتراضية' : 'Default City'}</Label>
