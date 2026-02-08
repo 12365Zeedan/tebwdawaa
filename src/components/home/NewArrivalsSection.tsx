@@ -4,13 +4,16 @@ import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/store/ProductCard';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useProducts } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function NewArrivalsSection() {
   const { t, direction, language } = useLanguage();
+  const { theme } = useTheme();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const { data: products, isLoading } = useProducts({ newArrivals: true, limit: 4 });
+  const heading = theme.content.sectionHeadings.newArrivals;
 
   if (!isLoading && (!products || products.length === 0)) {
     return null;
@@ -26,7 +29,7 @@ export function NewArrivalsSection() {
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              {language === 'ar' ? 'وصل حديثاً' : 'New Arrivals'}
+              {language === 'ar' ? heading?.titleAr : heading?.titleEn}
             </h2>
           </div>
           <Link to="/products?filter=new">

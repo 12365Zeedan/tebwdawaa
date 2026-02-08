@@ -4,13 +4,16 @@ import { ArrowRight, ArrowLeft, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/store/ProductCard';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useProducts } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function BestSellersSection() {
   const { t, direction, language } = useLanguage();
+  const { theme } = useTheme();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const { data: products, isLoading } = useProducts({ bestSellers: true, limit: 4 });
+  const heading = theme.content.sectionHeadings.bestSellers;
 
   if (!isLoading && (!products || products.length === 0)) {
     return null;
@@ -26,7 +29,7 @@ export function BestSellersSection() {
               <TrendingUp className="h-6 w-6 text-orange-500" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-              {language === 'ar' ? 'الأكثر مبيعاً' : 'Best Sellers'}
+              {language === 'ar' ? heading?.titleAr : heading?.titleEn}
             </h2>
           </div>
           <Link to="/products?filter=bestseller">

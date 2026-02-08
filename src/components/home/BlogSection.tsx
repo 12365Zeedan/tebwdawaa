@@ -4,13 +4,16 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function BlogSection() {
-  const { t, direction } = useLanguage();
+  const { t, direction, language } = useLanguage();
+  const { theme } = useTheme();
   const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
   const { data: posts, isLoading } = useBlogPosts({ limit: 3 });
+  const heading = theme.content.sectionHeadings.blog;
 
   return (
     <section className="py-16 md:py-24">
@@ -18,7 +21,7 @@ export function BlogSection() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-            {t('blog.title')}
+            {language === 'ar' ? heading?.titleAr : heading?.titleEn}
           </h2>
           <Link to="/blog">
             <Button variant="ghost" className="gap-2 text-primary hover:text-primary">

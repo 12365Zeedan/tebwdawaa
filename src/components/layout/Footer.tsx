@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Send } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { useBranding } from '@/hooks/useBranding';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
 export function Footer() {
   const { t, language } = useLanguage();
+  const { theme } = useTheme();
   const currentYear = new Date().getFullYear();
   const { data: settings } = useStoreSettings();
   const { data: branding } = useBranding();
@@ -18,6 +20,7 @@ export function Footer() {
   const subscribe = useNewsletterSubscribe();
   const [footerEmail, setFooterEmail] = useState('');
   const [footerSubscribed, setFooterSubscribed] = useState(false);
+  const footerContent = theme.content.footer;
 
   const storeName = language === 'ar' 
     ? (settings?.storeNameAr || 'صيدلية') 
@@ -45,18 +48,32 @@ export function Footer() {
               )}
             </div>
             <p className="text-sm text-link/80 leading-relaxed">
-              {t('footer.aboutText')}
+              {language === 'ar' ? footerContent.aboutTextAr : footerContent.aboutTextEn}
+            </p>
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-link/80 hover:text-link-hover transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
+              {footerContent.socialLinks.facebook && (
+                <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+                  <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {footerContent.socialLinks.twitter && (
+                <a href={footerContent.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+                  <Twitter className="h-5 w-5" />
+                </a>
+              )}
+              {footerContent.socialLinks.instagram && (
+                <a href={footerContent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {!footerContent.socialLinks.facebook && !footerContent.socialLinks.twitter && !footerContent.socialLinks.instagram && (
+                <>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Facebook className="h-5 w-5" /></a>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Twitter className="h-5 w-5" /></a>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Instagram className="h-5 w-5" /></a>
+                </>
+              )}
             </div>
           </div>
 
@@ -121,16 +138,14 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Newsletter in Footer */}
+        {footerContent.showNewsletter && (
         <div className="mt-10 pt-8 border-t border-link/20">
           <div className="max-w-md mx-auto text-center">
             <h3 className="text-lg font-semibold mb-2">
-              {language === 'ar' ? 'اشترك في النشرة البريدية' : 'Stay Updated'}
+              {language === 'ar' ? footerContent.newsletterTitleAr : footerContent.newsletterTitleEn}
             </h3>
             <p className="text-sm text-link/80 mb-4">
-              {language === 'ar'
-                ? 'احصل على أحدث المقالات والعروض'
-                : 'Get the latest articles and offers delivered to your inbox'}
+              {language === 'ar' ? footerContent.newsletterDescriptionAr : footerContent.newsletterDescriptionEn}
             </p>
             {footerSubscribed ? (
               <p className="text-sm text-link/80">
