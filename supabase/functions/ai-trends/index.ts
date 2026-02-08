@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, query, language } = await req.json();
+    const { type, query, language, saveToHistory } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -99,11 +100,37 @@ Include:
 - recommendations: array of 5 actionable recommendations`;
         break;
 
+      case "competitor_analysis":
+        systemPrompt += `\n\nYou are an expert at competitive intelligence in the Saudi cosmetics, beauty, pharmacy, and health market. You analyze competitor positioning, pricing strategies, product offerings, and market gaps.`;
+        userPrompt = `Perform a competitor analysis for the Saudi cosmetics, beauty, pharmacy, and health market. ${query ? `Focus on: ${query}` : "Analyze top competitors across all categories."}
+
+Return your analysis using this exact JSON structure via the provided tool.
+
+For each competitor include:
+- name: competitor/brand name
+- name_ar: Arabic name
+- type: "online_store", "pharmacy_chain", "marketplace", "brand_direct", or "social_seller"
+- categories: array of categories they focus on
+- price_positioning: "budget", "mid_range", "premium", or "luxury"
+- strengths: array of 2-3 key strengths
+- weaknesses: array of 2-3 key weaknesses
+- estimated_market_share: rough estimate as text
+- popular_products: array of 2-3 their best-selling products
+- pricing_strategy: brief description of their pricing approach
+- online_presence: object with platform presence scores (instagram, tiktok, website, marketplace)
+- threat_level: "high", "medium", or "low"
+
+Also include:
+- market_gaps: array of 3-5 market gaps/opportunities not being served well
+- pricing_insights: array of 3-4 pricing strategy recommendations
+- differentiation_ideas: array of 3-4 ideas to differentiate from competitors
+- summary: overall competitive landscape summary`;
+        break;
+
       default:
         throw new Error(`Unknown analysis type: ${type}`);
     }
 
-    // Define tools for structured output
     const tools = [
       {
         type: "function" as const,
@@ -158,7 +185,6 @@ Include:
 
     const data = await response.json();
 
-    // Extract tool call result
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     let result;
     if (toolCall?.function?.arguments) {
@@ -168,8 +194,31 @@ Include:
         result = toolCall.function.arguments;
       }
     } else {
-      // Fallback to message content
       result = data.choices?.[0]?.message?.content;
+    }
+
+    // Save to history if requested
+    if (saveToHistory) {
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+        const summary = typeof result === "object"
+          ? result.summary || result.market_size || result.primary_keyword || ""
+          : "";
+
+        await supabaseAdmin.from("trend_reports").insert({
+          analysis_type: type,
+          query: query || null,
+          language: language || "en",
+          result: result,
+          summary: summary,
+          triggered_by: saveToHistory === "scheduled" ? "scheduled" : "manual",
+        });
+      } catch (saveErr) {
+        console.error("Failed to save trend report:", saveErr);
+      }
     }
 
     return new Response(JSON.stringify({ result, type }), {
@@ -299,6 +348,47 @@ function getParametersForType(type: string) {
           recommendations: { type: "array", items: { type: "string" } },
         },
         required: ["market_size", "growth_rate", "top_categories", "consumer_insights", "recommendations"],
+      };
+
+    case "competitor_analysis":
+      return {
+        type: "object",
+        properties: {
+          competitors: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                name_ar: { type: "string" },
+                type: { type: "string", enum: ["online_store", "pharmacy_chain", "marketplace", "brand_direct", "social_seller"] },
+                categories: { type: "array", items: { type: "string" } },
+                price_positioning: { type: "string", enum: ["budget", "mid_range", "premium", "luxury"] },
+                strengths: { type: "array", items: { type: "string" } },
+                weaknesses: { type: "array", items: { type: "string" } },
+                estimated_market_share: { type: "string" },
+                popular_products: { type: "array", items: { type: "string" } },
+                pricing_strategy: { type: "string" },
+                online_presence: {
+                  type: "object",
+                  properties: {
+                    instagram: { type: "string" },
+                    tiktok: { type: "string" },
+                    website: { type: "string" },
+                    marketplace: { type: "string" },
+                  },
+                },
+                threat_level: { type: "string", enum: ["high", "medium", "low"] },
+              },
+              required: ["name", "name_ar", "type", "categories", "price_positioning", "strengths", "weaknesses", "pricing_strategy", "threat_level"],
+            },
+          },
+          market_gaps: { type: "array", items: { type: "string" } },
+          pricing_insights: { type: "array", items: { type: "string" } },
+          differentiation_ideas: { type: "array", items: { type: "string" } },
+          summary: { type: "string" },
+        },
+        required: ["competitors", "market_gaps", "pricing_insights", "differentiation_ideas", "summary"],
       };
 
     default:
