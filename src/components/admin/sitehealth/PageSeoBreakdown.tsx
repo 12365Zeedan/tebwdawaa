@@ -8,6 +8,7 @@ import {
   Globe,
   ArrowUpDown,
   FileText,
+  ChevronDown,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageSeoScores, PageSeoScore } from '@/hooks/usePageSeoScores';
+import { SeoRecommendationsPanel } from './SeoRecommendationsPanel';
 
 type SortField = 'page_path' | 'overall_score' | 'scanned_at';
 type SortDir = 'asc' | 'desc';
@@ -212,43 +215,65 @@ export function PageSeoBreakdown() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sorted.map((page) => (
-                  <TableRow
-                    key={page.page_path}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() =>
-                      setExpandedRow(expandedRow === page.page_path ? null : page.page_path)
-                    }
-                  >
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                        <span className="text-sm">{page.page_path}</span>
-                      </div>
-                      {page.page_title && (
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">
-                          {page.page_title}
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <ScoreBadge score={page.overall_score} />
-                    </TableCell>
-                    {seoChecks.map((check) => (
-                      <TableCell key={check.key} className="text-center px-1.5">
-                        <CheckIcon passed={(page as any)[check.key]} />
-                      </TableCell>
-                    ))}
-                    <TableCell className="text-center text-xs text-muted-foreground">
-                      {new Date(page.scanned_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {sorted.map((page) => {
+                  const isExpanded = expandedRow === page.page_path;
+                  return (
+                    <Collapsible
+                      key={page.page_path}
+                      open={isExpanded}
+                      onOpenChange={(open) =>
+                        setExpandedRow(open ? page.page_path : null)
+                      }
+                      asChild
+                    >
+                      <>
+                        <CollapsibleTrigger asChild>
+                          <TableRow className="cursor-pointer hover:bg-muted/50">
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                <ChevronDown
+                                  className={`h-3.5 w-3.5 text-muted-foreground flex-shrink-0 transition-transform duration-200 ${
+                                    isExpanded ? 'rotate-180' : ''
+                                  }`}
+                                />
+                                <Globe className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                                <span className="text-sm">{page.page_path}</span>
+                              </div>
+                              {page.page_title && (
+                                <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px] ms-7">
+                                  {page.page_title}
+                                </p>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <ScoreBadge score={page.overall_score} />
+                            </TableCell>
+                            {seoChecks.map((check) => (
+                              <TableCell key={check.key} className="text-center px-1.5">
+                                <CheckIcon passed={(page as any)[check.key]} />
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center text-xs text-muted-foreground">
+                              {new Date(page.scanned_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </TableCell>
+                          </TableRow>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent asChild>
+                          <tr>
+                            <td colSpan={seoChecks.length + 3} className="p-0">
+                              <SeoRecommendationsPanel page={page} />
+                            </td>
+                          </tr>
+                        </CollapsibleContent>
+                      </>
+                    </Collapsible>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
