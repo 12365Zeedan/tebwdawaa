@@ -18,6 +18,7 @@ import {
   Truck,
   CreditCard,
   Puzzle,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -46,6 +47,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/newsletter", icon: Mail, label: language === "ar" ? "النشرة البريدية" : "Newsletter" },
     { href: "/admin/theme", icon: Paintbrush, label: language === "ar" ? "المظهر" : "Theme" },
     { href: "/admin/plugins", icon: Puzzle, label: language === "ar" ? "الإضافات" : "Plugins" },
+    { href: "/admin/site-health", icon: Activity, label: language === "ar" ? "صحة الموقع" : "Site Health" },
     { href: "/admin/settings", icon: Settings, label: t("admin.settings") },
   ];
 
