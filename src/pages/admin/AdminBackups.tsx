@@ -22,6 +22,7 @@ import { useBackups, BackupScope } from "@/hooks/useBackups";
 import { BackupScheduleCard } from "@/components/admin/backup/BackupScheduleCard";
 import { BackupHistoryCard } from "@/components/admin/backup/BackupHistoryCard";
 import { BackupRestoreCard } from "@/components/admin/backup/BackupRestoreCard";
+import { BackupComparisonCard } from "@/components/admin/backup/BackupComparisonCard";
 import { StatCard } from "@/components/admin/StatCard";
 import { cn } from "@/lib/utils";
 
@@ -276,6 +277,9 @@ export default function AdminBackups() {
               onDelete={(id) => deleteBackup.mutate(id)}
               isLoading={isLoadingBackups}
             />
+
+            {/* Backup Comparison */}
+            <BackupComparisonCard />
           </div>
 
           {/* Right: Schedule */}
