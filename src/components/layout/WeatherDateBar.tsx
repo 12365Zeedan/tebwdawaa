@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Cloud, CloudRain, Sun, CloudSnow, CloudLightning, CloudDrizzle, Snowflake, Wind, MapPin, Calendar, Search } from "lucide-react";
+import { Cloud, CloudRain, Sun, CloudLightning, CloudDrizzle, Snowflake, MapPin, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -21,14 +20,6 @@ interface GeoCity {
   country: string;
   admin1?: string;
 }
-
-const DEFAULT_CITY: GeoCity = {
-  id: 0,
-  name: "Riyadh",
-  latitude: 24.7136,
-  longitude: 46.6753,
-  country: "Saudi Arabia",
-};
 
 function getWeatherIcon(code: number) {
   if (code === 0 || code === 1) return <Sun className="h-4 w-4 text-yellow-400" />;
@@ -61,15 +52,51 @@ function getWeatherLabel(code: number, lang: string): string {
   return lang === "ar" ? pair[1] : pair[0];
 }
 
+function toHijri(date: Date, lang: string): string {
+  try {
+    return date.toLocaleDateString(lang === "ar" ? "ar-SA" : "en-SA", {
+      calendar: "islamic-umalqura",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export function WeatherDateBar() {
-  const { language, direction } = useLanguage();
-  const [city, setCity] = useState<GeoCity>(DEFAULT_CITY);
+  const { language } = useLanguage();
+  const { theme } = useTheme();
+  const settings = theme.content.weatherBar;
+
+  const [city, setCity] = useState<GeoCity>({
+    id: 0,
+    name: settings.defaultCityName,
+    latitude: settings.defaultCityLat,
+    longitude: settings.defaultCityLon,
+    country: "",
+  });
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<GeoCity[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // Sync default city from admin settings
+  useEffect(() => {
+    setCity(prev => {
+      if (prev.name === settings.defaultCityName) return prev;
+      return {
+        id: 0,
+        name: settings.defaultCityName,
+        latitude: settings.defaultCityLat,
+        longitude: settings.defaultCityLon,
+        country: "",
+      };
+    });
+  }, [settings.defaultCityName, settings.defaultCityLat, settings.defaultCityLon]);
 
   const fetchWeather = useCallback(async (lat: number, lon: number) => {
     setLoading(true);
@@ -135,17 +162,17 @@ export function WeatherDateBar() {
     return () => clearTimeout(timer);
   }, [searchQuery, searchCities]);
 
-  // Date formatting
+  if (!settings.visible) return null;
+
   const now = new Date();
-  const dayName = now.toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", {
-    weekday: "long",
-  });
+  const dayName = now.toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", { weekday: "long" });
   const dateStr = now.toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
     calendar: "gregory",
   });
+  const hijriStr = settings.showHijriDate ? toHijri(now, language) : "";
 
   return (
     <div className="bg-header/95 border-b border-border/20 text-link">
@@ -154,13 +181,18 @@ export function WeatherDateBar() {
         <div className="flex items-center gap-2 text-link/90">
           <Calendar className="h-3.5 w-3.5 shrink-0" />
           <span className="font-medium">{dayName}</span>
-          <span className="hidden sm:inline text-link/60">|</span>
+          <span className="text-link/60">|</span>
           <span className="hidden sm:inline">{dateStr}</span>
+          {hijriStr && (
+            <>
+              <span className="hidden md:inline text-link/60">•</span>
+              <span className="hidden md:inline text-link/70">{hijriStr}</span>
+            </>
+          )}
         </div>
 
         {/* Weather + City */}
         <div className="flex items-center gap-2">
-          {/* Weather display */}
           {weather && !loading && (
             <div className="flex items-center gap-1.5 text-link/90">
               {getWeatherIcon(weather.weatherCode)}
@@ -170,9 +202,7 @@ export function WeatherDateBar() {
               </span>
             </div>
           )}
-          {loading && (
-            <div className="h-3 w-16 rounded bg-link/20 animate-pulse" />
-          )}
+          {loading && <div className="h-3 w-16 rounded bg-link/20 animate-pulse" />}
 
           {/* City selector */}
           <Popover open={open} onOpenChange={setOpen}>

@@ -1,19 +1,32 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Megaphone, Type, Shield, Heading, Info, LayoutTemplate } from 'lucide-react';
+import { Megaphone, Type, Shield, Heading, Info, LayoutTemplate, CloudSun } from 'lucide-react';
 import { NewsBannerEditor } from './content/NewsBannerEditor';
 import { HeroContentEditor } from './content/HeroContentEditor';
 import { HeroBadgesEditor } from './content/HeroBadgesEditor';
 import { SectionHeadingsEditor } from './content/SectionHeadingsEditor';
 import { AboutPageEditor } from './content/AboutPageEditor';
 import { FooterContentEditor } from './content/FooterContentEditor';
+import { WeatherBarEditor } from './content/WeatherBarEditor';
 
 export function ContentSettings() {
   const { language } = useLanguage();
 
   return (
-    <Accordion type="multiple" defaultValue={['news-banner', 'hero']} className="space-y-2">
+    <Accordion type="multiple" defaultValue={['weather-bar', 'news-banner', 'hero']} className="space-y-2">
+      <AccordionItem value="weather-bar" className="border rounded-lg px-1">
+        <AccordionTrigger className="text-sm font-medium gap-2 px-3 hover:no-underline">
+          <div className="flex items-center gap-2">
+            <CloudSun className="h-4 w-4" />
+            {language === 'ar' ? 'شريط الطقس والتاريخ' : 'Weather & Date Bar'}
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="px-1 pb-2">
+          <WeatherBarEditor />
+        </AccordionContent>
+      </AccordionItem>
+
       <AccordionItem value="news-banner" className="border rounded-lg px-1">
         <AccordionTrigger className="text-sm font-medium gap-2 px-3 hover:no-underline">
           <div className="flex items-center gap-2">
