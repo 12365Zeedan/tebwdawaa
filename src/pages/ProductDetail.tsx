@@ -14,6 +14,7 @@ import { ProductReviews } from '@/components/store/ProductReviews';
 import { YouMayAlsoLike } from '@/components/store/YouMayAlsoLike';
 import { WishlistButton } from '@/components/store/WishlistButton';
 import { CompareButton } from '@/components/store/CompareButton';
+import { ProductJsonLd } from '@/components/seo/ProductJsonLd';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { cn } from '@/lib/utils';
 import { getDisplayPrice } from '@/lib/vat';
@@ -131,9 +132,10 @@ import { getDisplayPrice } from '@/lib/vat';
      ? Math.round((1 - product.price / product.original_price) * 100)
      : 0;
  
-   return (
-     <MainLayout>
-       <div className="container mx-auto px-4 py-8">
+    return (
+      <MainLayout>
+        <ProductJsonLd product={product} />
+        <div className="container mx-auto px-4 py-8">
          {/* Back Button */}
          <Link 
            to="/products" 
