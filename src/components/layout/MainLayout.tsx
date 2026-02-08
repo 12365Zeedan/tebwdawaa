@@ -8,6 +8,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ComparisonBar } from '@/components/store/ComparisonBar';
 import { CanonicalUrl } from '@/components/seo/CanonicalUrl';
+import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd';
+import { BreadcrumbJsonLd } from '@/components/seo/BreadcrumbJsonLd';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,6 +21,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className={cn('min-h-screen flex flex-col', direction === 'rtl' && 'font-arabic')}>
       <CanonicalUrl />
+      <OrganizationJsonLd />
+      <BreadcrumbJsonLd />
       <WeatherDateBar />
       <NewsBanner />
       <MaintenanceBanner />
