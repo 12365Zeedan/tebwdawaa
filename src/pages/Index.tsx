@@ -7,7 +7,9 @@ import { BestSellersSection } from '@/components/home/BestSellersSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { BlogSection } from '@/components/home/BlogSection';
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection';
+import { SocialMetaTags } from '@/components/seo/SocialMetaTags';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
 const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
   hero: HeroSection,
@@ -21,9 +23,17 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
 
 const Index = () => {
   const { theme } = useTheme();
+  const { data: company } = useCompanyInfo();
+
+  const storeName = company?.store_name || 'My Store';
 
   return (
     <MainLayout>
+      <SocialMetaTags
+        title={storeName}
+        description={`Shop the best products at ${storeName}. Quality items, fast delivery, and excellent customer service.`}
+        type="website"
+      />
       {theme.layout.sections
         .filter((s) => s.visible && SECTION_COMPONENTS[s.id])
         .map((section) => {
