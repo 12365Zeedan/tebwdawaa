@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { BlogTag } from '@/hooks/useAdminBlog';
 import { useRecordView } from '@/hooks/useViewTracking';
 import { BlogComments } from '@/components/blog/BlogComments';
+import { SocialMetaTags } from '@/components/seo/SocialMetaTags';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -119,6 +120,14 @@ const BlogPostPage = () => {
 
   return (
     <MainLayout>
+      <SocialMetaTags
+        title={title}
+        description={(excerpt || '').slice(0, 160)}
+        image={post.image_url || undefined}
+        type="article"
+        publishedTime={post.published_at || post.created_at}
+        author={author || undefined}
+      />
       <article className="container py-8 md:py-12">
         {/* Back Link */}
         <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
