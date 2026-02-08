@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_schedules: {
+        Row: {
+          backup_scope: string
+          created_at: string
+          frequency: string
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          next_run_at: string | null
+          notify_on_complete: boolean
+          notify_on_failure: boolean
+          retention_days: number
+          updated_at: string
+        }
+        Insert: {
+          backup_scope?: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          notify_on_complete?: boolean
+          notify_on_failure?: boolean
+          retention_days?: number
+          updated_at?: string
+        }
+        Update: {
+          backup_scope?: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string | null
+          notify_on_complete?: boolean
+          notify_on_failure?: boolean
+          retention_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           created_at: string
@@ -1052,6 +1094,51 @@ export type Database = {
           shipping_rate?: number
           sort_order?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      site_backups: {
+        Row: {
+          backup_scope: string
+          backup_type: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          file_size_bytes: number | null
+          id: string
+          notes: string | null
+          started_at: string | null
+          status: string
+          tables_included: string[] | null
+          triggered_by: string | null
+        }
+        Insert: {
+          backup_scope?: string
+          backup_type?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          tables_included?: string[] | null
+          triggered_by?: string | null
+        }
+        Update: {
+          backup_scope?: string
+          backup_type?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_size_bytes?: number | null
+          id?: string
+          notes?: string | null
+          started_at?: string | null
+          status?: string
+          tables_included?: string[] | null
+          triggered_by?: string | null
         }
         Relationships: []
       }
