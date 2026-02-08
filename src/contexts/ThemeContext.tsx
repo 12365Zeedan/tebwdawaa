@@ -58,12 +58,70 @@ export interface HeroBadge {
   textAr: string;
 }
 
+export interface HeroContent {
+  titleEn: string;
+  titleAr: string;
+  subtitleEn: string;
+  subtitleAr: string;
+  ctaEn: string;
+  ctaAr: string;
+  secondaryCtaEn: string;
+  secondaryCtaAr: string;
+  imageUrl: string;
+  showFloatingCards: boolean;
+}
+
+export interface SectionHeading {
+  titleEn: string;
+  titleAr: string;
+}
+
+export interface AboutFeature {
+  id: string;
+  icon: string;
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+}
+
+export interface AboutPageContent {
+  titleEn: string;
+  titleAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  missionTitleEn: string;
+  missionTitleAr: string;
+  missionDescriptionEn: string;
+  missionDescriptionAr: string;
+  features: AboutFeature[];
+}
+
+export interface FooterContent {
+  aboutTextEn: string;
+  aboutTextAr: string;
+  showNewsletter: boolean;
+  newsletterTitleEn: string;
+  newsletterTitleAr: string;
+  newsletterDescriptionEn: string;
+  newsletterDescriptionAr: string;
+  socialLinks: {
+    facebook: string;
+    twitter: string;
+    instagram: string;
+  };
+}
+
 export interface ThemeContent {
   newsBanner: {
     visible: boolean;
     items: NewsBannerItem[];
   };
   heroBadges: HeroBadge[];
+  hero: HeroContent;
+  sectionHeadings: Record<string, SectionHeading>;
+  aboutPage: AboutPageContent;
+  footer: FooterContent;
 }
 
 export interface ThemeSettings {
@@ -133,12 +191,70 @@ export const DEFAULT_HERO_BADGES: HeroBadge[] = [
   { id: '3', textEn: '24/7 Support', textAr: 'دعم 24/7' },
 ];
 
+export const DEFAULT_HERO_CONTENT: HeroContent = {
+  titleEn: 'Your Health, Our Priority',
+  titleAr: 'صحتك، أولويتنا',
+  subtitleEn: 'Discover our wide range of pharmaceutical products and health essentials, delivered right to your doorstep.',
+  subtitleAr: 'اكتشف مجموعتنا الواسعة من المنتجات الصيدلانية ومستلزمات الصحة، يتم توصيلها مباشرة إلى باب منزلك.',
+  ctaEn: 'Shop Now',
+  ctaAr: 'تسوق الآن',
+  secondaryCtaEn: 'Learn More',
+  secondaryCtaAr: 'اعرف المزيد',
+  imageUrl: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=600&h=600&fit=crop',
+  showFloatingCards: true,
+};
+
+export const DEFAULT_SECTION_HEADINGS: Record<string, SectionHeading> = {
+  featured: { titleEn: 'Featured Products', titleAr: 'المنتجات المميزة' },
+  newArrivals: { titleEn: 'New Arrivals', titleAr: 'وصل حديثاً' },
+  bestSellers: { titleEn: 'Best Sellers', titleAr: 'الأكثر مبيعاً' },
+  recentlyViewed: { titleEn: 'Recently Viewed', titleAr: 'شوهد مؤخراً' },
+  categories: { titleEn: 'Shop by Category', titleAr: 'تسوق حسب الفئة' },
+  blog: { titleEn: 'Health Blog', titleAr: 'المدونة الصحية' },
+};
+
+export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
+  titleEn: 'About Us',
+  titleAr: 'من نحن',
+  descriptionEn: 'A leading pharmacy providing exceptional health services and high-quality pharmaceutical products for our community.',
+  descriptionAr: 'صيدلية رائدة في تقديم خدمات صحية متميزة ومنتجات صيدلانية عالية الجودة لمجتمعنا.',
+  missionTitleEn: 'Our Mission',
+  missionTitleAr: 'مهمتنا',
+  missionDescriptionEn: 'We strive to provide comprehensive healthcare and reliable pharmaceutical products for all members of the community, committed to the highest standards of quality and service.',
+  missionDescriptionAr: 'نسعى لتوفير رعاية صحية شاملة ومنتجات صيدلانية موثوقة لكل أفراد المجتمع، مع الالتزام بأعلى معايير الجودة والخدمة.',
+  features: [
+    { id: '1', icon: 'heart', titleEn: 'Trusted Healthcare', titleAr: 'رعاية صحية موثوقة', descriptionEn: 'We provide high-quality certified pharmaceutical products', descriptionAr: 'نقدم منتجات صيدلانية عالية الجودة ومعتمدة' },
+    { id: '2', icon: 'shield', titleEn: 'Genuine Products', titleAr: 'منتجات أصلية', descriptionEn: 'All our products are 100% genuine and certified', descriptionAr: 'جميع منتجاتنا أصلية 100% ومعتمدة' },
+    { id: '3', icon: 'truck', titleEn: 'Fast Delivery', titleAr: 'توصيل سريع', descriptionEn: 'Fast delivery to your doorstep across the Kingdom', descriptionAr: 'توصيل سريع إلى باب منزلك في جميع أنحاء المملكة' },
+    { id: '4', icon: 'clock', titleEn: '24/7 Support', titleAr: 'دعم 24/7', descriptionEn: 'Support team available around the clock to help you', descriptionAr: 'فريق دعم متاح على مدار الساعة لمساعدتك' },
+  ],
+};
+
+export const DEFAULT_FOOTER_CONTENT: FooterContent = {
+  aboutTextEn: 'Your trusted pharmacy partner providing quality healthcare products and services to our community.',
+  aboutTextAr: 'شريكك الموثوق في الصيدلة، نقدم منتجات وخدمات رعاية صحية عالية الجودة لمجتمعنا.',
+  showNewsletter: true,
+  newsletterTitleEn: 'Stay Updated',
+  newsletterTitleAr: 'اشترك في النشرة البريدية',
+  newsletterDescriptionEn: 'Get the latest articles and offers delivered to your inbox',
+  newsletterDescriptionAr: 'احصل على أحدث المقالات والعروض',
+  socialLinks: {
+    facebook: '',
+    twitter: '',
+    instagram: '',
+  },
+};
+
 export const DEFAULT_CONTENT: ThemeContent = {
   newsBanner: {
     visible: true,
     items: DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
   },
   heroBadges: DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+  hero: { ...DEFAULT_HERO_CONTENT },
+  sectionHeadings: JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
+  aboutPage: JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+  footer: JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)),
 };
 
 export const DEFAULT_THEME: ThemeSettings = {
@@ -243,6 +359,21 @@ function loadTheme(): ThemeSettings {
               heroBadges: parsed.content.heroBadges?.length
                 ? parsed.content.heroBadges
                 : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+              hero: { ...DEFAULT_HERO_CONTENT, ...parsed.content.hero },
+              sectionHeadings: {
+                ...JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
+                ...parsed.content.sectionHeadings,
+              },
+              aboutPage: parsed.content.aboutPage
+                ? {
+                    ...JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+                    ...parsed.content.aboutPage,
+                    features: parsed.content.aboutPage.features?.length
+                      ? parsed.content.aboutPage.features
+                      : DEFAULT_ABOUT_PAGE.features.map(f => ({ ...f })),
+                  }
+                : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+              footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
             }
           : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
       };

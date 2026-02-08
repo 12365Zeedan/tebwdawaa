@@ -5,13 +5,16 @@ import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/store/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { useProducts } from '@/hooks/useProducts';
 
 export function RecentlyViewedSection() {
   const { language } = useLanguage();
+  const { theme } = useTheme();
   const { recentIds } = useRecentlyViewed();
   const { data: allProducts, isLoading } = useProducts();
+  const heading = theme.content.sectionHeadings.recentlyViewed;
 
   // Get recently viewed products in order
   const recentProducts = recentIds
@@ -31,7 +34,7 @@ export function RecentlyViewedSection() {
           <div className="flex items-center gap-3">
             <Clock className="h-7 w-7 text-primary" />
             <h2 className="text-2xl md:text-3xl font-bold">
-              {language === 'ar' ? 'شوهد مؤخراً' : 'Recently Viewed'}
+              {language === 'ar' ? heading?.titleAr : heading?.titleEn}
             </h2>
           </div>
           <Link to="/products">

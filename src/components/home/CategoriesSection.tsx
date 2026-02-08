@@ -1,12 +1,15 @@
 import React from 'react';
 import { CategoryCard } from '@/components/store/CategoryCard';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useCategories } from '@/hooks/useCategories';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function CategoriesSection() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { theme } = useTheme();
   const { data: categories, isLoading } = useCategories();
+  const heading = theme.content.sectionHeadings.categories;
 
   return (
     <section className="py-16 md:py-24 bg-muted/30">
@@ -14,7 +17,7 @@ export function CategoriesSection() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            {t('categories.title')}
+            {language === 'ar' ? heading?.titleAr : heading?.titleEn}
           </h2>
         </div>
 
