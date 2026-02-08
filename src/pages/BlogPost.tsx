@@ -14,6 +14,7 @@ import type { BlogTag } from '@/hooks/useAdminBlog';
 import { useRecordView } from '@/hooks/useViewTracking';
 import { BlogComments } from '@/components/blog/BlogComments';
 import { SocialMetaTags } from '@/components/seo/SocialMetaTags';
+import { SocialShareButtons } from '@/components/store/SocialShareButtons';
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -176,6 +177,13 @@ const BlogPostPage = () => {
               </div>
             )}
           </div>
+
+          {/* Social Share */}
+          <SocialShareButtons
+            title={title}
+            description={(excerpt || '').slice(0, 100)}
+            className="mb-8"
+          />
 
           {/* Content */}
           <div

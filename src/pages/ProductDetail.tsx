@@ -16,6 +16,7 @@ import { WishlistButton } from '@/components/store/WishlistButton';
 import { CompareButton } from '@/components/store/CompareButton';
 import { ProductJsonLd } from '@/components/seo/ProductJsonLd';
 import { SocialMetaTags } from '@/components/seo/SocialMetaTags';
+import { SocialShareButtons } from '@/components/store/SocialShareButtons';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { cn } from '@/lib/utils';
 import { getDisplayPrice } from '@/lib/vat';
@@ -380,6 +381,11 @@ import { getDisplayPrice } from '@/lib/vat';
                   <WishlistButton productId={product.id} variant="default" className="flex-1" />
                   <CompareButton productId={product.id} variant="default" />
                 </div>
+
+                <SocialShareButtons
+                  title={name}
+                  description={(description || '').slice(0, 100)}
+                />
               </div>
             </div>
             </div>
