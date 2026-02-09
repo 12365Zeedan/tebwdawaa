@@ -149,13 +149,22 @@ export function useChatWidget() {
         if (error || !newConv) throw error;
         convId = newConv.id;
 
-        // Send welcome and wait messages as system messages
+        // Send welcome message
         const welcomeMsg = settings?.welcome_message || 'Welcome! How can we help you?';
-        const waitMsg = settings?.wait_message || 'Please wait, the pharmacist will respond soon.';
-        await supabase.from('chat_messages').insert([
+        const messagesToInsert: { conversation_id: string; sender_type: string; message: string }[] = [
           { conversation_id: convId, sender_type: 'pharmacist', message: welcomeMsg },
-          { conversation_id: convId, sender_type: 'pharmacist', message: waitMsg },
-        ]);
+        ];
+
+        // Check if within duty hours
+        if (settings && !isWithinDutyHours(settings)) {
+          const offlineMsg = settings.offline_message || 'We are currently outside our working hours. We will get back to you as soon as possible.';
+          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: offlineMsg });
+        } else {
+          const waitMsg = settings?.wait_message || 'Please wait, the pharmacist will respond soon.';
+          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: waitMsg });
+        }
+
+        await supabase.from('chat_messages').insert(messagesToInsert);
       }
 
       setConversationId(convId);
