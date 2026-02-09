@@ -22,6 +22,20 @@ export interface PageCustomization {
   border_bottom: boolean;
   backdrop_blur: boolean;
   shadow_depth: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  // Content fields
+  page_title: string | null;
+  page_title_ar: string | null;
+  page_subtitle: string | null;
+  page_subtitle_ar: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  hidden_sections: string[];
+  banner_text: string | null;
+  banner_text_ar: string | null;
+  banner_visible: boolean;
+  banner_color: string | null;
+  widget_ids: string[];
   created_at: string;
   updated_at: string;
 }
