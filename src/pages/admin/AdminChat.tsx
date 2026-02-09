@@ -205,7 +205,15 @@ export default function AdminChat() {
           <TabsList>
             <TabsTrigger value="conversations"><MessageCircle className="w-4 h-4 mr-1" /> Conversations</TabsTrigger>
             <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
-          </TabsList>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="ml-auto gap-1.5"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              {soundEnabled ? 'Sound On' : 'Sound Off'}
+            </Button>
 
           <TabsContent value="conversations" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-240px)]">
