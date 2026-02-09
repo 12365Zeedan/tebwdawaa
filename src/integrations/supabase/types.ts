@@ -921,6 +921,75 @@ export type Database = {
         }
         Relationships: []
       }
+      page_customizations: {
+        Row: {
+          backdrop_blur: boolean | null
+          background_color: string | null
+          border_bottom: boolean | null
+          border_color: string | null
+          created_at: string
+          font_size: string | null
+          font_weight: string | null
+          full_width: boolean | null
+          height: string | null
+          id: string
+          layout_style: string | null
+          link_color: string | null
+          link_hover_color: string | null
+          page_key: string
+          page_label: string
+          page_label_ar: string
+          shadow_depth: string | null
+          sticky_header: boolean | null
+          text_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          backdrop_blur?: boolean | null
+          background_color?: string | null
+          border_bottom?: boolean | null
+          border_color?: string | null
+          created_at?: string
+          font_size?: string | null
+          font_weight?: string | null
+          full_width?: boolean | null
+          height?: string | null
+          id?: string
+          layout_style?: string | null
+          link_color?: string | null
+          link_hover_color?: string | null
+          page_key: string
+          page_label: string
+          page_label_ar: string
+          shadow_depth?: string | null
+          sticky_header?: boolean | null
+          text_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          backdrop_blur?: boolean | null
+          background_color?: string | null
+          border_bottom?: boolean | null
+          border_color?: string | null
+          created_at?: string
+          font_size?: string | null
+          font_weight?: string | null
+          full_width?: boolean | null
+          height?: string | null
+          id?: string
+          layout_style?: string | null
+          link_color?: string | null
+          link_hover_color?: string | null
+          page_key?: string
+          page_label?: string
+          page_label_ar?: string
+          shadow_depth?: string | null
+          sticky_header?: boolean | null
+          text_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_seo_scores: {
         Row: {
           created_at: string

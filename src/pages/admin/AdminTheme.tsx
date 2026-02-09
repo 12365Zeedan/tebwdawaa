@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, FileStack } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
@@ -14,6 +14,7 @@ import { HeaderSettings } from '@/components/admin/theme/HeaderSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
 import { ThemeUpdatesContent } from '@/components/admin/theme/ThemeUpdatesContent';
 import { ThemeDocumentationContent } from '@/components/admin/theme/ThemeDocumentationContent';
+import { PageCustomizationSettings } from '@/components/admin/theme/PageCustomizationSettings';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminTheme() {
@@ -55,10 +56,14 @@ export default function AdminTheme() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="customize" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-4">
+          <TabsList className="w-full grid grid-cols-4 mb-4">
             <TabsTrigger value="customize" className="gap-1.5">
               <Palette className="h-3.5 w-3.5 hidden sm:block" />
               {language === 'ar' ? 'التخصيص' : 'Customize'}
+            </TabsTrigger>
+            <TabsTrigger value="pages" className="gap-1.5">
+              <FileStack className="h-3.5 w-3.5 hidden sm:block" />
+              {language === 'ar' ? 'الصفحات' : 'Pages'}
             </TabsTrigger>
             <TabsTrigger value="updates" className="gap-1.5">
               <RefreshCw className="h-3.5 w-3.5 hidden sm:block" />
@@ -119,6 +124,11 @@ export default function AdminTheme() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Pages Tab */}
+          <TabsContent value="pages">
+            <PageCustomizationSettings />
           </TabsContent>
 
           {/* Updates Tab */}
