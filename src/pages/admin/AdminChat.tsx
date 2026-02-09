@@ -9,10 +9,24 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, MessageCircle, Phone, Clock, Settings, Search } from 'lucide-react';
+import { Send, MessageCircle, Phone, Clock, Settings, Search, Volume2, VolumeX } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+
+const playNotificationSound = () => {
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 880;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+};
 
 interface Conversation {
   id: string;
@@ -49,10 +63,11 @@ export default function AdminChat() {
   const [reply, setReply] = useState('');
   const [search, setSearch] = useState('');
   const [settings, setSettings] = useState<ChatSettings | null>(null);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [settingsLoading, setSettingsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Fetch unread counts
   const fetchUnreadCounts = async () => {
@@ -87,12 +102,15 @@ export default function AdminChat() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => {
         fetchConversations();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload: any) => {
         fetchUnreadCounts();
+        if (payload.new?.sender_type === 'customer' && soundEnabled) {
+          playNotificationSound();
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [soundEnabled]);
 
   // Fetch messages for selected conversation
   useEffect(() => {
@@ -188,6 +206,15 @@ export default function AdminChat() {
           <TabsList>
             <TabsTrigger value="conversations"><MessageCircle className="w-4 h-4 mr-1" /> Conversations</TabsTrigger>
             <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="ml-auto gap-1.5"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              {soundEnabled ? 'Sound On' : 'Sound Off'}
+            </Button>
           </TabsList>
 
           <TabsContent value="conversations" className="mt-4">
