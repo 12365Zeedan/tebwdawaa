@@ -508,18 +508,10 @@ export function PageCustomizationSettings() {
                         <Puzzle className="h-4 w-4" />
                         {language === 'ar' ? 'الويدجت المخصصة' : 'Custom Widgets'}
                       </CardTitle>
-                      <CardDescription className="text-xs">{language === 'ar' ? 'أضف معرفات الويدجت المرتبطة بهذه الصفحة' : 'Add widget IDs linked to this page'}</CardDescription>
+                      <CardDescription className="text-xs">{language === 'ar' ? 'أضف وأدر الويدجت المخصصة لهذه الصفحة' : 'Add and manage custom widgets for this page'}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Textarea
-                        value={(draft.widget_ids ?? []).join(', ')}
-                        onChange={(e) => {
-                          const ids = e.target.value.split(',').map((s) => s.trim()).filter(Boolean);
-                          updateDraft('widget_ids', ids);
-                        }}
-                        placeholder={language === 'ar' ? 'أدخل معرفات الويدجت مفصولة بفواصل...' : 'Enter widget IDs separated by commas...'}
-                        rows={2}
-                      />
+                      <WidgetManager pageFilter={selectedPageKey} />
                     </CardContent>
                   </Card>
                 </div>
