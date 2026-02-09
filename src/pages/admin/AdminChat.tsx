@@ -214,6 +214,7 @@ export default function AdminChat() {
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               {soundEnabled ? 'Sound On' : 'Sound Off'}
             </Button>
+          </TabsList>
 
           <TabsContent value="conversations" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-240px)]">
