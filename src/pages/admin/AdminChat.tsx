@@ -112,6 +112,7 @@ export default function AdminChat() {
         .eq('conversation_id', selectedConv)
         .eq('sender_type', 'customer')
         .eq('is_read', false);
+      fetchUnreadCounts();
     };
     fetchMessages();
 
