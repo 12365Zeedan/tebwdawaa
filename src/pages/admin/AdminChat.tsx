@@ -460,6 +460,45 @@ export default function AdminChat() {
                       dir="ltr"
                     />
                   </div>
+
+                  <div className="border-t pt-4 mt-4">
+                    <h3 className="font-semibold mb-3">Duty Hours (Saudi Arabia Time - AST)</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Start Time</Label>
+                        <Input
+                          type="time"
+                          value={settings.duty_start_time}
+                          onChange={(e) => setSettings({ ...settings, duty_start_time: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>End Time</Label>
+                        <Input
+                          type="time"
+                          value={settings.duty_end_time}
+                          onChange={(e) => setSettings({ ...settings, duty_end_time: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Offline Apology Message (English)</Label>
+                    <Textarea
+                      value={settings.offline_message}
+                      onChange={(e) => setSettings({ ...settings, offline_message: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Offline Apology Message (Arabic)</Label>
+                    <Textarea
+                      value={settings.offline_message_ar}
+                      onChange={(e) => setSettings({ ...settings, offline_message_ar: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+
                   <Button onClick={saveSettings} disabled={settingsLoading}>
                     {settingsLoading ? 'Saving...' : 'Save Settings'}
                   </Button>
