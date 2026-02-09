@@ -119,6 +119,19 @@ export function usePageCustomizations() {
           border_bottom: false,
           backdrop_blur: false,
           shadow_depth: 'none',
+          page_title: null,
+          page_title_ar: null,
+          page_subtitle: null,
+          page_subtitle_ar: null,
+          meta_title: null,
+          meta_description: null,
+          og_image_url: null,
+          hidden_sections: [],
+          banner_text: null,
+          banner_text_ar: null,
+          banner_visible: false,
+          banner_color: null,
+          widget_ids: [],
         })
         .eq('id', id);
       if (error) throw error;
