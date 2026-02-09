@@ -28,6 +28,8 @@ serve(async (req) => {
         systemPrompt += `\n\nYou detect and analyze trending keywords in the cosmetics, beauty, pharmacy, and health sectors for the Saudi Arabian market. Consider both Arabic and English keywords Saudi consumers use.`;
         userPrompt = `Analyze the current trending keywords for the Saudi cosmetics, beauty, pharmacy, and health market. ${query ? `Focus area: ${query}` : ""}
 
+Return exactly 20 keywords, sorted by relevance_score from highest to lowest (descending order).
+
 Return your analysis using this exact JSON structure via the provided tool.
 
 For each keyword include:
@@ -46,6 +48,8 @@ For each keyword include:
       case "trending_products":
         systemPrompt += `\n\nYou identify trending products across platforms (Instagram, TikTok, Twitter/X, Amazon.sa, Noon, pharmacies) in the Saudi market for cosmetics, beauty, pharmacy, and health sectors.`;
         userPrompt = `Identify the current trending products in the Saudi cosmetics, beauty, pharmacy, and health market. ${query ? `Focus area: ${query}` : ""}
+
+Return exactly 20 products, sorted by trend_score from highest to lowest (descending order).
 
 Return your analysis using this exact JSON structure via the provided tool.
 
