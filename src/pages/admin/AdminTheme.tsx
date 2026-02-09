@@ -126,6 +126,11 @@ export default function AdminTheme() {
             </div>
           </TabsContent>
 
+          {/* Pages Tab */}
+          <TabsContent value="pages">
+            <PageCustomizationSettings />
+          </TabsContent>
+
           {/* Updates Tab */}
           <TabsContent value="updates">
             <ThemeUpdatesContent />
