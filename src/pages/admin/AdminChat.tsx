@@ -173,6 +173,19 @@ export default function AdminChat() {
     await supabase.from('chat_conversations').update({ last_message_at: new Date().toISOString() }).eq('id', selectedConv);
   };
 
+  const openWhatsApp = (phone: string, message?: string) => {
+    const cleanPhone = phone.replace(/[^0-9+]/g, '').replace(/^\+/, '');
+    const url = message
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/${cleanPhone}`;
+    window.open(url, '_blank');
+  };
+
+  const sendViaWhatsApp = () => {
+    if (!reply.trim() || !selectedConversation) return;
+    openWhatsApp(selectedConversation.customer_phone, reply.trim());
+  };
+
   const saveSettings = async () => {
     if (!settings) return;
     setSettingsLoading(true);
