@@ -9,12 +9,13 @@ import { Loader2, Upload, X, FileArchive } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import type { ThemeVersion, ThemeVersionInput } from "@/hooks/useThemeVersions";
-import { uploadThemeFile } from "@/hooks/useThemeVersions";
+import { uploadThemeFile, incrementVersion } from "@/hooks/useThemeVersions";
 
 interface VersionFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   version?: ThemeVersion | null;
+  latestVersion?: ThemeVersion | null;
   onSubmit: (data: ThemeVersionInput) => Promise<void>;
   isSubmitting: boolean;
 }
@@ -27,12 +28,16 @@ const platformLabels: Record<Platform, { en: string; ar: string }> = {
   salla: { en: "Salla", ar: "سلة" },
 };
 
-export function VersionFormDialog({ open, onOpenChange, version, onSubmit, isSubmitting }: VersionFormDialogProps) {
+export function VersionFormDialog({ open, onOpenChange, version, latestVersion, onSubmit, isSubmitting }: VersionFormDialogProps) {
   const { language } = useLanguage();
   const isAr = language === "ar";
 
+  // Auto-fill: when creating, derive next version from latestVersion
+  const nextVersion = version?.version
+    ?? (latestVersion ? incrementVersion(latestVersion.version) : "1.0.0");
+
   const [form, setForm] = useState<ThemeVersionInput>({
-    version: version?.version ?? "",
+    version: nextVersion,
     title: version?.title ?? "",
     title_ar: version?.title_ar ?? "",
     changelog: version?.changelog ?? "",

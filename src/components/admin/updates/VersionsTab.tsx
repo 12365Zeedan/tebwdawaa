@@ -163,6 +163,7 @@ export function VersionsTab() {
       <VersionFormDialog
         open={formOpen}
         onOpenChange={setFormOpen}
+        latestVersion={versions[0] ?? null}
         onSubmit={handleCreate}
         isSubmitting={createVersion.isPending}
       />
