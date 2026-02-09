@@ -1324,6 +1324,135 @@ export type Database = {
           },
         ]
       }
+      theme_licenses: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          license_key: string
+          notes: string | null
+          platform: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          license_key: string
+          notes?: string | null
+          platform: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          license_key?: string
+          notes?: string | null
+          platform?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      theme_update_downloads: {
+        Row: {
+          downloaded_at: string
+          id: string
+          ip_address: string | null
+          license_id: string
+          platform: string
+          version_id: string
+        }
+        Insert: {
+          downloaded_at?: string
+          id?: string
+          ip_address?: string | null
+          license_id: string
+          platform: string
+          version_id: string
+        }
+        Update: {
+          downloaded_at?: string
+          id?: string
+          ip_address?: string | null
+          license_id?: string
+          platform?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theme_update_downloads_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "theme_licenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theme_update_downloads_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "theme_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theme_versions: {
+        Row: {
+          changelog: string | null
+          changelog_ar: string | null
+          created_at: string
+          id: string
+          is_published: boolean
+          published_at: string | null
+          salla_file_url: string | null
+          shopify_file_url: string | null
+          title: string
+          title_ar: string
+          updated_at: string
+          version: string
+          wordpress_file_url: string | null
+        }
+        Insert: {
+          changelog?: string | null
+          changelog_ar?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          salla_file_url?: string | null
+          shopify_file_url?: string | null
+          title: string
+          title_ar?: string
+          updated_at?: string
+          version: string
+          wordpress_file_url?: string | null
+        }
+        Update: {
+          changelog?: string | null
+          changelog_ar?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          salla_file_url?: string | null
+          shopify_file_url?: string | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+          version?: string
+          wordpress_file_url?: string | null
+        }
+        Relationships: []
+      }
       trend_reports: {
         Row: {
           analysis_type: string
