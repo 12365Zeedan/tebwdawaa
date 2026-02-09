@@ -15,7 +15,7 @@ import { hexToHsl, hslToHex } from '@/lib/colorUtils';
 import {
   Palette, Type, Layout, Sparkles, RotateCcw, Monitor, Smartphone, Tablet, RefreshCw, Maximize2, FileStack, FileText, Megaphone, Eye, EyeOff, Puzzle,
 } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { WidgetManager } from './widgets/WidgetManager';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 const DEVICE_WIDTHS: Record<DeviceMode, number> = { desktop: 1280, tablet: 768, mobile: 375 };
