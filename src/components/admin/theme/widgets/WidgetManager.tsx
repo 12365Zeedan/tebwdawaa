@@ -140,23 +140,25 @@ export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
-          <Select value={selectedPage} onValueChange={setSelectedPage}>
-            <SelectTrigger className="h-8 w-[150px] text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" className="text-xs">
-                {language === 'ar' ? 'كل الصفحات' : 'All Pages'}
-              </SelectItem>
-              {PAGE_OPTIONS.map(p => (
-                <SelectItem key={p.value} value={p.value} className="text-xs">
-                  {language === 'ar' ? p.ar : p.en}
+          {!pageFilter && (
+            <Select value={selectedPage} onValueChange={setSelectedPage}>
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">
+                  {language === 'ar' ? 'كل الصفحات' : 'All Pages'}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                {PAGE_OPTIONS.map(p => (
+                  <SelectItem key={p.value} value={p.value} className="text-xs">
+                    {language === 'ar' ? p.ar : p.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
-          <Button size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5 h-8">
+          <Button size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5 h-8 ml-auto">
             <Plus className="h-3.5 w-3.5" />
             {language === 'ar' ? 'إضافة ويدجت' : 'Add Widget'}
           </Button>
