@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -199,6 +200,7 @@ export default function Wishlist() {
           </div>
         )}
       </div>
+      <PageWidgets page="wishlist" />
     </MainLayout>
   );
 }

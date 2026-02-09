@@ -381,6 +381,45 @@ export type Database = {
           },
         ]
       }
+      custom_widgets: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_visible: boolean | null
+          page: string
+          sort_order: number | null
+          title: string | null
+          title_ar: string | null
+          updated_at: string
+          widget_type: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          page?: string
+          sort_order?: number | null
+          title?: string | null
+          title_ar?: string | null
+          updated_at?: string
+          widget_type: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          page?: string
+          sort_order?: number | null
+          title?: string | null
+          title_ar?: string | null
+          updated_at?: string
+          widget_type?: string
+        }
+        Relationships: []
+      }
       customer_loyalty_points: {
         Row: {
           created_at: string

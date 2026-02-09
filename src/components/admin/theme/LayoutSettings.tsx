@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTheme, SECTION_LABELS, SectionConfig } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Layout, ArrowUp, ArrowDown, Eye, EyeOff, GripVertical } from 'lucide-react';
+import { Layout, ArrowUp, ArrowDown, Eye, EyeOff, GripVertical, Puzzle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WidgetManager } from './widgets/WidgetManager';
 
 export function LayoutSettings() {
   const { theme, updateSectionVisibility, reorderSections } = useTheme();
@@ -98,6 +99,24 @@ export function LayoutSettings() {
               );
             })}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Custom Widgets */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Puzzle className="h-4 w-4" />
+            {language === 'ar' ? 'الويدجت المخصصة' : 'Custom Widgets'}
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {language === 'ar'
+              ? 'أضف أقسام مخصصة مثل الكاروسيل والبانرات وآراء العملاء لأي صفحة'
+              : 'Add custom sections like carousels, banners, testimonials, and rich text to any page'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <WidgetManager />
         </CardContent>
       </Card>
 

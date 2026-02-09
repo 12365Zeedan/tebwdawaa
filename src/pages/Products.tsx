@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { Search, X } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProductCard } from '@/components/store/ProductCard';
@@ -247,6 +248,7 @@ const Products = () => {
           </div>
         )}
       </div>
+      <PageWidgets page="products" />
     </MainLayout>
   );
 };

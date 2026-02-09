@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { Heart, Shield, Truck, Clock, Star, CheckCircle, Zap, Award } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -56,6 +57,7 @@ const About = () => {
           </div>
         </div>
       </div>
+      <PageWidgets page="about" />
     </MainLayout>
   );
 };

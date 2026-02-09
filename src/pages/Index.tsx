@@ -8,6 +8,7 @@ import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { BlogSection } from '@/components/home/BlogSection';
 import { RecentlyViewedSection } from '@/components/home/RecentlyViewedSection';
 import { SocialMetaTags } from '@/components/seo/SocialMetaTags';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
 
@@ -40,6 +41,7 @@ const Index = () => {
           const Component = SECTION_COMPONENTS[section.id];
           return <Component key={section.id} />;
         })}
+      <PageWidgets page="home" />
     </MainLayout>
   );
 };
