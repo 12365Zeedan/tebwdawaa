@@ -54,6 +54,10 @@ interface ChatSettings {
   wait_message_ar: string;
   whatsapp_number: string;
   is_online: boolean;
+  offline_message: string;
+  offline_message_ar: string;
+  duty_start_time: string;
+  duty_end_time: string;
 }
 
 export default function AdminChat() {
