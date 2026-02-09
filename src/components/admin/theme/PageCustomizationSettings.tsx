@@ -168,6 +168,19 @@ export function PageCustomizationSettings() {
         border_bottom: selectedPage.border_bottom,
         backdrop_blur: selectedPage.backdrop_blur,
         shadow_depth: selectedPage.shadow_depth,
+        page_title: selectedPage.page_title,
+        page_title_ar: selectedPage.page_title_ar,
+        page_subtitle: selectedPage.page_subtitle,
+        page_subtitle_ar: selectedPage.page_subtitle_ar,
+        meta_title: selectedPage.meta_title,
+        meta_description: selectedPage.meta_description,
+        og_image_url: selectedPage.og_image_url,
+        hidden_sections: selectedPage.hidden_sections ?? [],
+        banner_text: selectedPage.banner_text,
+        banner_text_ar: selectedPage.banner_text_ar,
+        banner_visible: selectedPage.banner_visible,
+        banner_color: selectedPage.banner_color,
+        widget_ids: selectedPage.widget_ids ?? [],
       });
     }
   }, [selectedPage]);
