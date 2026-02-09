@@ -235,21 +235,23 @@ export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>{language === 'ar' ? 'الصفحة' : 'Page'}</Label>
-              <Select value={newWidgetPage} onValueChange={setNewWidgetPage}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAGE_OPTIONS.map(p => (
-                    <SelectItem key={p.value} value={p.value}>
-                      {language === 'ar' ? p.ar : p.en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!pageFilter && (
+              <div className="space-y-2">
+                <Label>{language === 'ar' ? 'الصفحة' : 'Page'}</Label>
+                <Select value={newWidgetPage} onValueChange={setNewWidgetPage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_OPTIONS.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {language === 'ar' ? p.ar : p.en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
