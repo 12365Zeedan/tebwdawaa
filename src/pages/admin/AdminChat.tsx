@@ -330,6 +330,7 @@ export default function AdminChat() {
                           WhatsApp
                           <ExternalLink className="w-3 h-3" />
                         </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
