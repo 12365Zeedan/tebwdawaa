@@ -45,6 +45,20 @@ export interface ThemeComponents {
   buttonStyle: 'default' | 'rounded' | 'pill' | 'sharp';
 }
 
+export interface ThemeHeader {
+  height: 'compact' | 'default' | 'tall';
+  sticky: boolean;
+  borderBottom: boolean;
+  shadow: 'none' | 'sm' | 'md';
+  backdropBlur: boolean;
+  layoutStyle: 'default' | 'centered' | 'minimal';
+  fontSize: 'sm' | 'base' | 'lg';
+  fontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
+  fullWidth: boolean;
+  textColor: string;
+  borderColor: string;
+}
+
 export interface NewsBannerItem {
   id: string;
   textEn: string;
@@ -140,6 +154,7 @@ export interface ThemeSettings {
   layout: ThemeLayout;
   components: ThemeComponents;
   content: ThemeContent;
+  header: ThemeHeader;
 }
 
 // ── Defaults (matching index.css) ───────────────────
@@ -277,12 +292,27 @@ export const DEFAULT_CONTENT: ThemeContent = {
   weatherBar: { ...DEFAULT_WEATHER_BAR },
 };
 
+export const DEFAULT_HEADER: ThemeHeader = {
+  height: 'default',
+  sticky: true,
+  borderBottom: true,
+  shadow: 'none',
+  backdropBlur: true,
+  layoutStyle: 'default',
+  fontSize: 'sm',
+  fontWeight: 'medium',
+  fullWidth: false,
+  textColor: '',
+  borderColor: '',
+};
+
 export const DEFAULT_THEME: ThemeSettings = {
   colors: { ...DEFAULT_COLORS },
   typography: { ...DEFAULT_TYPOGRAPHY },
   layout: { sections: DEFAULT_SECTIONS.map(s => ({ ...s })) },
   components: { ...DEFAULT_COMPONENTS },
   content: JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
+  header: { ...DEFAULT_HEADER },
 };
 
 // ── CSS Variable Mapping ───────────────────────────
@@ -346,6 +376,7 @@ interface ThemeContextValue {
   reorderSections: (sections: SectionConfig[]) => void;
   updateComponent: <K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => void;
   updateContent: (content: ThemeContent) => void;
+  updateHeader: <K extends keyof ThemeHeader>(key: K, value: ThemeHeader[K]) => void;
   resetToDefaults: () => void;
   hasChanges: boolean;
 }
@@ -368,6 +399,7 @@ function loadTheme(): ThemeSettings {
             : DEFAULT_SECTIONS.map(s => ({ ...s })),
         },
         components: { ...DEFAULT_COMPONENTS, ...parsed.components },
+        header: { ...DEFAULT_HEADER, ...parsed.header },
         content: parsed.content
           ? {
               newsBanner: {
@@ -457,6 +489,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
                 : DEFAULT_SECTIONS.map(s => ({ ...s })),
             },
             components: { ...DEFAULT_COMPONENTS, ...parsed.components },
+            header: { ...DEFAULT_HEADER, ...parsed.header },
             content: parsed.content
               ? {
                   newsBanner: {
@@ -550,6 +583,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setHasChanges(true);
   }, []);
 
+  const updateHeader = useCallback(<K extends keyof ThemeHeader>(key: K, value: ThemeHeader[K]) => {
+    setTheme(prev => ({
+      ...prev,
+      header: { ...prev.header, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
     setTheme(defaults);
@@ -567,6 +608,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         reorderSections,
         updateComponent,
         updateContent,
+        updateHeader,
         resetToDefaults,
         hasChanges,
       }}
