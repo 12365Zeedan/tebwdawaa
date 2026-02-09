@@ -3,6 +3,7 @@ import { DollarSign, ShoppingCart, Users, Package, AlertTriangle, Settings, Load
 import { TotalSalesCard } from '@/components/admin/analytics/TotalSalesCard';
 import { ProductSalesCard } from '@/components/admin/analytics/ProductSalesCard';
 import { FrequentlyBoughtTogetherCard } from '@/components/admin/analytics/FrequentlyBoughtTogetherCard';
+import { CategorySalesCard } from '@/components/admin/analytics/CategorySalesCard';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatCard } from '@/components/admin/StatCard';
