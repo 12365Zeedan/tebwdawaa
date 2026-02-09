@@ -55,12 +55,19 @@ export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
   const [duplicatePage, setDuplicatePage] = useState('home');
   const [editingWidget, setEditingWidget] = useState<CustomWidget | null>(null);
   const [newWidgetType, setNewWidgetType] = useState<CustomWidget['widget_type']>('carousel');
-  const [newWidgetPage, setNewWidgetPage] = useState('home');
+  const [newWidgetPage, setNewWidgetPage] = useState(pageFilter || 'home');
   const [newWidgetTitle, setNewWidgetTitle] = useState('');
   const [newWidgetTitleAr, setNewWidgetTitleAr] = useState('');
-  const [selectedPage, setSelectedPage] = useState<string>('all');
+  const [selectedPage, setSelectedPage] = useState<string>(pageFilter || 'all');
 
-  const filteredWidgets = selectedPage === 'all' ? widgets : widgets.filter(w => w.page === selectedPage);
+  // Map page keys between customization and widget systems
+  const mapPageKey = (key: string) => {
+    const mapping: Record<string, string> = { homepage: 'home' };
+    return mapping[key] || key;
+  };
+
+  const effectiveFilter = pageFilter ? mapPageKey(pageFilter) : (selectedPage === 'all' ? null : selectedPage);
+  const filteredWidgets = effectiveFilter ? widgets.filter(w => w.page === effectiveFilter) : widgets;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
