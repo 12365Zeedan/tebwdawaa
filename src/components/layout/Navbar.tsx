@@ -51,6 +51,9 @@ export function Navbar() {
     href: "/blog",
     label: t("nav.blog")
   }, {
+    href: "/docs",
+    label: language === "ar" ? "التوثيق" : "Docs"
+  }, {
     href: "/about",
     label: t("nav.about")
   }];
