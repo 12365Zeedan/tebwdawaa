@@ -1,6 +1,7 @@
 // Payment method types
 export type PaymentMethod = 
   | 'cod'           // Cash on Delivery
+  | 'bank_transfer' // Bank Transfer
   | 'mada'          // Mada (Saudi debit cards)
   | 'visa'          // Visa credit/debit
   | 'mastercard'    // Mastercard credit/debit
@@ -26,6 +27,17 @@ export interface PaymentMethodConfig {
   description: string;
   descriptionAr: string;
   requiresOnlineProcessing: boolean;
+}
+
+// Bank account details
+export interface BankAccountDetails {
+  accountHolder: string;
+  accountHolderAr: string;
+  bankName: string;
+  bankNameAr: string;
+  iban: string;
+  accountNumber: string;
+  swiftCode: string;
 }
 
 // Payment request for gateway
@@ -63,6 +75,7 @@ export interface PaymentTransaction {
   gatewayResponse?: Record<string, unknown>;
   errorMessage?: string;
   metadata?: Record<string, unknown>;
+  paymentProofUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,11 +93,21 @@ export const PAYMENT_METHODS: PaymentMethodConfig[] = [
     requiresOnlineProcessing: false,
   },
   {
+    id: 'bank_transfer',
+    name: 'Bank Transfer',
+    nameAr: 'تحويل بنكي',
+    icon: 'Building2',
+    enabled: false,
+    description: 'Transfer directly to our bank account',
+    descriptionAr: 'حوّل مباشرة إلى حسابنا البنكي',
+    requiresOnlineProcessing: false,
+  },
+  {
     id: 'mada',
     name: 'Mada',
     nameAr: 'مدى',
     icon: 'CreditCard',
-    enabled: false, // Will be enabled when gateway is integrated
+    enabled: false,
     description: 'Pay with your Mada debit card',
     descriptionAr: 'ادفع ببطاقة مدى الخاصة بك',
     requiresOnlineProcessing: true,
