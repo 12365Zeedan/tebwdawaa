@@ -132,6 +132,7 @@ const AdminDashboard = () => {
         {/* Sales Analytics */}
         <TotalSalesCard />
         <ProductSalesCard />
+        <CategorySalesCard />
         <FrequentlyBoughtTogetherCard />
 
         {/* Low Stock Alerts */}

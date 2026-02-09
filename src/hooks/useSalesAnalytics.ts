@@ -5,7 +5,7 @@ import { startOfDay, startOfWeek, startOfMonth, startOfQuarter, startOfYear } fr
 export type TimePeriod = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 export type SortDirection = 'asc' | 'desc';
 
-function getStartDate(period: TimePeriod): string {
+export function getStartDate(period: TimePeriod): string {
   const now = new Date();
   switch (period) {
     case 'daily':
