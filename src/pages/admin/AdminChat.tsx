@@ -203,6 +203,10 @@ export default function AdminChat() {
         wait_message_ar: settings.wait_message_ar,
         whatsapp_number: settings.whatsapp_number,
         is_online: settings.is_online,
+        offline_message: settings.offline_message,
+        offline_message_ar: settings.offline_message_ar,
+        duty_start_time: settings.duty_start_time,
+        duty_end_time: settings.duty_end_time,
       })
       .eq('id', settings.id);
     setSettingsLoading(false);
