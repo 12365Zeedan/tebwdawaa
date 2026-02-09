@@ -101,8 +101,11 @@ export default function AdminChat() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => {
         fetchConversations();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload: any) => {
         fetchUnreadCounts();
+        if (payload.new?.sender_type === 'customer' && soundEnabled) {
+          playNotificationSound();
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
