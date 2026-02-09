@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Plus, Trash2, Eye, EyeOff, GripVertical, ArrowUp, ArrowDown, Image, MessageSquareQuote, Type, SlidersHorizontal, Pencil } from 'lucide-react';
+import { Plus, SlidersHorizontal, Image, MessageSquareQuote, Type } from 'lucide-react';
 import { useCustomWidgets, getDefaultConfig, CustomWidget } from '@/hooks/useCustomWidgets';
 import { WidgetEditorDialog } from './WidgetEditorDialog';
-import { cn } from '@/lib/utils';
+import { SortableWidgetItem } from './SortableWidgetItem';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
+import { useToast } from '@/hooks/use-toast';
 
 const WIDGET_TYPE_LABELS: Record<CustomWidget['widget_type'], { en: string; ar: string; icon: React.ComponentType<any> }> = {
   carousel: { en: 'Image Carousel', ar: 'عرض شرائح', icon: SlidersHorizontal },
@@ -32,8 +47,12 @@ const PAGE_OPTIONS = [
 
 export function WidgetManager() {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const { widgets, isLoading, createWidget, updateWidget, deleteWidget } = useCustomWidgets();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [duplicatingWidget, setDuplicatingWidget] = useState<CustomWidget | null>(null);
+  const [duplicatePage, setDuplicatePage] = useState('home');
   const [editingWidget, setEditingWidget] = useState<CustomWidget | null>(null);
   const [newWidgetType, setNewWidgetType] = useState<CustomWidget['widget_type']>('carousel');
   const [newWidgetPage, setNewWidgetPage] = useState('home');
@@ -42,6 +61,11 @@ export function WidgetManager() {
   const [selectedPage, setSelectedPage] = useState<string>('all');
 
   const filteredWidgets = selectedPage === 'all' ? widgets : widgets.filter(w => w.page === selectedPage);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleAddWidget = () => {
     createWidget.mutate({
@@ -60,15 +84,47 @@ export function WidgetManager() {
     });
   };
 
-  const handleMove = (widget: CustomWidget, direction: 'up' | 'down') => {
-    const pageWidgets = widgets.filter(w => w.page === widget.page).sort((a, b) => a.sort_order - b.sort_order);
-    const idx = pageWidgets.findIndex(w => w.id === widget.id);
-    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= pageWidgets.length) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const other = pageWidgets[newIdx];
-    updateWidget.mutate({ id: widget.id, sort_order: other.sort_order });
-    updateWidget.mutate({ id: other.id, sort_order: widget.sort_order });
+    const oldIndex = filteredWidgets.findIndex(w => w.id === active.id);
+    const newIndex = filteredWidgets.findIndex(w => w.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(filteredWidgets, oldIndex, newIndex);
+
+    // Update sort_order for all reordered widgets
+    reordered.forEach((widget, index) => {
+      if (widget.sort_order !== index) {
+        updateWidget.mutate({ id: widget.id, sort_order: index });
+      }
+    });
+  };
+
+  const handleDuplicate = (widget: CustomWidget) => {
+    setDuplicatingWidget(widget);
+    setDuplicatePage(widget.page);
+    setDuplicateDialogOpen(true);
+  };
+
+  const confirmDuplicate = () => {
+    if (!duplicatingWidget) return;
+    const targetPageWidgets = widgets.filter(w => w.page === duplicatePage);
+    createWidget.mutate({
+      page: duplicatePage,
+      widget_type: duplicatingWidget.widget_type,
+      title: duplicatingWidget.title ? `${duplicatingWidget.title} (copy)` : undefined,
+      title_ar: duplicatingWidget.title_ar ? `${duplicatingWidget.title_ar} (نسخة)` : undefined,
+      config: JSON.parse(JSON.stringify(duplicatingWidget.config)),
+      sort_order: targetPageWidgets.length,
+    }, {
+      onSuccess: () => {
+        setDuplicateDialogOpen(false);
+        setDuplicatingWidget(null);
+        toast({ title: language === 'ar' ? 'تم النسخ' : 'Widget duplicated' });
+      },
+    });
   };
 
   return (
@@ -112,67 +168,37 @@ export function WidgetManager() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-2">
-            {filteredWidgets.map((widget, index) => {
-              const typeInfo = WIDGET_TYPE_LABELS[widget.widget_type];
-              const Icon = typeInfo.icon;
-              const pageMeta = PAGE_OPTIONS.find(p => p.value === widget.page);
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filteredWidgets.map(w => w.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {filteredWidgets.map((widget) => {
+                  const typeInfo = WIDGET_TYPE_LABELS[widget.widget_type];
+                  const pageMeta = PAGE_OPTIONS.find(p => p.value === widget.page);
 
-              return (
-                <div
-                  key={widget.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3 rounded-lg border transition-colors',
-                    widget.is_visible
-                      ? 'border-border bg-card'
-                      : 'border-border/50 bg-muted/30 opacity-60'
-                  )}
-                >
-                  <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-
-                  <Icon className="h-4 w-4 text-primary shrink-0" />
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {(language === 'ar' ? widget.title_ar : widget.title) || (language === 'ar' ? typeInfo.ar : typeInfo.en)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {language === 'ar' ? pageMeta?.ar : pageMeta?.en} · {language === 'ar' ? typeInfo.ar : typeInfo.en}
-                    </p>
-                  </div>
-
-                  {/* Edit */}
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingWidget(widget)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-
-                  {/* Reorder */}
-                  <div className="flex items-center gap-0.5">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleMove(widget, 'up')} disabled={index === 0}>
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleMove(widget, 'down')} disabled={index === filteredWidgets.length - 1}>
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-
-                  {/* Visibility */}
-                  <div className="flex items-center gap-1.5">
-                    {widget.is_visible ? <Eye className="h-3.5 w-3.5 text-success" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />}
-                    <Switch
-                      checked={widget.is_visible}
-                      onCheckedChange={(checked) => updateWidget.mutate({ id: widget.id, is_visible: checked })}
+                  return (
+                    <SortableWidgetItem
+                      key={widget.id}
+                      widget={widget}
+                      icon={typeInfo.icon}
+                      pageLabel={language === 'ar' ? pageMeta?.ar || '' : pageMeta?.en || ''}
+                      typeLabel={language === 'ar' ? typeInfo.ar : typeInfo.en}
+                      onEdit={() => setEditingWidget(widget)}
+                      onDuplicate={() => handleDuplicate(widget)}
+                      onToggleVisibility={(checked) => updateWidget.mutate({ id: widget.id, is_visible: checked })}
+                      onDelete={() => deleteWidget.mutate(widget.id)}
                     />
-                  </div>
-
-                  {/* Delete */}
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteWidget.mutate(widget.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
@@ -241,6 +267,45 @@ export function WidgetManager() {
             </Button>
             <Button onClick={handleAddWidget} disabled={createWidget.isPending}>
               {language === 'ar' ? 'إضافة' : 'Add'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Widget Dialog */}
+      <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'نسخ الويدجت' : 'Duplicate Widget'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {language === 'ar'
+                ? 'اختر الصفحة المستهدفة لنسخ الويدجت إليها.'
+                : 'Choose the target page to duplicate this widget to.'}
+            </p>
+            <div className="space-y-2">
+              <Label>{language === 'ar' ? 'الصفحة المستهدفة' : 'Target Page'}</Label>
+              <Select value={duplicatePage} onValueChange={setDuplicatePage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_OPTIONS.map(p => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {language === 'ar' ? p.ar : p.en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDuplicateDialogOpen(false)}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button onClick={confirmDuplicate} disabled={createWidget.isPending}>
+              {language === 'ar' ? 'نسخ' : 'Duplicate'}
             </Button>
           </DialogFooter>
         </DialogContent>
