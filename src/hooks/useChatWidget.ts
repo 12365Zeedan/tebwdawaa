@@ -17,7 +17,31 @@ interface ChatSettings {
   wait_message_ar: string;
   whatsapp_number: string;
   is_online: boolean;
+  offline_message: string;
+  offline_message_ar: string;
+  duty_start_time: string;
+  duty_end_time: string;
 }
+
+const isWithinDutyHours = (settings: ChatSettings): boolean => {
+  // Get current time in Saudi Arabia (Asia/Riyadh, UTC+3)
+  const now = new Date();
+  const saHours = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Riyadh',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now);
+  const [h, m] = saHours.split(':').map(Number);
+  const currentMinutes = h * 60 + m;
+
+  const [sh, sm] = (settings.duty_start_time || '08:00').split(':').map(Number);
+  const [eh, em] = (settings.duty_end_time || '23:00').split(':').map(Number);
+  const startMinutes = sh * 60 + sm;
+  const endMinutes = eh * 60 + em;
+
+  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+};
 
 export function useChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
