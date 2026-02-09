@@ -40,6 +40,11 @@ class MockPaymentGateway {
       return this.processCOD(request);
     }
 
+    // Handle bank transfer - pending until verified
+    if (request.paymentMethod === 'bank_transfer') {
+      return this.processBankTransfer(request);
+    }
+
     // Handle online payment methods (mock for now)
     return this.processOnlinePayment(request);
   }
@@ -60,6 +65,27 @@ class MockPaymentGateway {
       gatewayResponse: {
         method: 'cod',
         message: 'Cash on delivery registered. Payment will be collected upon delivery.',
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  /**
+   * Process Bank Transfer
+   */
+  private async processBankTransfer(request: PaymentRequest): Promise<PaymentResponse> {
+    const transactionId = this.generateTransactionId();
+
+    console.log('[MockGateway] Bank transfer registered:', transactionId);
+
+    return {
+      success: true,
+      transactionId,
+      status: 'pending', // Bank transfer is pending until admin verifies
+      gatewayReference: `BT-${transactionId}`,
+      gatewayResponse: {
+        method: 'bank_transfer',
+        message: 'Bank transfer registered. Awaiting payment verification.',
         timestamp: new Date().toISOString(),
       },
     };

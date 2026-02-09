@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { CheckoutPaymentSettings } from '@/components/admin/settings/CheckoutPaymentSettings';
+import { BankAccountSettings } from '@/components/admin/settings/BankAccountSettings';
 
 type PaymentFormData = {
   payment_cod_enabled: boolean;
@@ -154,6 +155,8 @@ export default function AdminCheckoutPayment() {
           onSave={(section, updates) => handleSave(section, updates as Partial<PaymentFormData>)}
           savingSection={savingSection}
         />
+
+        <BankAccountSettings />
       </div>
     </AdminLayout>
   );

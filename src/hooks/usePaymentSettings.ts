@@ -12,6 +12,7 @@ interface PaymentSettings {
 const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
   paymentMethodsEnabled: {
     cod: true,
+    bank_transfer: false,
     mada: false,
     visa: false,
     mastercard: false,
@@ -25,6 +26,7 @@ const DEFAULT_PAYMENT_SETTINGS: PaymentSettings = {
 
 const PAYMENT_KEYS = [
   'payment_cod_enabled',
+  'payment_bank_transfer_enabled',
   'payment_mada_enabled',
   'payment_visa_enabled',
   'payment_mastercard_enabled',
@@ -37,6 +39,7 @@ const PAYMENT_KEYS = [
 
 const keyToMethod: Record<string, PaymentMethod> = {
   payment_cod_enabled: 'cod',
+  payment_bank_transfer_enabled: 'bank_transfer',
   payment_mada_enabled: 'mada',
   payment_visa_enabled: 'visa',
   payment_mastercard_enabled: 'mastercard',

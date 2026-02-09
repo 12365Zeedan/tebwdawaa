@@ -17,6 +17,7 @@ interface ProcessPaymentData {
   customerEmail: string;
   customerName: string;
   customerPhone?: string;
+  paymentProofUrl?: string;
 }
 
 /**
@@ -54,7 +55,8 @@ export function useProcessPayment() {
           gateway_reference: response.gatewayReference,
           gateway_response: (response.gatewayResponse as Json) || null,
           error_message: response.errorMessage,
-        });
+          payment_proof_url: data.paymentProofUrl || null,
+        } as any);
 
       if (txnError) {
         console.error('Failed to log transaction:', txnError);
@@ -62,7 +64,7 @@ export function useProcessPayment() {
 
       // Update order payment status
       const paymentStatus: PaymentStatus = response.success 
-        ? (data.paymentMethod === 'cod' ? 'pending' : 'completed')
+        ? (data.paymentMethod === 'cod' || data.paymentMethod === 'bank_transfer' ? 'pending' : 'completed')
         : 'failed';
 
       const { error: orderError } = await supabase
@@ -93,9 +95,13 @@ export function useProcessPayment() {
       toast({
         title: data.paymentMethod === 'cod' 
           ? 'Order placed successfully!' 
+          : data.paymentMethod === 'bank_transfer'
+          ? 'Order placed! Awaiting transfer verification.'
           : 'Payment successful!',
         description: data.paymentMethod === 'cod'
           ? 'Pay with cash when your order arrives.'
+          : data.paymentMethod === 'bank_transfer'
+          ? 'We will verify your bank transfer and update the order status.'
           : `Payment processed via ${methodName}.`,
       });
     },
