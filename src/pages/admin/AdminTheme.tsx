@@ -4,13 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
 import { ComponentSettings } from '@/components/admin/theme/ComponentSettings';
 import { ContentSettings } from '@/components/admin/theme/ContentSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
+import { ThemeUpdatesContent } from '@/components/admin/theme/ThemeUpdatesContent';
+import { ThemeDocumentationContent } from '@/components/admin/theme/ThemeDocumentationContent';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminTheme() {
@@ -50,59 +52,79 @@ export default function AdminTheme() {
           )}
         </div>
 
-        {/* Main layout: Settings + Preview */}
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-          {/* Settings tabs */}
-          <div>
-            <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="w-full grid grid-cols-5 mb-4">
-                <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
-                  <Palette className="h-3.5 w-3.5 hidden sm:block" />
-                  {language === 'ar' ? 'الألوان' : 'Colors'}
-                </TabsTrigger>
-                <TabsTrigger value="typography" className="gap-1.5 text-xs sm:text-sm">
-                  <Type className="h-3.5 w-3.5 hidden sm:block" />
-                  {language === 'ar' ? 'الخطوط' : 'Fonts'}
-                </TabsTrigger>
-                <TabsTrigger value="layout" className="gap-1.5 text-xs sm:text-sm">
-                  <Layout className="h-3.5 w-3.5 hidden sm:block" />
-                  {language === 'ar' ? 'التخطيط' : 'Layout'}
-                </TabsTrigger>
-                <TabsTrigger value="components" className="gap-1.5 text-xs sm:text-sm">
-                  <Layers className="h-3.5 w-3.5 hidden sm:block" />
-                  {language === 'ar' ? 'العناصر' : 'Styles'}
-                </TabsTrigger>
-                <TabsTrigger value="content" className="gap-1.5 text-xs sm:text-sm">
-                  <FileText className="h-3.5 w-3.5 hidden sm:block" />
-                  {language === 'ar' ? 'المحتوى' : 'Content'}
-                </TabsTrigger>
-              </TabsList>
+        {/* Main Tabs */}
+        <Tabs defaultValue="customize" className="w-full">
+          <TabsList className="w-full grid grid-cols-3 mb-4">
+            <TabsTrigger value="customize" className="gap-1.5">
+              <Palette className="h-3.5 w-3.5 hidden sm:block" />
+              {language === 'ar' ? 'التخصيص' : 'Customize'}
+            </TabsTrigger>
+            <TabsTrigger value="updates" className="gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5 hidden sm:block" />
+              {language === 'ar' ? 'التحديثات' : 'Updates'}
+            </TabsTrigger>
+            <TabsTrigger value="docs" className="gap-1.5">
+              <BookOpen className="h-3.5 w-3.5 hidden sm:block" />
+              {language === 'ar' ? 'الدليل' : 'Docs'}
+            </TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="colors">
-                <ColorSettings />
-              </TabsContent>
-              <TabsContent value="typography">
-                <TypographySettings />
-              </TabsContent>
-              <TabsContent value="layout">
-                <LayoutSettings />
-              </TabsContent>
-              <TabsContent value="components">
-                <ComponentSettings />
-              </TabsContent>
-              <TabsContent value="content">
-                <ContentSettings />
-              </TabsContent>
-            </Tabs>
-          </div>
+          {/* Customize Tab */}
+          <TabsContent value="customize">
+            <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+              {/* Settings tabs */}
+              <div>
+                <Tabs defaultValue="colors" className="w-full">
+                  <TabsList className="w-full grid grid-cols-5 mb-4">
+                    <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
+                      <Palette className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'الألوان' : 'Colors'}
+                    </TabsTrigger>
+                    <TabsTrigger value="typography" className="gap-1.5 text-xs sm:text-sm">
+                      <Type className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'الخطوط' : 'Fonts'}
+                    </TabsTrigger>
+                    <TabsTrigger value="layout" className="gap-1.5 text-xs sm:text-sm">
+                      <Layout className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'التخطيط' : 'Layout'}
+                    </TabsTrigger>
+                    <TabsTrigger value="components" className="gap-1.5 text-xs sm:text-sm">
+                      <Layers className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'العناصر' : 'Styles'}
+                    </TabsTrigger>
+                    <TabsTrigger value="content" className="gap-1.5 text-xs sm:text-sm">
+                      <FileText className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'المحتوى' : 'Content'}
+                    </TabsTrigger>
+                  </TabsList>
 
-          {/* Live Preview - sticky sidebar */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <ThemePreview />
+                  <TabsContent value="colors"><ColorSettings /></TabsContent>
+                  <TabsContent value="typography"><TypographySettings /></TabsContent>
+                  <TabsContent value="layout"><LayoutSettings /></TabsContent>
+                  <TabsContent value="components"><ComponentSettings /></TabsContent>
+                  <TabsContent value="content"><ContentSettings /></TabsContent>
+                </Tabs>
+              </div>
+
+              {/* Live Preview - sticky sidebar */}
+              <div className="hidden lg:block">
+                <div className="sticky top-24">
+                  <ThemePreview />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Updates Tab */}
+          <TabsContent value="updates">
+            <ThemeUpdatesContent />
+          </TabsContent>
+
+          {/* Documentation Tab */}
+          <TabsContent value="docs">
+            <ThemeDocumentationContent />
+          </TabsContent>
+        </Tabs>
       </div>
     </AdminLayout>
   );
