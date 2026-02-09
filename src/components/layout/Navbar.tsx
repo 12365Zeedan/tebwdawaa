@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingCart, User, Globe, Search, Package, UserCircle, Heart } from "lucide-react";
+import { Menu, X, ShoppingCart, User, Globe, Package, UserCircle, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,51 +11,29 @@ import { useBranding } from "@/hooks/useBranding";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { NavbarSearch } from "./NavbarSearch";
+import { NavbarBlogDropdown } from "./NavbarBlogDropdown";
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const {
-    language,
-    setLanguage,
-    t,
-    direction
-  } = useLanguage();
-  const {
-    totalItems
-  } = useCart();
-  const {
-    user,
-    isAdmin,
-    signOut
-  } = useAuth();
-  const {
-    wishlistItems
-  } = useWishlist();
+  const { language, setLanguage, t, direction } = useLanguage();
+  const { totalItems } = useCart();
+  const { user, isAdmin, signOut } = useAuth();
+  const { wishlistItems } = useWishlist();
   const location = useLocation();
-  const {
-    data: settings
-  } = useStoreSettings();
+  const { data: settings } = useStoreSettings();
   const { data: branding } = useBranding();
   const { theme } = useTheme();
   const header = theme.header;
+
   const storeName = language === "ar" ? settings?.storeNameAr || "صيدلية" : settings?.storeName || "PharmaCare";
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
-  const navLinks = [{
-    href: "/",
-    label: t("nav.home")
-  }, {
-    href: "/products",
-    label: t("nav.products")
-  }, {
-    href: "/categories",
-    label: t("nav.categories")
-  }, {
-    href: "/blog",
-    label: t("nav.blog")
-  }, {
-    href: "/about",
-    label: t("nav.about")
-  }];
+
+  const navLinks = [
+    { href: "/", label: t("nav.home") },
+    { href: "/about", label: t("nav.about") },
+  ];
+
   const isActive = (path: string) => location.pathname === path;
 
   const heightClass = header.height === 'compact' ? 'h-12' : header.height === 'tall' ? 'h-20' : 'h-16';
@@ -64,24 +41,21 @@ export function Navbar() {
   const fontWeightClass = header.fontWeight === 'normal' ? 'font-normal' : header.fontWeight === 'semibold' ? 'font-semibold' : header.fontWeight === 'bold' ? 'font-bold' : 'font-medium';
 
   const headerStyle: React.CSSProperties = {};
-  if (header.textColor) {
-    headerStyle.color = `hsl(${header.textColor})`;
-  }
-  if (header.borderColor && header.borderBottom) {
-    headerStyle.borderColor = `hsl(${header.borderColor})`;
-  }
+  if (header.textColor) headerStyle.color = `hsl(${header.textColor})`;
+  if (header.borderColor && header.borderBottom) headerStyle.borderColor = `hsl(${header.borderColor})`;
 
-  return <header
-    className={cn(
-      "z-50 w-full bg-header",
-      header.sticky && "sticky top-0",
-      header.borderBottom && "border-b border-border/40",
-      header.shadow === 'sm' && "shadow-sm",
-      header.shadow === 'md' && "shadow-md",
-      header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/95",
-    )}
-    style={headerStyle}
-  >
+  return (
+    <header
+      className={cn(
+        "z-50 w-full bg-header",
+        header.sticky && "sticky top-0",
+        header.borderBottom && "border-b border-border/40",
+        header.shadow === 'sm' && "shadow-sm",
+        header.shadow === 'md' && "shadow-md",
+        header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/95",
+      )}
+      style={headerStyle}
+    >
       <div className={cn(
         "flex items-center justify-between",
         heightClass,
@@ -104,17 +78,36 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className={cn("hidden md:flex items-center gap-1", header.layoutStyle === 'centered' && "order-last w-full justify-center mt-1")}>
-          {navLinks.map(link => <Link key={link.href} to={link.href} className={cn("px-4 py-2 rounded-lg transition-colors", fontSizeClass, fontWeightClass, isActive(link.href) ? "bg-primary text-primary-foreground" : "text-link hover:text-link-hover hover:bg-white/10")}>
+          {navLinks.map(link => (
+            <Link
+              key={link.href}
+              to={link.href}
+              className={cn(
+                "px-4 py-2 rounded-lg transition-colors",
+                fontSizeClass,
+                fontWeightClass,
+                isActive(link.href)
+                  ? "bg-primary text-primary-foreground"
+                  : "text-link hover:text-link-hover hover:bg-white/10"
+              )}
+            >
               {link.label}
-            </Link>)}
+            </Link>
+          ))}
+          {/* Blog with hover dropdown */}
+          <NavbarBlogDropdown
+            href="/blog"
+            label={t("nav.blog")}
+            isActive={isActive("/blog")}
+            fontSizeClass={fontSizeClass}
+            fontWeightClass={fontWeightClass}
+          />
         </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Search Toggle */}
-          <Button variant="ghost" size="icon" onClick={() => setShowSearch(!showSearch)} className="hidden md:flex text-link hover:text-link-hover hover:bg-white/10">
-            <Search className="h-5 w-5" />
-          </Button>
+          {/* Inline Search */}
+          <NavbarSearch />
 
           {/* Language Toggle */}
           <Button variant="ghost" size="icon" onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="relative text-link hover:text-link-hover hover:bg-white/10">
@@ -125,27 +118,34 @@ export function Navbar() {
           </Button>
 
           {/* Wishlist */}
-          {user && <Link to="/wishlist">
+          {user && (
+            <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
                 <Heart className="h-5 w-5" />
-                {wishlistItems.length > 0 && <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                {wishlistItems.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
                     {wishlistItems.length}
-                  </span>}
+                  </span>
+                )}
               </Button>
-            </Link>}
+            </Link>
+          )}
 
           {/* Cart */}
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
                   {totalItems}
-                </span>}
+                </span>
+              )}
             </Button>
           </Link>
 
           {/* Auth / User Menu */}
-          {user ? <div className="hidden md:flex items-center gap-2">
+          {user ? (
+            <div className="hidden md:flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10">
@@ -163,9 +163,11 @@ export function Navbar() {
                     <Link to="/wishlist" className="flex items-center gap-2 cursor-pointer">
                       <Heart className="h-4 w-4" />
                       {language === "ar" ? "قائمة الأمنيات" : "Wishlist"}
-                      {wishlistItems.length > 0 && <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                      {wishlistItems.length > 0 && (
+                        <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
                           {wishlistItems.length}
-                        </span>}
+                        </span>
+                      )}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -180,18 +182,23 @@ export function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {isAdmin && <Link to="/admin">
+              {isAdmin && (
+                <Link to="/admin">
                   <Button variant="outline" size="sm" className="gap-2 border-link text-link bg-transparent hover:bg-transparent hover:text-link">
                     <User className="h-4 w-4" />
                     {t("nav.admin")}
                   </Button>
-                </Link>}
-            </div> : <Link to="/auth" className="hidden md:block">
+                </Link>
+              )}
+            </div>
+          ) : (
+            <Link to="/auth" className="hidden md:block">
               <Button variant="outline" size="sm" className="gap-2 border-link text-link bg-transparent hover:bg-transparent hover:text-link">
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
               </Button>
-            </Link>}
+            </Link>
+          )}
 
           {/* Mobile Menu Toggle */}
           <Button variant="ghost" size="icon" className="md:hidden text-link hover:text-link-hover hover:bg-white/10" onClick={() => setIsOpen(!isOpen)}>
@@ -200,21 +207,39 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      {showSearch && <div className="container py-3 border-t border-border/40 animate-fade-in">
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder={t("products.search")} className={cn("pl-10 bg-muted/50", direction === "rtl" && "pr-10 pl-4")} />
-          </div>
-        </div>}
-
       {/* Mobile Menu */}
-      {isOpen && <div className="md:hidden border-t border-border/40 animate-fade-in">
+      {isOpen && (
+        <div className="md:hidden border-t border-border/40 animate-fade-in">
           <nav className="container py-4 flex flex-col gap-2">
-            {navLinks.map(link => <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)} className={cn("px-4 py-3 rounded-lg text-sm font-medium transition-colors", isActive(link.href) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted")}>
+            {navLinks.map(link => (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isActive(link.href)
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
                 {link.label}
-              </Link>)}
-            {user ? <>
+              </Link>
+            ))}
+            <Link
+              to="/blog"
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                isActive("/blog")
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              {t("nav.blog")}
+            </Link>
+            {user ? (
+              <>
                 <Link to="/profile" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {language === "ar" ? "الملف الشخصي" : "My Profile"}
@@ -222,29 +247,38 @@ export function Navbar() {
                 <Link to="/wishlist" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <Heart className="h-4 w-4" />
                   {language === "ar" ? "قائمة الأمنيات" : "Wishlist"}
-                  {wishlistItems.length > 0 && <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                  {wishlistItems.length > 0 && (
+                    <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
                       {wishlistItems.length}
-                    </span>}
+                    </span>
+                  )}
                 </Link>
                 <Link to="/orders" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   {language === "ar" ? "طلباتي" : "My Orders"}
                 </Link>
-                {isAdmin && <Link to="/admin" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2">
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2">
                     <User />
                     {t("nav.admin")}
-                  </Link>}
-                <button onClick={() => {
-            signOut();
-            setIsOpen(false);
-          }} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left rtl:text-right">
+                  </Link>
+                )}
+                <button
+                  onClick={() => { signOut(); setIsOpen(false); }}
+                  className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left rtl:text-right"
+                >
                   {language === "ar" ? "خروج" : "Logout"}
                 </button>
-              </> : <Link to="/auth" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
+              </>
+            ) : (
+              <Link to="/auth" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
-              </Link>}
+              </Link>
+            )}
           </nav>
-        </div>}
-    </header>;
+        </div>
+      )}
+    </header>
+  );
 }
