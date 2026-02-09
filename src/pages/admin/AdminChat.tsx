@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, MessageCircle, Phone, Clock, Settings, Search, Volume2, VolumeX } from 'lucide-react';
+import { Send, MessageCircle, Phone, Clock, Settings, Search, Volume2, VolumeX, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
