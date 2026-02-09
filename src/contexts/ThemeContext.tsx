@@ -442,6 +442,61 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
   }, [theme]);
 
+  // Listen for storage changes from other frames (iframe live preview)
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          const merged: ThemeSettings = {
+            colors: { ...DEFAULT_COLORS, ...parsed.colors },
+            typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
+            layout: {
+              sections: parsed.layout?.sections?.length
+                ? parsed.layout.sections
+                : DEFAULT_SECTIONS.map(s => ({ ...s })),
+            },
+            components: { ...DEFAULT_COMPONENTS, ...parsed.components },
+            content: parsed.content
+              ? {
+                  newsBanner: {
+                    visible: parsed.content.newsBanner?.visible ?? true,
+                    items: parsed.content.newsBanner?.items?.length
+                      ? parsed.content.newsBanner.items
+                      : DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
+                  },
+                  heroBadges: parsed.content.heroBadges?.length
+                    ? parsed.content.heroBadges
+                    : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+                  hero: { ...DEFAULT_HERO_CONTENT, ...parsed.content.hero },
+                  sectionHeadings: {
+                    ...JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
+                    ...parsed.content.sectionHeadings,
+                  },
+                  aboutPage: parsed.content.aboutPage
+                    ? {
+                        ...JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+                        ...parsed.content.aboutPage,
+                        features: parsed.content.aboutPage.features?.length
+                          ? parsed.content.aboutPage.features
+                          : DEFAULT_ABOUT_PAGE.features.map(f => ({ ...f })),
+                      }
+                    : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+                  footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
+                  weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
+                }
+              : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
+          };
+          setTheme(merged);
+        } catch {
+          // Ignore parse errors
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const updateColor = useCallback((key: keyof ThemeColors, value: string) => {
     setTheme(prev => ({
       ...prev,
