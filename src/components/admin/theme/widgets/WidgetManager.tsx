@@ -75,8 +75,9 @@ export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
   );
 
   const handleAddWidget = () => {
+    const targetPage = pageFilter ? mapPageKey(pageFilter) : newWidgetPage;
     createWidget.mutate({
-      page: newWidgetPage,
+      page: targetPage,
       widget_type: newWidgetType,
       title: newWidgetTitle || undefined,
       title_ar: newWidgetTitleAr || undefined,
