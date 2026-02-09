@@ -13,8 +13,21 @@ export interface DocSection {
   titleEn: string;
   titleAr: string;
   icon: string;
+  image?: string;
   items: DocStep[];
 }
+
+// Visual guide image map - maps section IDs to their guide images
+export const sectionImages: Record<string, () => Promise<{ default: string }>> = {
+  'getting-started': () => import('@/assets/docs/guide-dashboard.jpg'),
+  'colors': () => import('@/assets/docs/guide-colors.jpg'),
+  'layout': () => import('@/assets/docs/guide-layout.jpg'),
+  'hero-section': () => import('@/assets/docs/guide-hero.jpg'),
+  'products-management': () => import('@/assets/docs/guide-products.jpg'),
+  'orders': () => import('@/assets/docs/guide-orders.jpg'),
+  'discounts': () => import('@/assets/docs/guide-discounts.jpg'),
+  'blog-system': () => import('@/assets/docs/guide-blog.jpg'),
+};
 
 export const themeDocSections: DocSection[] = [
   {

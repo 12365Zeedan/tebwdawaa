@@ -102,6 +102,9 @@ export function Footer() {
               <Link to="/contact" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('footer.contact')}
               </Link>
+              <Link to="/docs" className="text-sm text-link/80 hover:text-link-hover transition-colors">
+                {language === 'ar' ? 'دليل القالب' : 'Theme Docs'}
+              </Link>
               <Link to="/privacy" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('footer.privacy')}
               </Link>
