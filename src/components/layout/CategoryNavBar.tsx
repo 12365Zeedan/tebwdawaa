@@ -52,7 +52,7 @@ export function CategoryNavBar() {
         const hasSubs = subs.length > 0;
         const isHovered = hoveredId === cat.id;
         return <div key={cat.id} className="relative" onMouseEnter={() => setHoveredId(cat.id)} onMouseLeave={() => setHoveredId(null)}>
-              <Link to={`/categories/${cat.slug}`} className={cn("flex items-center gap-1 px-4 py-2.5 whitespace-nowrap transition-colors text-link/80 hover:text-link-hover hover:bg-white/10 text-base text-center font-semibold", isHovered && "bg-white/10 text-link-hover")}>
+              <Link to={`/categories/${cat.slug}`} className={cn("flex items-center gap-1 px-4 py-2.5 whitespace-nowrap transition-colors text-[#01012d] hover:text-[#01012d]/70 hover:bg-[#01012d]/5 text-base text-center font-semibold", isHovered && "bg-[#01012d]/5 text-[#01012d]/70")}>
                 {language === "ar" ? cat.name_ar : cat.name}
                 {hasSubs && <ChevronDown className={cn("h-3 w-3 transition-transform", isHovered && "rotate-180")} />}
               </Link>
