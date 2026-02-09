@@ -24,6 +24,7 @@ import Compare from "./pages/Compare";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import DocsPage from "./pages/Docs";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -75,6 +76,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/theme-updates" element={<ThemeUpdates />} />
+                <Route path="/docs" element={<DocsPage />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminDashboard />} />

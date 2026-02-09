@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Lightbulb } from 'lucide-react';
+import { CheckCircle2, Lightbulb, ImageIcon } from 'lucide-react';
 import type { DocSection } from '@/data/themeDocumentation';
+import { sectionImages } from '@/data/themeDocumentation';
 
 interface DocumentationSectionProps {
   section: DocSection;
@@ -12,9 +13,37 @@ interface DocumentationSectionProps {
 export function DocumentationSection({ section }: DocumentationSectionProps) {
   const { language } = useLanguage();
   const isAr = language === 'ar';
+  const [guideImage, setGuideImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loader = sectionImages[section.id];
+    if (loader) {
+      loader().then(mod => setGuideImage(mod.default)).catch(() => setGuideImage(null));
+    } else {
+      setGuideImage(null);
+    }
+  }, [section.id]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Visual Guide Image */}
+      {guideImage && (
+        <div className="rounded-lg overflow-hidden border bg-muted/30">
+          <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/50">
+            <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              {isAr ? 'دليل مرئي' : 'Visual Guide'}
+            </span>
+          </div>
+          <img
+            src={guideImage}
+            alt={isAr ? section.titleAr : section.titleEn}
+            className="w-full h-auto max-h-[280px] object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+
       <Accordion type="multiple" defaultValue={section.items.map(i => i.id)}>
         {section.items.map((item) => (
           <AccordionItem key={item.id} value={item.id} className="border rounded-lg px-1 mb-2">
