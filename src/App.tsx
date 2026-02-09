@@ -45,6 +45,7 @@ import AdminPlugins from "./pages/admin/AdminPlugins";
 import AdminSiteHealth from "./pages/admin/AdminSiteHealth";
 import AdminBackups from "./pages/admin/AdminBackups";
 import AdminTrends from "./pages/admin/AdminTrends";
+import AdminChat from "./pages/admin/AdminChat";
 import ThemeUpdates from "./pages/ThemeUpdates";
 
 const queryClient = new QueryClient();
