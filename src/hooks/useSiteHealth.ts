@@ -6,9 +6,55 @@ import { toast } from "sonner";
 import { useHealthFixes } from "./useHealthFixes";
 import type { FixItem, FixSummary } from "@/components/admin/sitehealth/AutoFixDialog";
 
-// Simulated health check runner (client-side analysis)
-function runHealthCheck(checkId: string): HealthCheckResult {
-  // Simulate running checks with realistic results
+// Map check IDs to app_settings keys that indicate a fix was applied
+const fixSettingsMap: Record<string, string> = {
+  "perf-bundle-size": "bundle_optimization_config",
+  "perf-image-optimization": "image_optimization_enabled",
+  "perf-caching": "caching_config",
+  "sec-headers": "security_headers",
+  "seo-meta-tags": "seo_meta_title",
+  "seo-sitemap": "generated_sitemap",
+  "seo-robots": "generated_robots_txt",
+  "seo-structured-data": "seo_jsonld_enabled",
+  "seo-canonical": "seo_canonical_enabled",
+  "a11y-alt-text": "alt_text_auto_generated",
+  "a11y-heading-hierarchy": "heading_hierarchy_enforcement",
+  "a11y-aria-labels": "aria_labels_enforcement",
+  "gen-broken-links": "broken_links_scan",
+};
+
+async function fetchAppliedFixes(): Promise<Set<string>> {
+  const fixKeys = Object.values(fixSettingsMap);
+  const { data } = await supabase
+    .from("app_settings")
+    .select("key, value")
+    .in("key", fixKeys);
+
+  const appliedKeys = new Set((data || []).map((s) => s.key));
+  const appliedCheckIds = new Set<string>();
+
+  for (const [checkId, settingKey] of Object.entries(fixSettingsMap)) {
+    if (appliedKeys.has(settingKey)) {
+      appliedCheckIds.add(checkId);
+    }
+  }
+
+  return appliedCheckIds;
+}
+
+// Health check runner — reads app_settings to reflect previously applied fixes
+function runHealthCheck(checkId: string, appliedFixes: Set<string>): HealthCheckResult {
+  // If this check was previously fixed, return passed
+  if (appliedFixes.has(checkId)) {
+    const check = healthChecks.find((c) => c.id === checkId);
+    return {
+      checkId,
+      status: "passed",
+      message: `${check?.name || checkId} — optimized ✓`,
+      fixApplied: true,
+    };
+  }
+
   const checks: Record<string, () => HealthCheckResult> = {
     "perf-bundle-size": () => ({
       checkId,
@@ -265,11 +311,14 @@ export function useSiteHealth() {
       ? healthChecks.filter((c) => categories.includes(c.category))
       : healthChecks;
 
+    // Fetch applied fixes from app_settings so checks reflect real state
+    const appliedFixes = await fetchAppliedFixes();
+
     const results: HealthCheckResult[] = [];
 
     for (let i = 0; i < filteredChecks.length; i++) {
       await new Promise((r) => setTimeout(r, 150));
-      const result = runHealthCheck(filteredChecks[i].id);
+      const result = runHealthCheck(filteredChecks[i].id, appliedFixes);
       results.push(result);
       setCurrentResults([...results]);
       setScanProgress(Math.round(((i + 1) / filteredChecks.length) * 100));

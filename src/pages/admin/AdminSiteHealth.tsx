@@ -141,14 +141,14 @@ export default function AdminSiteHealth() {
                 {isFixingAll ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {language === "ar" ? "جاري الإصلاح..." : "Fixing..."}
+                    {language === "ar" ? "جاري التحسين..." : "Optimizing..."}
                   </>
                 ) : (
                   <>
                     <Wrench className="h-4 w-4" />
                     {language === "ar"
-                      ? `إصلاح الكل (${fixableCount})`
-                      : `Fix All (${fixableCount} issues)`}
+                      ? `تحسين الآن (${fixableCount})`
+                      : `Optimize Now (${fixableCount})`}
                   </>
                 )}
               </Button>

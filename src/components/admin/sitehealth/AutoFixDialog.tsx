@@ -73,8 +73,8 @@ export function AutoFixDialog({
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-primary" />
             {isComplete
-              ? language === "ar" ? "اكتمل الإصلاح التلقائي!" : "Auto-Fix Complete!"
-              : language === "ar" ? "جاري الإصلاح التلقائي..." : "Auto-Fix Progress"}
+              ? language === "ar" ? "اكتمل التحسين!" : "Optimization Complete!"
+              : language === "ar" ? "جاري التحسين..." : "Optimization Progress"}
           </DialogTitle>
         </DialogHeader>
 
