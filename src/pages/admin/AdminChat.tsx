@@ -52,6 +52,23 @@ export default function AdminChat() {
   const [settingsLoading, setSettingsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+
+  // Fetch unread counts
+  const fetchUnreadCounts = async () => {
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('conversation_id')
+      .eq('sender_type', 'customer')
+      .eq('is_read', false);
+    if (data) {
+      const counts: Record<string, number> = {};
+      data.forEach((m: any) => {
+        counts[m.conversation_id] = (counts[m.conversation_id] || 0) + 1;
+      });
+      setUnreadCounts(counts);
+    }
+  };
 
   // Fetch conversations
   useEffect(() => {
@@ -63,11 +80,15 @@ export default function AdminChat() {
       if (data) setConversations(data as unknown as Conversation[]);
     };
     fetchConversations();
+    fetchUnreadCounts();
 
     const channel = supabase
       .channel('admin-conversations')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => {
         fetchConversations();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+        fetchUnreadCounts();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -91,6 +112,7 @@ export default function AdminChat() {
         .eq('conversation_id', selectedConv)
         .eq('sender_type', 'customer')
         .eq('is_read', false);
+      fetchUnreadCounts();
     };
     fetchMessages();
 
@@ -199,9 +221,16 @@ export default function AdminChat() {
                             <Phone className="w-4 h-4 text-muted-foreground" />
                             <span className="font-medium text-sm" dir="ltr">{conv.customer_phone}</span>
                           </div>
-                          <Badge variant={conv.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                            {conv.status}
-                          </Badge>
+                          <div className="flex items-center gap-1.5">
+                            {unreadCounts[conv.id] > 0 && (
+                              <span className="min-w-5 h-5 rounded-full bg-[#25D366] text-white text-xs flex items-center justify-center px-1 font-bold">
+                                {unreadCounts[conv.id]}
+                              </span>
+                            )}
+                            <Badge variant={conv.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                              {conv.status}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                           <Clock className="w-3 h-3" />
