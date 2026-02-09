@@ -45,6 +45,7 @@ import AdminSiteHealth from "./pages/admin/AdminSiteHealth";
 import AdminBackups from "./pages/admin/AdminBackups";
 import AdminTrends from "./pages/admin/AdminTrends";
 import AdminThemeUpdates from "./pages/admin/AdminThemeUpdates";
+import AdminThemeDocumentation from "./pages/admin/AdminThemeDocumentation";
 import ThemeUpdates from "./pages/ThemeUpdates";
 
 const queryClient = new QueryClient();
@@ -96,6 +97,7 @@ const App = () => (
                 <Route path="/admin/backups" element={<AdminBackups />} />
                 <Route path="/admin/trends" element={<AdminTrends />} />
                 <Route path="/admin/theme-updates" element={<AdminThemeUpdates />} />
+                <Route path="/admin/theme-docs" element={<AdminThemeDocumentation />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 {/* Catch-all */}
