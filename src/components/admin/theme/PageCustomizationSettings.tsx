@@ -13,8 +13,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageCustomizations, PageCustomization, PAGE_ROUTE_MAP } from '@/hooks/usePageCustomizations';
 import { hexToHsl, hslToHex } from '@/lib/colorUtils';
 import {
-  Palette, Type, Layout, Sparkles, RotateCcw, Monitor, Smartphone, Tablet, RefreshCw, Maximize2, FileStack,
+  Palette, Type, Layout, Sparkles, RotateCcw, Monitor, Smartphone, Tablet, RefreshCw, Maximize2, FileStack, FileText, Megaphone, Eye, EyeOff, Puzzle,
 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 const DEVICE_WIDTHS: Record<DeviceMode, number> = { desktop: 1280, tablet: 768, mobile: 375 };
@@ -167,6 +168,19 @@ export function PageCustomizationSettings() {
         border_bottom: selectedPage.border_bottom,
         backdrop_blur: selectedPage.backdrop_blur,
         shadow_depth: selectedPage.shadow_depth,
+        page_title: selectedPage.page_title,
+        page_title_ar: selectedPage.page_title_ar,
+        page_subtitle: selectedPage.page_subtitle,
+        page_subtitle_ar: selectedPage.page_subtitle_ar,
+        meta_title: selectedPage.meta_title,
+        meta_description: selectedPage.meta_description,
+        og_image_url: selectedPage.og_image_url,
+        hidden_sections: selectedPage.hidden_sections ?? [],
+        banner_text: selectedPage.banner_text,
+        banner_text_ar: selectedPage.banner_text_ar,
+        banner_visible: selectedPage.banner_visible,
+        banner_color: selectedPage.banner_color,
+        widget_ids: selectedPage.widget_ids ?? [],
       });
     }
   }, [selectedPage]);
@@ -231,7 +245,7 @@ export function PageCustomizationSettings() {
           {/* Settings */}
           <div className="space-y-4">
             <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsList className="w-full grid grid-cols-5 mb-4">
                 <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
                   <Palette className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'الألوان' : 'Colors'}
@@ -247,6 +261,10 @@ export function PageCustomizationSettings() {
                 <TabsTrigger value="styles" className="gap-1.5 text-xs sm:text-sm">
                   <Sparkles className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'الأنماط' : 'Styles'}
+                </TabsTrigger>
+                <TabsTrigger value="content" className="gap-1.5 text-xs sm:text-sm">
+                  <FileText className="h-3.5 w-3.5 hidden sm:block" />
+                  {language === 'ar' ? 'المحتوى' : 'Content'}
                 </TabsTrigger>
               </TabsList>
 
@@ -357,6 +375,154 @@ export function PageCustomizationSettings() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Content */}
+              <TabsContent value="content">
+                <div className="space-y-4">
+                  {/* Page Title & Subtitle */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        {language === 'ar' ? 'العنوان والوصف' : 'Title & Subtitle'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'العنوان (EN)' : 'Page Title (EN)'}</Label>
+                        <Input value={draft.page_title ?? ''} onChange={(e) => updateDraft('page_title', e.target.value || null)} placeholder="Custom page title..." />
+                      </div>
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'العنوان (AR)' : 'Page Title (AR)'}</Label>
+                        <Input value={draft.page_title_ar ?? ''} onChange={(e) => updateDraft('page_title_ar', e.target.value || null)} placeholder="عنوان الصفحة..." dir="rtl" />
+                      </div>
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'العنوان الفرعي (EN)' : 'Subtitle (EN)'}</Label>
+                        <Input value={draft.page_subtitle ?? ''} onChange={(e) => updateDraft('page_subtitle', e.target.value || null)} placeholder="Short description..." />
+                      </div>
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'العنوان الفرعي (AR)' : 'Subtitle (AR)'}</Label>
+                        <Input value={draft.page_subtitle_ar ?? ''} onChange={(e) => updateDraft('page_subtitle_ar', e.target.value || null)} placeholder="وصف قصير..." dir="rtl" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Meta SEO */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">{language === 'ar' ? 'إعدادات SEO' : 'SEO Settings'}</CardTitle>
+                      <CardDescription className="text-xs">{language === 'ar' ? 'تحسين ظهور الصفحة في محركات البحث' : 'Optimize page for search engines'}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'عنوان Meta' : 'Meta Title'}</Label>
+                        <Input value={draft.meta_title ?? ''} onChange={(e) => updateDraft('meta_title', e.target.value || null)} placeholder="SEO title (max 60 chars)..." maxLength={60} />
+                        <p className="text-xs text-muted-foreground mt-1">{(draft.meta_title ?? '').length}/60</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'وصف Meta' : 'Meta Description'}</Label>
+                        <Textarea value={draft.meta_description ?? ''} onChange={(e) => updateDraft('meta_description', e.target.value || null)} placeholder="SEO description (max 160 chars)..." maxLength={160} rows={3} />
+                        <p className="text-xs text-muted-foreground mt-1">{(draft.meta_description ?? '').length}/160</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'رابط صورة OG' : 'OG Image URL'}</Label>
+                        <Input value={draft.og_image_url ?? ''} onChange={(e) => updateDraft('og_image_url', e.target.value || null)} placeholder="https://..." />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Page Banner */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Megaphone className="h-4 w-4" />
+                        {language === 'ar' ? 'بانر الصفحة' : 'Page Banner'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">{language === 'ar' ? 'رسالة إعلانية مخصصة لهذه الصفحة' : 'Custom announcement message for this page'}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">{language === 'ar' ? 'إظهار البانر' : 'Show Banner'}</Label>
+                        <Switch checked={draft.banner_visible ?? false} onCheckedChange={(v) => updateDraft('banner_visible', v)} />
+                      </div>
+                      {draft.banner_visible && (
+                        <>
+                          <div>
+                            <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'نص البانر (EN)' : 'Banner Text (EN)'}</Label>
+                            <Input value={draft.banner_text ?? ''} onChange={(e) => updateDraft('banner_text', e.target.value || null)} placeholder="Announcement text..." />
+                          </div>
+                          <div>
+                            <Label className="text-sm mb-1.5 block">{language === 'ar' ? 'نص البانر (AR)' : 'Banner Text (AR)'}</Label>
+                            <Input value={draft.banner_text_ar ?? ''} onChange={(e) => updateDraft('banner_text_ar', e.target.value || null)} placeholder="نص الإعلان..." dir="rtl" />
+                          </div>
+                          <ColorField label={language === 'ar' ? 'لون البانر' : 'Banner Color'} value={draft.banner_color ?? null} onChange={(v) => updateDraft('banner_color', v)} />
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Show/Hide Sections */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Eye className="h-4 w-4" />
+                        {language === 'ar' ? 'إظهار/إخفاء الأقسام' : 'Show/Hide Sections'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">{language === 'ar' ? 'تحكم في ظهور الأقسام في هذه الصفحة' : 'Control which sections appear on this page'}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {['newsletter', 'chat_widget', 'weather_bar', 'news_banner', 'category_nav', 'comparison_bar'].map((section) => {
+                        const labels: Record<string, { en: string; ar: string }> = {
+                          newsletter: { en: 'Newsletter', ar: 'النشرة البريدية' },
+                          chat_widget: { en: 'Chat Widget', ar: 'ويدجت الدردشة' },
+                          weather_bar: { en: 'Weather Bar', ar: 'شريط الطقس' },
+                          news_banner: { en: 'News Banner', ar: 'شريط الأخبار' },
+                          category_nav: { en: 'Category Nav', ar: 'تنقل الفئات' },
+                          comparison_bar: { en: 'Comparison Bar', ar: 'شريط المقارنة' },
+                        };
+                        const isHidden = (draft.hidden_sections ?? []).includes(section);
+                        return (
+                          <div key={section} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {isHidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-success" />}
+                              <Label className="text-sm">{language === 'ar' ? labels[section]?.ar : labels[section]?.en}</Label>
+                            </div>
+                            <Switch
+                              checked={!isHidden}
+                              onCheckedChange={(visible) => {
+                                const current = draft.hidden_sections ?? [];
+                                updateDraft('hidden_sections', visible ? current.filter((s) => s !== section) : [...current, section]);
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
+
+                  {/* Custom Widgets */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Puzzle className="h-4 w-4" />
+                        {language === 'ar' ? 'الويدجت المخصصة' : 'Custom Widgets'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">{language === 'ar' ? 'أضف معرفات الويدجت المرتبطة بهذه الصفحة' : 'Add widget IDs linked to this page'}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Textarea
+                        value={(draft.widget_ids ?? []).join(', ')}
+                        onChange={(e) => {
+                          const ids = e.target.value.split(',').map((s) => s.trim()).filter(Boolean);
+                          updateDraft('widget_ids', ids);
+                        }}
+                        placeholder={language === 'ar' ? 'أدخل معرفات الويدجت مفصولة بفواصل...' : 'Enter widget IDs separated by commas...'}
+                        rows={2}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
 

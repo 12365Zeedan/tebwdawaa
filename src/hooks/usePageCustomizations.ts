@@ -22,6 +22,20 @@ export interface PageCustomization {
   border_bottom: boolean;
   backdrop_blur: boolean;
   shadow_depth: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  // Content fields
+  page_title: string | null;
+  page_title_ar: string | null;
+  page_subtitle: string | null;
+  page_subtitle_ar: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  hidden_sections: string[];
+  banner_text: string | null;
+  banner_text_ar: string | null;
+  banner_visible: boolean;
+  banner_color: string | null;
+  widget_ids: string[];
   created_at: string;
   updated_at: string;
 }
@@ -105,6 +119,19 @@ export function usePageCustomizations() {
           border_bottom: false,
           backdrop_blur: false,
           shadow_depth: 'none',
+          page_title: null,
+          page_title_ar: null,
+          page_subtitle: null,
+          page_subtitle_ar: null,
+          meta_title: null,
+          meta_description: null,
+          og_image_url: null,
+          hidden_sections: [],
+          banner_text: null,
+          banner_text_ar: null,
+          banner_visible: false,
+          banner_color: null,
+          widget_ids: [],
         })
         .eq('id', id);
       if (error) throw error;

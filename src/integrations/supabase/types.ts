@@ -925,6 +925,10 @@ export type Database = {
         Row: {
           backdrop_blur: boolean | null
           background_color: string | null
+          banner_color: string | null
+          banner_text: string | null
+          banner_text_ar: string | null
+          banner_visible: boolean | null
           border_bottom: boolean | null
           border_color: string | null
           created_at: string
@@ -932,21 +936,34 @@ export type Database = {
           font_weight: string | null
           full_width: boolean | null
           height: string | null
+          hidden_sections: string[] | null
           id: string
           layout_style: string | null
           link_color: string | null
           link_hover_color: string | null
+          meta_description: string | null
+          meta_title: string | null
+          og_image_url: string | null
           page_key: string
           page_label: string
           page_label_ar: string
+          page_subtitle: string | null
+          page_subtitle_ar: string | null
+          page_title: string | null
+          page_title_ar: string | null
           shadow_depth: string | null
           sticky_header: boolean | null
           text_color: string | null
           updated_at: string
+          widget_ids: string[] | null
         }
         Insert: {
           backdrop_blur?: boolean | null
           background_color?: string | null
+          banner_color?: string | null
+          banner_text?: string | null
+          banner_text_ar?: string | null
+          banner_visible?: boolean | null
           border_bottom?: boolean | null
           border_color?: string | null
           created_at?: string
@@ -954,21 +971,34 @@ export type Database = {
           font_weight?: string | null
           full_width?: boolean | null
           height?: string | null
+          hidden_sections?: string[] | null
           id?: string
           layout_style?: string | null
           link_color?: string | null
           link_hover_color?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
           page_key: string
           page_label: string
           page_label_ar: string
+          page_subtitle?: string | null
+          page_subtitle_ar?: string | null
+          page_title?: string | null
+          page_title_ar?: string | null
           shadow_depth?: string | null
           sticky_header?: boolean | null
           text_color?: string | null
           updated_at?: string
+          widget_ids?: string[] | null
         }
         Update: {
           backdrop_blur?: boolean | null
           background_color?: string | null
+          banner_color?: string | null
+          banner_text?: string | null
+          banner_text_ar?: string | null
+          banner_visible?: boolean | null
           border_bottom?: boolean | null
           border_color?: string | null
           created_at?: string
@@ -976,17 +1006,26 @@ export type Database = {
           font_weight?: string | null
           full_width?: boolean | null
           height?: string | null
+          hidden_sections?: string[] | null
           id?: string
           layout_style?: string | null
           link_color?: string | null
           link_hover_color?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
           page_key?: string
           page_label?: string
           page_label_ar?: string
+          page_subtitle?: string | null
+          page_subtitle_ar?: string | null
+          page_title?: string | null
+          page_title_ar?: string | null
           shadow_depth?: string | null
           sticky_header?: boolean | null
           text_color?: string | null
           updated_at?: string
+          widget_ids?: string[] | null
         }
         Relationships: []
       }
