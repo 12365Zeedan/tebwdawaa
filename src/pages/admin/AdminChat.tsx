@@ -66,7 +66,7 @@ export default function AdminChat() {
   const [settingsLoading, setSettingsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Fetch unread counts
   const fetchUnreadCounts = async () => {
