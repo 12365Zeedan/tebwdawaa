@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -170,6 +171,7 @@ const Cart = () => {
           </div>
         </div>
       </div>
+      <PageWidgets page="cart" />
     </MainLayout>
   );
 };

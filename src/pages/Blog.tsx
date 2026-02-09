@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { BlogCard } from '@/components/blog/BlogCard';
@@ -210,6 +211,7 @@ const Blog = () => {
           <NewsletterSubscription />
         </div>
       </div>
+      <PageWidgets page="blog" />
     </MainLayout>
   );
 };

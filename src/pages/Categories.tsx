@@ -1,4 +1,5 @@
 import React from 'react';
+import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { CategoryCard } from '@/components/store/CategoryCard';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -41,6 +42,7 @@ const Categories = () => {
           )}
         </div>
       </div>
+      <PageWidgets page="categories" />
     </MainLayout>
   );
 };
