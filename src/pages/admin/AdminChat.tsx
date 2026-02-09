@@ -211,7 +211,8 @@ export default function AdminChat() {
   };
 
   const filteredConversations = conversations.filter(c =>
-    c.customer_phone.includes(search) || c.customer_name?.toLowerCase().includes(search.toLowerCase())
+    c.status === statusFilter &&
+    (c.customer_phone.includes(search) || c.customer_name?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const selectedConversation = conversations.find(c => c.id === selectedConv);
