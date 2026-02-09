@@ -455,8 +455,12 @@ export type Database = {
       chat_settings: {
         Row: {
           created_at: string
+          duty_end_time: string | null
+          duty_start_time: string | null
           id: string
           is_online: boolean | null
+          offline_message: string | null
+          offline_message_ar: string | null
           updated_at: string
           wait_message: string | null
           wait_message_ar: string | null
@@ -466,8 +470,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          duty_end_time?: string | null
+          duty_start_time?: string | null
           id?: string
           is_online?: boolean | null
+          offline_message?: string | null
+          offline_message_ar?: string | null
           updated_at?: string
           wait_message?: string | null
           wait_message_ar?: string | null
@@ -477,8 +485,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          duty_end_time?: string | null
+          duty_start_time?: string | null
           id?: string
           is_online?: boolean | null
+          offline_message?: string | null
+          offline_message_ar?: string | null
           updated_at?: string
           wait_message?: string | null
           wait_message_ar?: string | null
