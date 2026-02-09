@@ -46,7 +46,7 @@ export function CategoryNavBar() {
   const getSubcategories = (parentId: string) => categories?.filter(c => c.parent_category_id === parentId) || [];
   if (parentCategories.length === 0) return null;
   return <div className={cn("w-full bg-header/90 border-b border-border/30 z-40", theme.header.sticky && "sticky top-12 md:top-16", theme.header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/80")}>
-      <div className={cn("gap-0.5 overflow-x-auto scrollbar-hide opacity-100 bg-white flex items-center justify-center text-secondary-foreground", theme.header.fullWidth ? "px-4 sm:px-8" : "container")}>
+      <div className={cn("gap-0.5 overflow-x-auto scrollbar-hide opacity-100 bg-white flex items-center justify-center", theme.header.fullWidth ? "px-4 sm:px-8" : "container")}>
         {parentCategories.map(cat => {
         const subs = getSubcategories(cat.id);
         const hasSubs = subs.length > 0;
