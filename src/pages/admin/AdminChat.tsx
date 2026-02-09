@@ -109,7 +109,7 @@ export default function AdminChat() {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [soundEnabled]);
 
   // Fetch messages for selected conversation
   useEffect(() => {
