@@ -63,6 +63,7 @@ export default function AdminChat() {
   const [reply, setReply] = useState('');
   const [search, setSearch] = useState('');
   const [settings, setSettings] = useState<ChatSettings | null>(null);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [settingsLoading, setSettingsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
