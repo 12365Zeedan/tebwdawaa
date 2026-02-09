@@ -101,7 +101,7 @@ export function TrendingProductsTab({ products, isLoading, onAnalyze }: Trending
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {products.products.map((product, idx) => (
+            {[...products.products].sort((a, b) => b.trend_score - a.trend_score).map((product, idx) => (
               <Card key={idx} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex justify-between items-start mb-3">

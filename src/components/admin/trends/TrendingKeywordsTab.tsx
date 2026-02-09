@@ -123,7 +123,7 @@ export function TrendingKeywordsTab({ keywords, isLoading, onAnalyze }: Trending
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {keywords.keywords.map((kw, idx) => (
+                  {[...keywords.keywords].sort((a, b) => b.relevance_score - a.relevance_score).map((kw, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="font-medium">{kw.keyword_en}</TableCell>
                       <TableCell className="font-arabic text-right" dir="rtl">{kw.keyword_ar}</TableCell>
