@@ -56,10 +56,14 @@ export default function AdminTheme() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="customize" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-4">
+          <TabsList className="w-full grid grid-cols-4 mb-4">
             <TabsTrigger value="customize" className="gap-1.5">
               <Palette className="h-3.5 w-3.5 hidden sm:block" />
               {language === 'ar' ? 'التخصيص' : 'Customize'}
+            </TabsTrigger>
+            <TabsTrigger value="pages" className="gap-1.5">
+              <FileStack className="h-3.5 w-3.5 hidden sm:block" />
+              {language === 'ar' ? 'الصفحات' : 'Pages'}
             </TabsTrigger>
             <TabsTrigger value="updates" className="gap-1.5">
               <RefreshCw className="h-3.5 w-3.5 hidden sm:block" />
