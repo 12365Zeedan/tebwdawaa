@@ -13,8 +13,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageCustomizations, PageCustomization, PAGE_ROUTE_MAP } from '@/hooks/usePageCustomizations';
 import { hexToHsl, hslToHex } from '@/lib/colorUtils';
 import {
-  Palette, Type, Layout, Sparkles, RotateCcw, Monitor, Smartphone, Tablet, RefreshCw, Maximize2, FileStack,
+  Palette, Type, Layout, Sparkles, RotateCcw, Monitor, Smartphone, Tablet, RefreshCw, Maximize2, FileStack, FileText, Megaphone, Eye, EyeOff, Puzzle,
 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 const DEVICE_WIDTHS: Record<DeviceMode, number> = { desktop: 1280, tablet: 768, mobile: 375 };
