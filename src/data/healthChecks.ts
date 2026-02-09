@@ -44,8 +44,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من الصور غير المحسنة أو كبيرة الحجم",
     category: "performance",
     severity: "warning",
-    autoFixable: false,
-    fixDescription: "Compress and resize large images",
+    autoFixable: true,
+    fixDescription: "Enable image optimization settings",
   },
   {
     id: "perf-lazy-loading",
@@ -75,7 +75,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من رؤوس التخزين المؤقت وتخزين الأصول الثابتة",
     category: "performance",
     severity: "warning",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Configure caching headers for static assets",
   },
   // Security Checks
   {
@@ -96,7 +97,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من رؤوس الأمان الأساسية",
     category: "security",
     severity: "critical",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Store recommended security headers config",
   },
   {
     id: "sec-rls",
@@ -193,7 +195,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من أن جميع الصور تحتوي على نص بديل وصفي",
     category: "accessibility",
     severity: "warning",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Auto-generate alt text from product names",
   },
   {
     id: "a11y-contrast",
@@ -213,7 +216,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من بنية العناوين الصحيحة",
     category: "accessibility",
     severity: "info",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Enable heading hierarchy enforcement",
   },
   {
     id: "a11y-keyboard-nav",
@@ -233,7 +237,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق من وجود تسميات ARIA الصحيحة على العناصر التفاعلية",
     category: "accessibility",
     severity: "info",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Enable ARIA label enforcement",
   },
   // Database & General
   {
@@ -264,7 +269,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يبحث عن الروابط الداخلية والخارجية المعطلة",
     category: "general",
     severity: "warning",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Scan and flag broken internal links",
   },
   {
     id: "gen-error-pages",
