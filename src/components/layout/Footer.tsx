@@ -9,70 +9,63 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNewsletterSubscribe } from '@/hooks/useNewsletter';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
-
 export function Footer() {
-  const { t, language } = useLanguage();
-  const { theme } = useTheme();
+  const {
+    t,
+    language
+  } = useLanguage();
+  const {
+    theme
+  } = useTheme();
   const currentYear = new Date().getFullYear();
-  const { data: settings } = useStoreSettings();
-  const { data: branding } = useBranding();
-  const { data: companyInfo } = useCompanyInfo();
+  const {
+    data: settings
+  } = useStoreSettings();
+  const {
+    data: branding
+  } = useBranding();
+  const {
+    data: companyInfo
+  } = useCompanyInfo();
   const subscribe = useNewsletterSubscribe();
   const [footerEmail, setFooterEmail] = useState('');
   const [footerSubscribed, setFooterSubscribed] = useState(false);
   const footerContent = theme.content.footer;
-
-  const storeName = language === 'ar' 
-    ? (settings?.storeNameAr || 'صيدلية') 
-    : (settings?.storeName || 'PharmaCare');
+  const storeName = language === 'ar' ? settings?.storeNameAr || 'صيدلية' : settings?.storeName || 'PharmaCare';
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
-
-  return (
-    <footer className="bg-header text-link">
+  return <footer className="bg-header text-link">
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* About */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              {logoUrl ? (
-                <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert" />
-              ) : (
-                <>
+              {logoUrl ? <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert" /> : <>
                   <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
                     <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
                   </div>
                   <span className="text-xl font-bold">
                     {storeName}
                   </span>
-                </>
-              )}
+                </>}
             </div>
             <p className="text-sm text-link/80 leading-relaxed">
               {language === 'ar' ? footerContent.aboutTextAr : footerContent.aboutTextEn}
             </p>
             <div className="flex gap-4">
-              {footerContent.socialLinks.facebook && (
-                <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+              {footerContent.socialLinks.facebook && <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
                   <Facebook className="h-5 w-5" />
-                </a>
-              )}
-              {footerContent.socialLinks.twitter && (
-                <a href={footerContent.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+                </a>}
+              {footerContent.socialLinks.twitter && <a href={footerContent.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
                   <Twitter className="h-5 w-5" />
-                </a>
-              )}
-              {footerContent.socialLinks.instagram && (
-                <a href={footerContent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+                </a>}
+              {footerContent.socialLinks.instagram && <a href={footerContent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
                   <Instagram className="h-5 w-5" />
-                </a>
-              )}
-              {!footerContent.socialLinks.facebook && !footerContent.socialLinks.twitter && !footerContent.socialLinks.instagram && (
-                <>
+                </a>}
+              {!footerContent.socialLinks.facebook && !footerContent.socialLinks.twitter && !footerContent.socialLinks.instagram && <>
                   <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Facebook className="h-5 w-5" /></a>
                   <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Twitter className="h-5 w-5" /></a>
                   <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Instagram className="h-5 w-5" /></a>
-                </>
-              )}
+                </>}
             </div>
           </div>
 
@@ -126,64 +119,40 @@ export function Footer() {
               <div className="flex items-start gap-3 text-sm text-link/80">
                 <MapPin className="h-4 w-4 mt-0.5" />
                 <span>
-                  {companyInfo?.company_address
-                    ? (typeof companyInfo.company_address === 'object'
-                        ? `${(companyInfo.company_address as any).city || ''}, ${(companyInfo.company_address as any).country || ''}`
-                        : String(companyInfo.company_address))
-                    : (language === 'ar' ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia')}
+                  {companyInfo?.company_address ? typeof companyInfo.company_address === 'object' ? `${(companyInfo.company_address as any).city || ''}, ${(companyInfo.company_address as any).country || ''}` : String(companyInfo.company_address) : language === 'ar' ? 'الرياض، المملكة العربية السعودية' : 'Riyadh, Saudi Arabia'}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {footerContent.showNewsletter && (
-        <div className="mt-10 pt-8 border-t border-link/20">
+        {footerContent.showNewsletter && <div className="mt-10 pt-8 border-t border-link/20">
           <div className="max-w-md mx-auto text-center">
-            <h3 className="text-lg font-semibold mb-2">
+            <h3 className="text-lg font-semibold mb-2 text-center">
               {language === 'ar' ? footerContent.newsletterTitleAr : footerContent.newsletterTitleEn}
             </h3>
-            <p className="text-sm text-link/80 mb-4">
+            <p className="text-sm text-link/80 mb-4 text-center">
               {language === 'ar' ? footerContent.newsletterDescriptionAr : footerContent.newsletterDescriptionEn}
             </p>
-            {footerSubscribed ? (
-              <p className="text-sm text-link/80">
+            {footerSubscribed ? <p className="text-sm text-link/80">
                 ✓ {language === 'ar' ? 'تم الاشتراك بنجاح!' : 'Successfully subscribed!'}
-              </p>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!footerEmail.trim()) return;
-                  subscribe.mutate(
-                    { email: footerEmail.trim() },
-                    { onSuccess: () => setFooterSubscribed(true) }
-                  );
-                }}
-                className="flex gap-2"
-              >
-                <Input
-                  type="email"
-                  value={footerEmail}
-                  onChange={(e) => setFooterEmail(e.target.value)}
-                  placeholder={language === 'ar' ? 'بريدك الإلكتروني' : 'Your email'}
-                  className="flex-1 bg-white border-white/20 text-foreground placeholder:text-muted-foreground"
-                  required
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="gap-2 shrink-0"
-                  disabled={subscribe.isPending}
-                >
+              </p> : <form onSubmit={e => {
+            e.preventDefault();
+            if (!footerEmail.trim()) return;
+            subscribe.mutate({
+              email: footerEmail.trim()
+            }, {
+              onSuccess: () => setFooterSubscribed(true)
+            });
+          }} className="flex gap-2">
+                <Input type="email" value={footerEmail} onChange={e => setFooterEmail(e.target.value)} placeholder={language === 'ar' ? 'بريدك الإلكتروني' : 'Your email'} className="flex-1 bg-white border-white/20 text-foreground placeholder:text-muted-foreground" required />
+                <Button type="submit" size="sm" className="gap-2 shrink-0" disabled={subscribe.isPending}>
                   <Send className="h-4 w-4" />
                   {language === 'ar' ? 'اشترك' : 'Subscribe'}
                 </Button>
-              </form>
-            )}
+              </form>}
           </div>
-        </div>
-        )}
+        </div>}
 
         <div className="mt-8 pt-8 border-t border-link/20">
           <p className="text-center text-sm text-link/80">
@@ -191,6 +160,5 @@ export function Footer() {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }
