@@ -52,6 +52,23 @@ export default function AdminChat() {
   const [settingsLoading, setSettingsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+
+  // Fetch unread counts
+  const fetchUnreadCounts = async () => {
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('conversation_id')
+      .eq('sender_type', 'customer')
+      .eq('is_read', false);
+    if (data) {
+      const counts: Record<string, number> = {};
+      data.forEach((m: any) => {
+        counts[m.conversation_id] = (counts[m.conversation_id] || 0) + 1;
+      });
+      setUnreadCounts(counts);
+    }
+  };
 
   // Fetch conversations
   useEffect(() => {
@@ -63,11 +80,15 @@ export default function AdminChat() {
       if (data) setConversations(data as unknown as Conversation[]);
     };
     fetchConversations();
+    fetchUnreadCounts();
 
     const channel = supabase
       .channel('admin-conversations')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => {
         fetchConversations();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+        fetchUnreadCounts();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
