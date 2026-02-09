@@ -44,6 +44,14 @@ export function useThemeVersions() {
   });
 }
 
+/** Increment semver patch: 1.0.0 → 1.0.1 */
+export function incrementVersion(version: string): string {
+  const parts = version.split('.').map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return '1.0.0';
+  parts[2] += 1;
+  return parts.join('.');
+}
+
 export function useCreateThemeVersion() {
   const queryClient = useQueryClient();
 
