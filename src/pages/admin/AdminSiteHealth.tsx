@@ -9,6 +9,7 @@ import {
   XCircle,
   Mail,
   Send,
+  Wrench,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,8 @@ import { ScheduleCard } from "@/components/admin/sitehealth/ScheduleCard";
 import { CategoryFilter } from "@/components/admin/sitehealth/CategoryFilter";
 import { HealthScoreTrendChart } from "@/components/admin/sitehealth/HealthScoreTrendChart";
 import { PageSeoBreakdown } from "@/components/admin/sitehealth/PageSeoBreakdown";
+import { AutoFixDialog } from "@/components/admin/sitehealth/AutoFixDialog";
+import { AutoFixSummary } from "@/components/admin/sitehealth/AutoFixSummary";
 import { StatCard } from "@/components/admin/StatCard";
 
 export default function AdminSiteHealth() {
@@ -42,6 +45,17 @@ export default function AdminSiteHealth() {
     applyFix,
     isFixing,
     sendScanNotification,
+    // Fix All
+    fixAllIssues,
+    isFixingAll,
+    fixableCount,
+    fixAllItems,
+    fixAllProgress,
+    fixAllComplete,
+    fixAllSummary,
+    showFixDialog,
+    setShowFixDialog,
+    rescanAfterFix,
   } = useSiteHealth();
 
   const [selectedCategory, setSelectedCategory] = useState<HealthCheckCategory | "all">("all");
@@ -90,7 +104,6 @@ export default function AdminSiteHealth() {
     return healthChecks.filter((c) => c.category === selectedCategory);
   }, [selectedCategory]);
 
-  // Check which checks are currently running
   const completedCheckIds = new Set(currentResults.map((r) => r.checkId));
 
   const handleSendNotification = async () => {
@@ -116,25 +129,56 @@ export default function AdminSiteHealth() {
                 : "Monitor and optimize your site's performance, security, and quality"}
             </p>
           </div>
-          <Button
-            onClick={() => runScan()}
-            disabled={isScanning}
-            className="gap-2"
-            size="lg"
-          >
-            {isScanning ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {language === "ar" ? "جاري الفحص..." : "Scanning..."}
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4" />
-                {language === "ar" ? "بدء فحص شامل" : "Run Full Scan"}
-              </>
+          <div className="flex items-center gap-2">
+            {fixableCount > 0 && (
+              <Button
+                onClick={fixAllIssues}
+                disabled={isScanning || isFixingAll}
+                variant="default"
+                className="gap-2"
+                size="lg"
+              >
+                {isFixingAll ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {language === "ar" ? "جاري الإصلاح..." : "Fixing..."}
+                  </>
+                ) : (
+                  <>
+                    <Wrench className="h-4 w-4" />
+                    {language === "ar"
+                      ? `إصلاح الكل (${fixableCount})`
+                      : `Fix All (${fixableCount} issues)`}
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
+            <Button
+              onClick={() => runScan()}
+              disabled={isScanning || isFixingAll}
+              variant={fixableCount > 0 ? "outline" : "default"}
+              className="gap-2"
+              size="lg"
+            >
+              {isScanning ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {language === "ar" ? "جاري الفحص..." : "Scanning..."}
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  {language === "ar" ? "بدء فحص شامل" : "Run Full Scan"}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
+
+        {/* Auto-Fix Summary (shown after fix completes) */}
+        {fixAllSummary && fixAllComplete && !showFixDialog && (
+          <AutoFixSummary summary={fixAllSummary} />
+        )}
 
         {/* Scan Progress */}
         {isScanning && (
@@ -313,6 +357,18 @@ export default function AdminSiteHealth() {
             />
           </div>
         </div>
+
+        {/* Auto-Fix Dialog */}
+        <AutoFixDialog
+          open={showFixDialog}
+          onOpenChange={setShowFixDialog}
+          fixItems={fixAllItems}
+          progress={fixAllProgress}
+          isComplete={fixAllComplete}
+          summary={fixAllSummary}
+          onRescan={rescanAfterFix}
+          isRescanning={isScanning}
+        />
       </div>
     </AdminLayout>
   );

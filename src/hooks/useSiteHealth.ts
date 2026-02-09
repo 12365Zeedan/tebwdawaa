@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { healthChecks, HealthCheckResult, HealthCheckCategory } from "@/data/healthChecks";
 import { toast } from "sonner";
-import { useSeoFixes } from "./useSeoFixes";
+import { useHealthFixes } from "./useHealthFixes";
+import type { FixItem, FixSummary } from "@/components/admin/sitehealth/AutoFixDialog";
 
 // Simulated health check runner (client-side analysis)
 function runHealthCheck(checkId: string): HealthCheckResult {
@@ -215,7 +216,15 @@ export function useSiteHealth() {
   const [scanProgress, setScanProgress] = useState(0);
   const [currentResults, setCurrentResults] = useState<HealthCheckResult[]>([]);
   const [isFixing, setIsFixing] = useState(false);
-  const { applyFix: applySeoFix } = useSeoFixes();
+  const { applyFix: applyHealthFix } = useHealthFixes();
+
+  // Fix All state
+  const [isFixingAll, setIsFixingAll] = useState(false);
+  const [fixAllItems, setFixAllItems] = useState<FixItem[]>([]);
+  const [fixAllProgress, setFixAllProgress] = useState(0);
+  const [fixAllComplete, setFixAllComplete] = useState(false);
+  const [fixAllSummary, setFixAllSummary] = useState<FixSummary | null>(null);
+  const [showFixDialog, setShowFixDialog] = useState(false);
 
   // Fetch scan history
   const { data: scanHistory = [], isLoading: isLoadingHistory } = useQuery({
@@ -259,7 +268,6 @@ export function useSiteHealth() {
     const results: HealthCheckResult[] = [];
 
     for (let i = 0; i < filteredChecks.length; i++) {
-      // Small delay for visual feedback
       await new Promise((r) => setTimeout(r, 150));
       const result = runHealthCheck(filteredChecks[i].id);
       results.push(result);
@@ -271,7 +279,6 @@ export function useSiteHealth() {
     const passed = results.filter((r) => r.status === "passed").length;
     const overallScore = Math.round((passed / results.length) * 100);
 
-    // Save to database
     try {
       await supabase.from("site_health_scans").insert({
         scan_type: "manual",
@@ -336,14 +343,13 @@ export function useSiteHealth() {
     },
   });
 
-  // Apply an auto-fix
+  // Apply a single auto-fix
   const applyFix = useCallback(
     async (checkId: string): Promise<boolean> => {
       setIsFixing(true);
       try {
-        const success = await applySeoFix(checkId);
+        const success = await applyHealthFix(checkId);
         if (success) {
-          // Update the result in current results to show fix applied
           setCurrentResults((prev) =>
             prev.map((r) =>
               r.checkId === checkId ? { ...r, fixApplied: true } : r
@@ -355,8 +361,120 @@ export function useSiteHealth() {
         setIsFixing(false);
       }
     },
-    [applySeoFix]
+    [applyHealthFix]
   );
+
+  // Fix All Issues
+  const fixAllIssues = useCallback(async () => {
+    // Get all failed/warning results where the check is auto-fixable
+    const fixableIssues = currentResults
+      .filter((r) => (r.status === "failed" || r.status === "warning") && !r.fixApplied)
+      .filter((r) => {
+        const check = healthChecks.find((c) => c.id === r.checkId);
+        return check?.autoFixable;
+      });
+
+    if (fixableIssues.length === 0) {
+      toast.info("No fixable issues found — run a scan first");
+      return;
+    }
+
+    // Calculate score before
+    const passed = currentResults.filter((r) => r.status === "passed").length;
+    const scoreBefore = currentResults.length > 0 ? Math.round((passed / currentResults.length) * 100) : 0;
+
+    // Build fix items
+    const items: FixItem[] = fixableIssues.map((r) => {
+      const check = healthChecks.find((c) => c.id === r.checkId)!;
+      return {
+        checkId: r.checkId,
+        name: check.name,
+        nameAr: check.nameAr,
+        status: "pending" as const,
+      };
+    });
+
+    setFixAllItems(items);
+    setFixAllProgress(0);
+    setFixAllComplete(false);
+    setFixAllSummary(null);
+    setShowFixDialog(true);
+    setIsFixingAll(true);
+
+    const fixed: string[] = [];
+    const failed: string[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      // Update current item to "fixing"
+      setFixAllItems((prev) =>
+        prev.map((item, idx) => (idx === i ? { ...item, status: "fixing" } : item))
+      );
+
+      try {
+        const success = await applyHealthFix(items[i].checkId);
+        if (success) {
+          fixed.push(items[i].checkId);
+          setFixAllItems((prev) =>
+            prev.map((item, idx) => (idx === i ? { ...item, status: "fixed" } : item))
+          );
+          // Update current results
+          setCurrentResults((prev) =>
+            prev.map((r) =>
+              r.checkId === items[i].checkId ? { ...r, fixApplied: true } : r
+            )
+          );
+        } else {
+          failed.push(items[i].checkId);
+          setFixAllItems((prev) =>
+            prev.map((item, idx) => (idx === i ? { ...item, status: "failed" } : item))
+          );
+        }
+      } catch {
+        failed.push(items[i].checkId);
+        setFixAllItems((prev) =>
+          prev.map((item, idx) => (idx === i ? { ...item, status: "failed" } : item))
+        );
+      }
+
+      setFixAllProgress(Math.round(((i + 1) / items.length) * 100));
+    }
+
+    const skipped = currentResults
+      .filter((r) => (r.status === "failed" || r.status === "warning") && !r.fixApplied)
+      .filter((r) => {
+        const check = healthChecks.find((c) => c.id === r.checkId);
+        return !check?.autoFixable;
+      })
+      .map((r) => r.checkId);
+
+    const summary: FixSummary = {
+      fixed,
+      failed,
+      skipped,
+      scoreBefore,
+      scoreAfter: null, // Will be filled after re-scan
+    };
+
+    setFixAllSummary(summary);
+    setFixAllComplete(true);
+    setIsFixingAll(false);
+  }, [currentResults, applyHealthFix]);
+
+  // Get count of fixable issues
+  const fixableCount = currentResults
+    .filter((r) => (r.status === "failed" || r.status === "warning") && !r.fixApplied)
+    .filter((r) => {
+      const check = healthChecks.find((c) => c.id === r.checkId);
+      return check?.autoFixable;
+    }).length;
+
+  // Re-scan after fix and update summary score
+  const rescanAfterFix = useCallback(async () => {
+    const result = await runScan();
+    if (result && fixAllSummary) {
+      setFixAllSummary((prev) => prev ? { ...prev, scoreAfter: result.overallScore } : prev);
+    }
+  }, [runScan, fixAllSummary]);
 
   // Send scan notification email
   const sendScanNotification = useCallback(
@@ -383,7 +501,6 @@ export function useSiteHealth() {
           };
         });
 
-      // Fetch store name
       const { data: storeData } = await supabase
         .from("app_settings")
         .select("value")
@@ -441,5 +558,16 @@ export function useSiteHealth() {
     applyFix,
     isFixing,
     sendScanNotification,
+    // Fix All
+    fixAllIssues,
+    isFixingAll,
+    fixableCount,
+    fixAllItems,
+    fixAllProgress,
+    fixAllComplete,
+    fixAllSummary,
+    showFixDialog,
+    setShowFixDialog,
+    rescanAfterFix,
   };
 }
