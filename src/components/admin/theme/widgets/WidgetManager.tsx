@@ -45,7 +45,7 @@ const PAGE_OPTIONS = [
   { value: 'wishlist', en: 'Wishlist', ar: 'المفضلة' },
 ];
 
-export function WidgetManager() {
+export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
   const { language } = useLanguage();
   const { toast } = useToast();
   const { widgets, isLoading, createWidget, updateWidget, deleteWidget } = useCustomWidgets();
