@@ -20,7 +20,7 @@ export function AutoFixSummary({ summary }: AutoFixSummaryProps) {
         <div className="flex items-center gap-3 mb-3">
           <TrendingUp className="h-5 w-5 text-green-600" />
           <p className="font-semibold text-sm">
-            {language === "ar" ? "ملخص الإصلاح التلقائي" : "Auto-Fix Summary"}
+            {language === "ar" ? "ملخص التحسين" : "Optimization Summary"}
           </p>
         </div>
 

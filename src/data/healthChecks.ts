@@ -34,7 +34,8 @@ export const healthChecks: HealthCheck[] = [
     descriptionAr: "يتحقق مما إذا كان حجم حزمة JavaScript ضمن الحدود المقبولة",
     category: "performance",
     severity: "warning",
-    autoFixable: false,
+    autoFixable: true,
+    fixDescription: "Enable code splitting and tree shaking optimization",
   },
   {
     id: "perf-image-optimization",
