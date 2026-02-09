@@ -97,6 +97,7 @@ const App = () => (
                 <Route path="/admin/site-health" element={<AdminSiteHealth />} />
                 <Route path="/admin/backups" element={<AdminBackups />} />
                 <Route path="/admin/trends" element={<AdminTrends />} />
+                <Route path="/admin/chat" element={<AdminChat />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 
                 {/* Catch-all */}
