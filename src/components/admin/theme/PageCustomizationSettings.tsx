@@ -245,7 +245,7 @@ export function PageCustomizationSettings() {
           {/* Settings */}
           <div className="space-y-4">
             <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsList className="w-full grid grid-cols-5 mb-4">
                 <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
                   <Palette className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'الألوان' : 'Colors'}
@@ -261,6 +261,10 @@ export function PageCustomizationSettings() {
                 <TabsTrigger value="styles" className="gap-1.5 text-xs sm:text-sm">
                   <Sparkles className="h-3.5 w-3.5 hidden sm:block" />
                   {language === 'ar' ? 'الأنماط' : 'Styles'}
+                </TabsTrigger>
+                <TabsTrigger value="content" className="gap-1.5 text-xs sm:text-sm">
+                  <FileText className="h-3.5 w-3.5 hidden sm:block" />
+                  {language === 'ar' ? 'المحتوى' : 'Content'}
                 </TabsTrigger>
               </TabsList>
 
