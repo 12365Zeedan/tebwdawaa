@@ -17,7 +17,31 @@ interface ChatSettings {
   wait_message_ar: string;
   whatsapp_number: string;
   is_online: boolean;
+  offline_message: string;
+  offline_message_ar: string;
+  duty_start_time: string;
+  duty_end_time: string;
 }
+
+const isWithinDutyHours = (settings: ChatSettings): boolean => {
+  // Get current time in Saudi Arabia (Asia/Riyadh, UTC+3)
+  const now = new Date();
+  const saHours = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Riyadh',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now);
+  const [h, m] = saHours.split(':').map(Number);
+  const currentMinutes = h * 60 + m;
+
+  const [sh, sm] = (settings.duty_start_time || '08:00').split(':').map(Number);
+  const [eh, em] = (settings.duty_end_time || '23:00').split(':').map(Number);
+  const startMinutes = sh * 60 + sm;
+  const endMinutes = eh * 60 + em;
+
+  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+};
 
 export function useChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,13 +149,22 @@ export function useChatWidget() {
         if (error || !newConv) throw error;
         convId = newConv.id;
 
-        // Send welcome and wait messages as system messages
+        // Send welcome message
         const welcomeMsg = settings?.welcome_message || 'Welcome! How can we help you?';
-        const waitMsg = settings?.wait_message || 'Please wait, the pharmacist will respond soon.';
-        await supabase.from('chat_messages').insert([
+        const messagesToInsert: { conversation_id: string; sender_type: string; message: string }[] = [
           { conversation_id: convId, sender_type: 'pharmacist', message: welcomeMsg },
-          { conversation_id: convId, sender_type: 'pharmacist', message: waitMsg },
-        ]);
+        ];
+
+        // Check if within duty hours
+        if (settings && !isWithinDutyHours(settings)) {
+          const offlineMsg = settings.offline_message || 'We are currently outside our working hours. We will get back to you as soon as possible.';
+          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: offlineMsg });
+        } else {
+          const waitMsg = settings?.wait_message || 'Please wait, the pharmacist will respond soon.';
+          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: waitMsg });
+        }
+
+        await supabase.from('chat_messages').insert(messagesToInsert);
       }
 
       setConversationId(convId);
