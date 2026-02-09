@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { WidgetManager } from './widgets/WidgetManager';
-import { WidgetManager } from './widgets/WidgetManager';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 const DEVICE_WIDTHS: Record<DeviceMode, number> = { desktop: 1280, tablet: 768, mobile: 375 };
