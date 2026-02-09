@@ -167,7 +167,7 @@ export function Footer() {
                   value={footerEmail}
                   onChange={(e) => setFooterEmail(e.target.value)}
                   placeholder={language === 'ar' ? 'بريدك الإلكتروني' : 'Your email'}
-                  className="flex-1 bg-link/10 border-link/20 text-link placeholder:text-link/50"
+                  className="flex-1 bg-white border-white/20 text-foreground placeholder:text-muted-foreground"
                   required
                 />
                 <Button
