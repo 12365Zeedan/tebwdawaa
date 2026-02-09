@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Swords, Shield, AlertTriangle, Lightbulb, TrendingUp, DollarSign } from "lucide-react";
+import { Search, Swords, Shield, Lightbulb, TrendingUp, DollarSign } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { CompetitorAnalysis } from "@/hooks/useTrendsAgent";
+import { TrendsPagination, usePagination } from "./TrendsPagination";
+import type { CompetitorAnalysis, Competitor } from "@/hooks/useTrendsAgent";
 
 interface CompetitorAnalysisTabProps {
   analysis: CompetitorAnalysis | null;
@@ -15,9 +16,27 @@ interface CompetitorAnalysisTabProps {
   onAnalyze: (query?: string) => void;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function CompetitorAnalysisTab({ analysis, isLoading, onAnalyze }: CompetitorAnalysisTabProps) {
   const { language } = useLanguage();
   const [focusQuery, setFocusQuery] = useState("");
+
+  const competitors = analysis?.competitors || [];
+
+  const {
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+    paginatedItems,
+    setCurrentPage,
+    resetPage,
+  } = usePagination(competitors, ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    resetPage();
+  }, [analysis]);
 
   const getThreatBadge = (level: string) => {
     const styles: Record<string, string> = {
@@ -121,6 +140,7 @@ export function CompetitorAnalysisTab({ analysis, isLoading, onAnalyze }: Compet
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-8">#</TableHead>
                     <TableHead>{language === "ar" ? "المنافس" : "Competitor"}</TableHead>
                     <TableHead>{language === "ar" ? "النوع" : "Type"}</TableHead>
                     <TableHead>{language === "ar" ? "التسعير" : "Pricing"}</TableHead>
@@ -131,44 +151,55 @@ export function CompetitorAnalysisTab({ analysis, isLoading, onAnalyze }: Compet
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {analysis.competitors.map((comp, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-sm">{comp.name}</p>
-                          <p className="text-xs text-muted-foreground" dir="rtl">{comp.name_ar}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getTypeBadge(comp.type)}</TableCell>
-                      <TableCell>{getPriceBadge(comp.price_positioning)}</TableCell>
-                      <TableCell>{getThreatBadge(comp.threat_level)}</TableCell>
-                      <TableCell>
-                        <ul className="text-xs space-y-0.5">
-                          {comp.strengths.map((s, i) => (
-                            <li key={i} className="flex items-start gap-1">
-                              <span className="text-green-600 mt-0.5">✓</span>
-                              <span>{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </TableCell>
-                      <TableCell>
-                        <ul className="text-xs space-y-0.5">
-                          {comp.weaknesses.map((w, i) => (
-                            <li key={i} className="flex items-start gap-1">
-                              <span className="text-red-500 mt-0.5">✗</span>
-                              <span>{w}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground max-w-[180px]">
-                        {comp.pricing_strategy}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {paginatedItems.map((comp, idx) => {
+                    const rank = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell className="text-xs text-muted-foreground font-medium">{rank}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-sm">{comp.name}</p>
+                            <p className="text-xs text-muted-foreground" dir="rtl">{comp.name_ar}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getTypeBadge(comp.type)}</TableCell>
+                        <TableCell>{getPriceBadge(comp.price_positioning)}</TableCell>
+                        <TableCell>{getThreatBadge(comp.threat_level)}</TableCell>
+                        <TableCell>
+                          <ul className="text-xs space-y-0.5">
+                            {comp.strengths.map((s, i) => (
+                              <li key={i} className="flex items-start gap-1">
+                                <span className="text-green-600 mt-0.5">✓</span>
+                                <span>{s}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </TableCell>
+                        <TableCell>
+                          <ul className="text-xs space-y-0.5">
+                            {comp.weaknesses.map((w, i) => (
+                              <li key={i} className="flex items-start gap-1">
+                                <span className="text-red-500 mt-0.5">✗</span>
+                                <span>{w}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[180px]">
+                          {comp.pricing_strategy}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
+              <TrendsPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+              />
             </CardContent>
           </Card>
 
