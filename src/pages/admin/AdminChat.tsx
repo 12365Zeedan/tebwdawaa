@@ -61,6 +61,7 @@ interface ChatSettings {
 }
 
 export default function AdminChat() {
+  const [statusFilter, setStatusFilter] = useState<'active' | 'closed'>('active');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConv, setSelectedConv] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
