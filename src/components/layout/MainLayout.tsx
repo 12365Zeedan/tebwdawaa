@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Navbar } from './Navbar';
+import { CategoryNavBar } from './CategoryNavBar';
 import { Footer } from './Footer';
 import { MaintenanceBanner } from './MaintenanceBanner';
 import { NewsBanner } from './NewsBanner';
@@ -29,6 +30,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <NewsBanner />
       <MaintenanceBanner />
       <Navbar />
+      <CategoryNavBar />
       <main className="flex-1">{children}</main>
       <Footer />
       <ComparisonBar />
