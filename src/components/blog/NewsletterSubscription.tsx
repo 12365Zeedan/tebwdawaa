@@ -65,7 +65,7 @@ export function NewsletterSubscription() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={isAr ? 'بريدك الإلكتروني' : 'Your email address'}
-          className="flex-1 bg-background"
+          className="flex-1 bg-white text-foreground placeholder:text-muted-foreground"
           required
         />
         <Button
