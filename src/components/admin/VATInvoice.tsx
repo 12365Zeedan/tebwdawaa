@@ -122,15 +122,18 @@ const VATInvoice: React.FC<VATInvoiceProps> = ({ order, companyInfo }) => {
 
     setIsDownloading(true);
     try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Invoice-${order.order_number}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      };
-      await html2pdf().set(opt).from(content).save();
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(content, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // 10mm margin each side
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'JPEG', 10, 10, pdfWidth, pdfHeight);
+      pdf.save(`Invoice-${order.order_number}.pdf`);
     } catch (error) {
       console.error('PDF download failed:', error);
     } finally {
