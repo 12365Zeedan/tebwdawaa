@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Minus, Search, Sparkles, ArrowUp, ArrowDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Search, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TrendsPagination, usePagination } from "./TrendsPagination";
 import type { TrendingKeyword } from "@/hooks/useTrendsAgent";
 
 interface TrendingKeywordsTabProps {
@@ -15,9 +16,30 @@ interface TrendingKeywordsTabProps {
   onAnalyze: (query?: string) => void;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export function TrendingKeywordsTab({ keywords, isLoading, onAnalyze }: TrendingKeywordsTabProps) {
   const { language } = useLanguage();
   const [focusQuery, setFocusQuery] = useState("");
+
+  const sortedKeywords = keywords
+    ? [...keywords.keywords].sort((a, b) => b.relevance_score - a.relevance_score)
+    : [];
+
+  const {
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+    paginatedItems,
+    setCurrentPage,
+    resetPage,
+  } = usePagination(sortedKeywords, ITEMS_PER_PAGE);
+
+  // Reset page when new results arrive
+  useEffect(() => {
+    resetPage();
+  }, [keywords]);
 
   const getTrendIcon = (direction: string) => {
     switch (direction) {
@@ -112,6 +134,7 @@ export function TrendingKeywordsTab({ keywords, isLoading, onAnalyze }: Trending
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-8">#</TableHead>
                     <TableHead>{language === "ar" ? "الكلمة المفتاحية" : "Keyword"}</TableHead>
                     <TableHead>{language === "ar" ? "عربي" : "Arabic"}</TableHead>
                     <TableHead>{language === "ar" ? "الاتجاه" : "Trend"}</TableHead>
@@ -123,39 +146,50 @@ export function TrendingKeywordsTab({ keywords, isLoading, onAnalyze }: Trending
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {[...keywords.keywords].sort((a, b) => b.relevance_score - a.relevance_score).map((kw, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell className="font-medium">{kw.keyword_en}</TableCell>
-                      <TableCell className="font-arabic text-right" dir="rtl">{kw.keyword_ar}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          {getTrendIcon(kw.trend_direction)}
-                          <span className="text-xs capitalize">{kw.trend_direction}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getVolumeBadge(kw.search_volume)}</TableCell>
-                      <TableCell>{getCompetitionBadge(kw.competition)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <div className="w-8 h-2 rounded-full bg-muted overflow-hidden">
-                            <div
-                              className="h-full bg-primary rounded-full"
-                              style={{ width: `${kw.relevance_score}%` }}
-                            />
+                  {paginatedItems.map((kw, idx) => {
+                    const rank = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell className="text-xs text-muted-foreground font-medium">{rank}</TableCell>
+                        <TableCell className="font-medium">{kw.keyword_en}</TableCell>
+                        <TableCell className="font-arabic text-right" dir="rtl">{kw.keyword_ar}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {getTrendIcon(kw.trend_direction)}
+                            <span className="text-xs capitalize">{kw.trend_direction}</span>
                           </div>
-                          <span className="text-xs">{kw.relevance_score}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize text-xs">{kw.category}</Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={kw.tip}>
-                        {kw.tip}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>{getVolumeBadge(kw.search_volume)}</TableCell>
+                        <TableCell>{getCompetitionBadge(kw.competition)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <div className="w-8 h-2 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full"
+                                style={{ width: `${kw.relevance_score}%` }}
+                              />
+                            </div>
+                            <span className="text-xs">{kw.relevance_score}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize text-xs">{kw.category}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={kw.tip}>
+                          {kw.tip}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
+              <TrendsPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+              />
             </CardContent>
           </Card>
         </>
