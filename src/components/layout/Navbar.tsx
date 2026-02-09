@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useBranding } from "@/hooks/useBranding";
+import { useTheme } from "@/contexts/ThemeContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 export function Navbar() {
@@ -36,6 +37,8 @@ export function Navbar() {
     data: settings
   } = useStoreSettings();
   const { data: branding } = useBranding();
+  const { theme } = useTheme();
+  const header = theme.header;
   const storeName = language === "ar" ? settings?.storeNameAr || "صيدلية" : settings?.storeName || "PharmaCare";
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
   const navLinks = [{
@@ -55,8 +58,36 @@ export function Navbar() {
     label: t("nav.about")
   }];
   const isActive = (path: string) => location.pathname === path;
-  return <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-header backdrop-blur supports-[backdrop-filter]:bg-header/95">
-      <div className="container flex h-16 items-center justify-between">
+
+  const heightClass = header.height === 'compact' ? 'h-12' : header.height === 'tall' ? 'h-20' : 'h-16';
+  const fontSizeClass = header.fontSize === 'sm' ? 'text-sm' : header.fontSize === 'lg' ? 'text-base' : 'text-sm';
+  const fontWeightClass = header.fontWeight === 'normal' ? 'font-normal' : header.fontWeight === 'semibold' ? 'font-semibold' : header.fontWeight === 'bold' ? 'font-bold' : 'font-medium';
+
+  const headerStyle: React.CSSProperties = {};
+  if (header.textColor) {
+    headerStyle.color = `hsl(${header.textColor})`;
+  }
+  if (header.borderColor && header.borderBottom) {
+    headerStyle.borderColor = `hsl(${header.borderColor})`;
+  }
+
+  return <header
+    className={cn(
+      "z-50 w-full bg-header",
+      header.sticky && "sticky top-0",
+      header.borderBottom && "border-b border-border/40",
+      header.shadow === 'sm' && "shadow-sm",
+      header.shadow === 'md' && "shadow-md",
+      header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/95",
+    )}
+    style={headerStyle}
+  >
+      <div className={cn(
+        "flex items-center justify-between",
+        heightClass,
+        header.fullWidth ? "px-4 sm:px-8" : "container",
+        header.layoutStyle === 'centered' && "flex-wrap"
+      )}>
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           {logoUrl ? (
@@ -72,8 +103,8 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map(link => <Link key={link.href} to={link.href} className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-colors", isActive(link.href) ? "bg-primary text-primary-foreground" : "text-link hover:text-link-hover hover:bg-white/10")}>
+        <nav className={cn("hidden md:flex items-center gap-1", header.layoutStyle === 'centered' && "order-last w-full justify-center mt-1")}>
+          {navLinks.map(link => <Link key={link.href} to={link.href} className={cn("px-4 py-2 rounded-lg transition-colors", fontSizeClass, fontWeightClass, isActive(link.href) ? "bg-primary text-primary-foreground" : "text-link hover:text-link-hover hover:bg-white/10")}>
               {link.label}
             </Link>)}
         </nav>
