@@ -22,6 +22,7 @@ import {
   HardDrive,
   Bot,
   RefreshCw,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -54,6 +55,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/backups", icon: HardDrive, label: language === "ar" ? "النسخ الاحتياطي" : "Backups" },
     { href: "/admin/trends", icon: Bot, label: language === "ar" ? "وكيل الاتجاهات" : "AI Trends" },
     { href: "/admin/theme-updates", icon: RefreshCw, label: language === "ar" ? "تحديثات القالب" : "Theme Updates" },
+    { href: "/admin/theme-docs", icon: BookOpen, label: language === "ar" ? "دليل القالب" : "Theme Docs" },
     { href: "/admin/settings", icon: Settings, label: t("admin.settings") },
   ];
 
