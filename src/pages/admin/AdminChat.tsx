@@ -220,9 +220,16 @@ export default function AdminChat() {
                             <Phone className="w-4 h-4 text-muted-foreground" />
                             <span className="font-medium text-sm" dir="ltr">{conv.customer_phone}</span>
                           </div>
-                          <Badge variant={conv.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                            {conv.status}
-                          </Badge>
+                          <div className="flex items-center gap-1.5">
+                            {unreadCounts[conv.id] > 0 && (
+                              <span className="min-w-5 h-5 rounded-full bg-[#25D366] text-white text-xs flex items-center justify-center px-1 font-bold">
+                                {unreadCounts[conv.id]}
+                              </span>
+                            )}
+                            <Badge variant={conv.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                              {conv.status}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                           <Clock className="w-3 h-3" />
