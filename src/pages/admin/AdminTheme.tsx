@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, FileStack } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
@@ -14,6 +14,7 @@ import { HeaderSettings } from '@/components/admin/theme/HeaderSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
 import { ThemeUpdatesContent } from '@/components/admin/theme/ThemeUpdatesContent';
 import { ThemeDocumentationContent } from '@/components/admin/theme/ThemeDocumentationContent';
+import { PageCustomizationSettings } from '@/components/admin/theme/PageCustomizationSettings';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AdminTheme() {
