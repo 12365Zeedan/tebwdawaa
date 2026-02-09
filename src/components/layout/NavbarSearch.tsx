@@ -30,7 +30,7 @@ export function NavbarSearch() {
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={t("products.search")}
         className={cn(
-          "w-48 lg:w-64 h-9 bg-white/10 border-white/20 text-link placeholder:text-link/50 focus-visible:ring-primary/50 focus-visible:bg-white/15 transition-all",
+          "w-48 lg:w-64 h-9 bg-white border-white/20 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 transition-all",
           direction === "rtl" ? "pr-9 pl-3" : "pl-9 pr-3"
         )}
       />
