@@ -11,6 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2 } from 'lucide-react';
 import { CustomWidget, CarouselConfig, BannerConfig, TestimonialsConfig, RichTextConfig, CarouselSlide, TestimonialItem } from '@/hooks/useCustomWidgets';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import { useCustomWidgets } from '@/hooks/useCustomWidgets';
 
 interface Props {
@@ -145,7 +146,16 @@ function CarouselEditor({ config, onChange }: { config: CarouselConfig; onChange
               </Button>
             </div>
             <div className="space-y-2">
-              <Input placeholder="Image URL" value={slide.imageUrl} onChange={(e) => updateSlide(slide.id, { imageUrl: e.target.value })} className="text-xs h-8" />
+              <div className="space-y-1">
+                <Label className="text-xs">{language === 'ar' ? 'صورة الشريحة' : 'Slide Image'}</Label>
+                <ImageUpload
+                  value={slide.imageUrl || null}
+                  onChange={(url) => updateSlide(slide.id, { imageUrl: url || '' })}
+                  bucket="product-images"
+                  folder="widgets/carousel"
+                  className="[&_img]:h-32 [&_div.h-48]:h-32"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <Input placeholder="Title (EN)" value={slide.title} onChange={(e) => updateSlide(slide.id, { title: e.target.value })} className="text-xs h-8" />
                 <Input placeholder="العنوان (AR)" value={slide.titleAr} onChange={(e) => updateSlide(slide.id, { titleAr: e.target.value })} dir="rtl" className="text-xs h-8" />
@@ -232,7 +242,16 @@ function BannerEditor({ config, onChange }: { config: BannerConfig; onChange: (c
   const { language } = useLanguage();
   return (
     <div className="space-y-3">
-      <Input placeholder="Image URL" value={config.imageUrl} onChange={(e) => onChange({ ...config, imageUrl: e.target.value })} className="text-xs h-8" />
+      <div className="space-y-1">
+        <Label className="text-xs">{language === 'ar' ? 'صورة البانر' : 'Banner Image'}</Label>
+        <ImageUpload
+          value={config.imageUrl || null}
+          onChange={(url) => onChange({ ...config, imageUrl: url || '' })}
+          bucket="product-images"
+          folder="widgets/banners"
+          className="[&_img]:h-36 [&_div.h-48]:h-36"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-2">
         <Input placeholder="Title (EN)" value={config.title} onChange={(e) => onChange({ ...config, title: e.target.value })} className="text-xs h-8" />
         <Input placeholder="العنوان (AR)" value={config.titleAr} onChange={(e) => onChange({ ...config, titleAr: e.target.value })} dir="rtl" className="text-xs h-8" />
