@@ -45,7 +45,7 @@ const PAGE_OPTIONS = [
   { value: 'wishlist', en: 'Wishlist', ar: 'المفضلة' },
 ];
 
-export function WidgetManager() {
+export function WidgetManager({ pageFilter }: { pageFilter?: string } = {}) {
   const { language } = useLanguage();
   const { toast } = useToast();
   const { widgets, isLoading, createWidget, updateWidget, deleteWidget } = useCustomWidgets();
@@ -55,12 +55,19 @@ export function WidgetManager() {
   const [duplicatePage, setDuplicatePage] = useState('home');
   const [editingWidget, setEditingWidget] = useState<CustomWidget | null>(null);
   const [newWidgetType, setNewWidgetType] = useState<CustomWidget['widget_type']>('carousel');
-  const [newWidgetPage, setNewWidgetPage] = useState('home');
+  const [newWidgetPage, setNewWidgetPage] = useState(pageFilter || 'home');
   const [newWidgetTitle, setNewWidgetTitle] = useState('');
   const [newWidgetTitleAr, setNewWidgetTitleAr] = useState('');
-  const [selectedPage, setSelectedPage] = useState<string>('all');
+  const [selectedPage, setSelectedPage] = useState<string>(pageFilter || 'all');
 
-  const filteredWidgets = selectedPage === 'all' ? widgets : widgets.filter(w => w.page === selectedPage);
+  // Map page keys between customization and widget systems
+  const mapPageKey = (key: string) => {
+    const mapping: Record<string, string> = { homepage: 'home' };
+    return mapping[key] || key;
+  };
+
+  const effectiveFilter = pageFilter ? mapPageKey(pageFilter) : (selectedPage === 'all' ? null : selectedPage);
+  const filteredWidgets = effectiveFilter ? widgets.filter(w => w.page === effectiveFilter) : widgets;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -68,8 +75,9 @@ export function WidgetManager() {
   );
 
   const handleAddWidget = () => {
+    const targetPage = pageFilter ? mapPageKey(pageFilter) : newWidgetPage;
     createWidget.mutate({
-      page: newWidgetPage,
+      page: targetPage,
       widget_type: newWidgetType,
       title: newWidgetTitle || undefined,
       title_ar: newWidgetTitleAr || undefined,
@@ -132,23 +140,25 @@ export function WidgetManager() {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
-          <Select value={selectedPage} onValueChange={setSelectedPage}>
-            <SelectTrigger className="h-8 w-[150px] text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" className="text-xs">
-                {language === 'ar' ? 'كل الصفحات' : 'All Pages'}
-              </SelectItem>
-              {PAGE_OPTIONS.map(p => (
-                <SelectItem key={p.value} value={p.value} className="text-xs">
-                  {language === 'ar' ? p.ar : p.en}
+          {!pageFilter && (
+            <Select value={selectedPage} onValueChange={setSelectedPage}>
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="text-xs">
+                  {language === 'ar' ? 'كل الصفحات' : 'All Pages'}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                {PAGE_OPTIONS.map(p => (
+                  <SelectItem key={p.value} value={p.value} className="text-xs">
+                    {language === 'ar' ? p.ar : p.en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
-          <Button size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5 h-8">
+          <Button size="sm" onClick={() => setAddDialogOpen(true)} className="gap-1.5 h-8 ml-auto">
             <Plus className="h-3.5 w-3.5" />
             {language === 'ar' ? 'إضافة ويدجت' : 'Add Widget'}
           </Button>
@@ -225,21 +235,23 @@ export function WidgetManager() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>{language === 'ar' ? 'الصفحة' : 'Page'}</Label>
-              <Select value={newWidgetPage} onValueChange={setNewWidgetPage}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAGE_OPTIONS.map(p => (
-                    <SelectItem key={p.value} value={p.value}>
-                      {language === 'ar' ? p.ar : p.en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!pageFilter && (
+              <div className="space-y-2">
+                <Label>{language === 'ar' ? 'الصفحة' : 'Page'}</Label>
+                <Select value={newWidgetPage} onValueChange={setNewWidgetPage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_OPTIONS.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {language === 'ar' ? p.ar : p.en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
