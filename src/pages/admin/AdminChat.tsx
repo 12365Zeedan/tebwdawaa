@@ -240,7 +240,25 @@ export default function AdminChat() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-240px)]">
               {/* Conversation List */}
               <Card className="md:col-span-1 flex flex-col">
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 space-y-2">
+                  <div className="flex gap-1">
+                    <Button
+                      variant={statusFilter === 'active' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('active')}
+                      className="flex-1 text-xs"
+                    >
+                      Active
+                    </Button>
+                    <Button
+                      variant={statusFilter === 'closed' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('closed')}
+                      className="flex-1 text-xs"
+                    >
+                      Closed
+                    </Button>
+                  </div>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
