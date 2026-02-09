@@ -67,7 +67,7 @@ export function useChatWidget() {
     fetchMessages();
   }, [conversationId]);
 
-  // Realtime subscription for new messages
+  // Realtime subscription for new messages + conversation status
   useEffect(() => {
     if (!conversationId) return;
     const channel = supabase
@@ -79,6 +79,22 @@ export function useChatWidget() {
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         setMessages(prev => [...prev, payload.new as unknown as ChatMessage]);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chat_conversations',
+        filter: `id=eq.${conversationId}`,
+      }, (payload: any) => {
+        if (payload.new?.status === 'closed') {
+          // Conversation was closed by admin — reset customer widget
+          setConversationId(null);
+          setIsStarted(false);
+          setMessages([]);
+          setPhone('');
+          localStorage.removeItem('chat_conversation_id');
+          localStorage.removeItem('chat_phone');
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
