@@ -8,6 +8,7 @@ import { WeatherDateBar } from './WeatherDateBar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ComparisonBar } from '@/components/store/ComparisonBar';
+import { ChatWidget } from '@/components/chat/ChatWidget';
 import { CanonicalUrl } from '@/components/seo/CanonicalUrl';
 import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd';
 import { BreadcrumbJsonLd } from '@/components/seo/BreadcrumbJsonLd';
@@ -34,6 +35,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <main className="flex-1">{children}</main>
       <Footer />
       <ComparisonBar />
+      <ChatWidget />
     </div>
   );
 }

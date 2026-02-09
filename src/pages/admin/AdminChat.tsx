@@ -1,0 +1,339 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
+import { Send, MessageCircle, Phone, Clock, Settings, Search } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
+interface Conversation {
+  id: string;
+  customer_phone: string;
+  customer_name: string | null;
+  status: string;
+  last_message_at: string;
+  created_at: string;
+}
+
+interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_type: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+interface ChatSettings {
+  id: string;
+  welcome_message: string;
+  welcome_message_ar: string;
+  wait_message: string;
+  wait_message_ar: string;
+  whatsapp_number: string;
+  is_online: boolean;
+}
+
+export default function AdminChat() {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConv, setSelectedConv] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [reply, setReply] = useState('');
+  const [search, setSearch] = useState('');
+  const [settings, setSettings] = useState<ChatSettings | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  // Fetch conversations
+  useEffect(() => {
+    const fetchConversations = async () => {
+      const { data } = await supabase
+        .from('chat_conversations')
+        .select('*')
+        .order('last_message_at', { ascending: false });
+      if (data) setConversations(data as unknown as Conversation[]);
+    };
+    fetchConversations();
+
+    const channel = supabase
+      .channel('admin-conversations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_conversations' }, () => {
+        fetchConversations();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  // Fetch messages for selected conversation
+  useEffect(() => {
+    if (!selectedConv) return;
+    const fetchMessages = async () => {
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('conversation_id', selectedConv)
+        .order('created_at', { ascending: true });
+      if (data) setMessages(data as unknown as ChatMessage[]);
+
+      // Mark as read
+      await supabase
+        .from('chat_messages')
+        .update({ is_read: true })
+        .eq('conversation_id', selectedConv)
+        .eq('sender_type', 'customer')
+        .eq('is_read', false);
+    };
+    fetchMessages();
+
+    const channel = supabase
+      .channel(`admin-chat-${selectedConv}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `conversation_id=eq.${selectedConv}`,
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new as unknown as ChatMessage]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [selectedConv]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Fetch settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from('chat_settings').select('*').limit(1).single();
+      if (data) setSettings(data as unknown as ChatSettings);
+    };
+    fetchSettings();
+  }, []);
+
+  const sendReply = async () => {
+    if (!reply.trim() || !selectedConv) return;
+    const msg = reply.trim();
+    setReply('');
+    await supabase.from('chat_messages').insert({
+      conversation_id: selectedConv,
+      sender_type: 'pharmacist',
+      message: msg,
+    });
+    await supabase.from('chat_conversations').update({ last_message_at: new Date().toISOString() }).eq('id', selectedConv);
+  };
+
+  const saveSettings = async () => {
+    if (!settings) return;
+    setSettingsLoading(true);
+    const { error } = await supabase
+      .from('chat_settings')
+      .update({
+        welcome_message: settings.welcome_message,
+        welcome_message_ar: settings.welcome_message_ar,
+        wait_message: settings.wait_message,
+        wait_message_ar: settings.wait_message_ar,
+        whatsapp_number: settings.whatsapp_number,
+        is_online: settings.is_online,
+      })
+      .eq('id', settings.id);
+    setSettingsLoading(false);
+    if (!error) toast({ title: 'Settings saved successfully' });
+    else toast({ title: 'Error saving settings', variant: 'destructive' });
+  };
+
+  const filteredConversations = conversations.filter(c =>
+    c.customer_phone.includes(search) || c.customer_name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const selectedConversation = conversations.find(c => c.id === selectedConv);
+
+  return (
+    <AdminLayout>
+      <div className="p-4 md:p-6">
+        <h1 className="text-2xl font-bold mb-4">Chat Management</h1>
+        <Tabs defaultValue="conversations">
+          <TabsList>
+            <TabsTrigger value="conversations"><MessageCircle className="w-4 h-4 mr-1" /> Conversations</TabsTrigger>
+            <TabsTrigger value="settings"><Settings className="w-4 h-4 mr-1" /> Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="conversations" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-240px)]">
+              {/* Conversation List */}
+              <Card className="md:col-span-1 flex flex-col">
+                <CardHeader className="pb-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by phone..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 overflow-hidden p-0">
+                  <ScrollArea className="h-full">
+                    {filteredConversations.map(conv => (
+                      <button
+                        key={conv.id}
+                        onClick={() => setSelectedConv(conv.id)}
+                        className={cn(
+                          'w-full text-left px-4 py-3 border-b hover:bg-muted/50 transition-colors',
+                          selectedConv === conv.id && 'bg-muted'
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <span className="font-medium text-sm" dir="ltr">{conv.customer_phone}</span>
+                          </div>
+                          <Badge variant={conv.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                            {conv.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {format(new Date(conv.last_message_at), 'MMM dd, HH:mm')}
+                        </div>
+                      </button>
+                    ))}
+                    {filteredConversations.length === 0 && (
+                      <p className="text-center text-muted-foreground text-sm py-8">No conversations yet</p>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Chat Area */}
+              <Card className="md:col-span-2 flex flex-col">
+                {selectedConv && selectedConversation ? (
+                  <>
+                    <CardHeader className="pb-2 border-b">
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        <CardTitle className="text-base" dir="ltr">{selectedConversation.customer_phone}</CardTitle>
+                        <span className="text-xs text-muted-foreground">
+                          Started {format(new Date(selectedConversation.created_at), 'MMM dd, yyyy HH:mm')}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+                      <ScrollArea className="flex-1 p-3">
+                        <div className="space-y-2">
+                          {messages.map(msg => (
+                            <div
+                              key={msg.id}
+                              className={cn(
+                                'max-w-[75%] rounded-lg px-3 py-2 text-sm',
+                                msg.sender_type === 'pharmacist'
+                                  ? 'ml-auto bg-[#DCF8C6] text-foreground'
+                                  : 'mr-auto bg-white border text-foreground shadow-sm'
+                              )}
+                            >
+                              <p className="text-[10px] font-medium text-muted-foreground mb-1">
+                                {msg.sender_type === 'pharmacist' ? 'Pharmacist' : 'Customer'}
+                              </p>
+                              <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                              <p className="text-[10px] text-muted-foreground mt-1 text-right">
+                                {format(new Date(msg.created_at), 'HH:mm')}
+                              </p>
+                            </div>
+                          ))}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      </ScrollArea>
+                      <div className="p-3 border-t flex gap-2">
+                        <Input
+                          value={reply}
+                          onChange={(e) => setReply(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }}}
+                          placeholder="Type your reply..."
+                          className="flex-1"
+                        />
+                        <Button onClick={sendReply} disabled={!reply.trim()} size="icon" className="bg-[#25D366] hover:bg-[#25D366]/90 text-white">
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                      <p>Select a conversation to start replying</p>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-4">
+            {settings && (
+              <Card className="max-w-2xl">
+                <CardHeader>
+                  <CardTitle>Chat Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Welcome Message (English)</Label>
+                    <Textarea
+                      value={settings.welcome_message}
+                      onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Welcome Message (Arabic)</Label>
+                    <Textarea
+                      value={settings.welcome_message_ar}
+                      onChange={(e) => setSettings({ ...settings, welcome_message_ar: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+                  <div>
+                    <Label>Wait Message (English)</Label>
+                    <Textarea
+                      value={settings.wait_message}
+                      onChange={(e) => setSettings({ ...settings, wait_message: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Wait Message (Arabic)</Label>
+                    <Textarea
+                      value={settings.wait_message_ar}
+                      onChange={(e) => setSettings({ ...settings, wait_message_ar: e.target.value })}
+                      dir="rtl"
+                    />
+                  </div>
+                  <div>
+                    <Label>WhatsApp Number</Label>
+                    <Input
+                      value={settings.whatsapp_number}
+                      onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                      dir="ltr"
+                    />
+                  </div>
+                  <Button onClick={saveSettings} disabled={settingsLoading}>
+                    {settingsLoading ? 'Saving...' : 'Save Settings'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AdminLayout>
+  );
+}
