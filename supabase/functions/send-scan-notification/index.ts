@@ -1,13 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 interface ScanNotificationRequest {
   email: string;
@@ -33,26 +40,40 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const apiKey = Deno.env.get("RESEND_API_KEY");
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
+    const resend = new Resend(apiKey);
     const body: ScanNotificationRequest = await req.json();
 
     if (!body.email) {
       throw new Error("Missing email address");
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email)) {
+      throw new Error("Invalid email format");
+    }
+
     const scoreColor =
       body.overallScore >= 80 ? "#22c55e" : body.overallScore >= 50 ? "#eab308" : "#ef4444";
 
-    const issueRows = body.issues
+    const issueRows = (body.issues || []).slice(0, 50)
       .map((issue) => {
         const statusIcon = issue.status === "failed" ? "🔴" : "🟡";
         return `
           <tr>
-            <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb;">${statusIcon} ${issue.name}</td>
-            <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #6b7280;">${issue.message}</td>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb;">${statusIcon} ${escapeHtml(String(issue.name))}</td>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #6b7280;">${escapeHtml(String(issue.message))}</td>
           </tr>
         `;
       })
       .join("");
+
+    const safeStoreName = escapeHtml(String(body.storeName || "Your Store"));
+    const safeScanDate = escapeHtml(String(body.scanDate || ""));
 
     const html = `
       <!DOCTYPE html>
@@ -64,14 +85,14 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <div style="background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 24px 32px;">
             <h1 style="margin: 0; font-size: 20px;">🔍 Site Health Scan Report</h1>
-            <p style="margin: 6px 0 0; opacity: 0.8; font-size: 14px;">${body.storeName || "Your Store"} — ${body.scanDate}</p>
+            <p style="margin: 6px 0 0; opacity: 0.8; font-size: 14px;">${safeStoreName} — ${safeScanDate}</p>
           </div>
 
           <div style="padding: 32px;">
             <!-- Score -->
             <div style="text-align: center; margin-bottom: 32px;">
               <div style="display: inline-block; width: 100px; height: 100px; border-radius: 50%; border: 6px solid ${scoreColor}; line-height: 88px; font-size: 32px; font-weight: bold; color: ${scoreColor};">
-                ${body.overallScore}
+                ${Number(body.overallScore)}
               </div>
               <p style="margin: 12px 0 0; font-size: 16px; font-weight: 600; color: #111827;">Overall Score</p>
             </div>
@@ -79,21 +100,21 @@ const handler = async (req: Request): Promise<Response> => {
             <!-- Summary Grid -->
             <div style="display: flex; gap: 12px; margin-bottom: 24px;">
               <div style="flex: 1; background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: bold; color: #16a34a;">${body.passed}</div>
+                <div style="font-size: 24px; font-weight: bold; color: #16a34a;">${Number(body.passed)}</div>
                 <div style="font-size: 12px; color: #166534;">Passed</div>
               </div>
               <div style="flex: 1; background: #fefce8; border-radius: 8px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: bold; color: #ca8a04;">${body.warnings}</div>
+                <div style="font-size: 24px; font-weight: bold; color: #ca8a04;">${Number(body.warnings)}</div>
                 <div style="font-size: 12px; color: #854d0e;">Warnings</div>
               </div>
               <div style="flex: 1; background: #fef2f2; border-radius: 8px; padding: 12px; text-align: center;">
-                <div style="font-size: 24px; font-weight: bold; color: #dc2626;">${body.failed}</div>
+                <div style="font-size: 24px; font-weight: bold; color: #dc2626;">${Number(body.failed)}</div>
                 <div style="font-size: 12px; color: #991b1b;">Failed</div>
               </div>
             </div>
 
             ${
-              body.issues.length > 0
+              body.issues && body.issues.length > 0
                 ? `
               <h2 style="font-size: 16px; margin: 0 0 12px; color: #111827;">Issues Found</h2>
               <table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
@@ -123,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Site Health <onboarding@resend.dev>",
       to: [body.email],
-      subject: `Site Health Report: Score ${body.overallScore}/100 — ${body.issuesFound} issue${body.issuesFound !== 1 ? "s" : ""} found`,
+      subject: `Site Health Report: Score ${Number(body.overallScore)}/100 — ${Number(body.issuesFound)} issue${body.issuesFound !== 1 ? "s" : ""} found`,
       html,
     });
 

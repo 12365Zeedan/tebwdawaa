@@ -8,6 +8,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface CommentNotificationRequest {
   commentId: string;
   postTitle: string;
@@ -80,13 +89,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(apiKey);
 
-    // Truncate comment for preview
-    const previewContent =
-      commentContent.length > 300
-        ? commentContent.substring(0, 300) + "..."
-        : commentContent;
+    // Truncate and escape comment for preview
+    const rawContent = String(commentContent || "");
+    const previewContent = escapeHtml(
+      rawContent.length > 300 ? rawContent.substring(0, 300) + "..." : rawContent
+    );
 
-    const moderationUrl = `${supabaseUrl.replace(".supabase.co", ".lovable.app")}/admin/blog/comments`;
+    const safePostTitle = escapeHtml(String(postTitle || ""));
+    const safeCommenterName = escapeHtml(String(commenterName || "Anonymous User"));
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -111,17 +121,17 @@ const handler = async (req: Request): Promise<Response> => {
             <!-- Post Reference -->
             <div style="background-color: #f0f4ff; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
               <p style="margin: 0 0 4px; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Article</p>
-              <p style="margin: 0; color: #000435; font-size: 16px; font-weight: 600;">${postTitle}</p>
+              <p style="margin: 0; color: #000435; font-size: 16px; font-weight: 600;">${safePostTitle}</p>
             </div>
 
             <!-- Comment Details -->
             <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
               <div style="display: flex; align-items: center; margin-bottom: 12px;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #e0e7ff; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                  <span style="color: #000435; font-weight: bold; font-size: 14px;">${(commenterName || "U").charAt(0).toUpperCase()}</span>
+                  <span style="color: #000435; font-weight: bold; font-size: 14px;">${safeCommenterName.charAt(0).toUpperCase()}</span>
                 </div>
                 <div>
-                  <p style="margin: 0; color: #333; font-weight: 600; font-size: 14px;">${commenterName || "Anonymous User"}</p>
+                  <p style="margin: 0; color: #333; font-weight: 600; font-size: 14px;">${safeCommenterName}</p>
                 </div>
               </div>
               <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${previewContent}</p>
@@ -129,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 24px 0;">
-              <a href="${moderationUrl}" style="display: inline-block; background-color: #000435; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+              <a href="/admin/blog/comments" style="display: inline-block; background-color: #000435; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
                 Review Comments
               </a>
             </div>
@@ -149,7 +159,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Blog <onboarding@resend.dev>",
       to: adminEmails,
-      subject: `New comment on "${postTitle}" — Review needed`,
+      subject: `New comment on "${safePostTitle}" — Review needed`,
       html: emailHtml,
     });
 

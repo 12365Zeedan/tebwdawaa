@@ -9,6 +9,15 @@ const corsHeaders = {
 
 const VAT_RATE = 0.15;
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function calculateVAT(priceExclVAT: number): number {
   return Math.round(priceExclVAT * VAT_RATE * 100) / 100;
 }
@@ -73,9 +82,9 @@ function formatAddress(addr: string | CompanyAddress): string {
         return formatAddressObject(parsed);
       }
     } catch {
-      return addr;
+      return escapeHtml(addr);
     }
-    return addr;
+    return escapeHtml(addr);
   }
   return formatAddressObject(addr);
 }
@@ -83,21 +92,23 @@ function formatAddress(addr: string | CompanyAddress): string {
 function formatAddressObject(addr: CompanyAddress): string {
   const line1 = [addr.building_no, addr.street, addr.district]
     .filter(Boolean)
+    .map(s => escapeHtml(String(s)))
     .join(", ");
   const line2 = [addr.city, addr.region, addr.postal_code]
     .filter(Boolean)
+    .map(s => escapeHtml(String(s)))
     .join(", ");
-  const line3 = addr.country || "";
+  const line3 = addr.country ? escapeHtml(addr.country) : "";
   return [line1, line2, line3].filter(Boolean).join("<br>");
 }
 
 function buildInvoiceHtml(data: InvoiceRequest): string {
   const { companyInfo, items, subtotal, shippingCost } = data;
 
-  const subtotalExclVAT = subtotal;
+  const subtotalExclVAT = Number(subtotal);
   const vatAmount = calculateVAT(subtotalExclVAT);
   const subtotalInclVAT = calculateTotalWithVAT(subtotalExclVAT);
-  const grandTotal = subtotalInclVAT + (shippingCost ?? 0);
+  const grandTotal = subtotalInclVAT + (Number(shippingCost) ?? 0);
 
   const companyAddress = formatAddress(companyInfo.company_address);
 
@@ -107,25 +118,35 @@ function buildInvoiceHtml(data: InvoiceRequest): string {
 
   const itemsHtml = items
     .map((item, index) => {
-      const itemVAT = calculateVAT(item.total_price);
-      const itemTotal = calculateTotalWithVAT(item.total_price);
+      const itemVAT = calculateVAT(Number(item.total_price));
+      const itemTotal = calculateTotalWithVAT(Number(item.total_price));
       return `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px 12px; font-size: 13px; color: #666;">${index + 1}</td>
-          <td style="padding: 10px 12px; font-size: 13px; font-weight: 500;">${item.product_name}</td>
-          <td style="padding: 10px 12px; text-align: center; font-size: 13px;">${item.quantity}</td>
-          <td style="padding: 10px 12px; text-align: right; font-size: 13px;">${item.unit_price.toFixed(2)}</td>
+          <td style="padding: 10px 12px; font-size: 13px; font-weight: 500;">${escapeHtml(String(item.product_name))}</td>
+          <td style="padding: 10px 12px; text-align: center; font-size: 13px;">${Number(item.quantity)}</td>
+          <td style="padding: 10px 12px; text-align: right; font-size: 13px;">${Number(item.unit_price).toFixed(2)}</td>
           <td style="padding: 10px 12px; text-align: right; font-size: 13px; color: #666;">${itemVAT.toFixed(2)}</td>
           <td style="padding: 10px 12px; text-align: right; font-size: 13px; font-weight: 600;">${itemTotal.toFixed(2)}</td>
         </tr>`;
     })
     .join("");
 
+  const safeCustomerName = escapeHtml(String(data.customerName || ""));
+  const safeCustomerEmail = escapeHtml(String(data.customerEmail || ""));
+  const safeCustomerPhone = data.customerPhone ? escapeHtml(String(data.customerPhone)) : "";
+  const safeOrderNumber = escapeHtml(String(data.orderNumber));
+  const safeCompanyName = escapeHtml(String(companyInfo.company_name || companyInfo.store_name || ""));
+  const safeCrNumber = escapeHtml(String(companyInfo.cr_number || ""));
+  const safeVatNumber = escapeHtml(String(companyInfo.vat_number || ""));
+  const safeCompanyPhone = escapeHtml(String(companyInfo.company_phone || ""));
+  const safeSiteUrl = escapeHtml(String(companyInfo.site_url || ""));
+
   const customerAddressHtml = data.shippingAddress
     ? `
-      <p style="margin: 2px 0; color: #555;">${data.shippingAddress.street || ""}</p>
-      <p style="margin: 2px 0; color: #555;">${data.shippingAddress.city || ""}${data.shippingAddress.postalCode ? `, ${data.shippingAddress.postalCode}` : ""}</p>
-      <p style="margin: 2px 0; color: #555;">${data.shippingAddress.country || ""}</p>`
+      <p style="margin: 2px 0; color: #555;">${escapeHtml(String(data.shippingAddress.street || ""))}</p>
+      <p style="margin: 2px 0; color: #555;">${escapeHtml(String(data.shippingAddress.city || ""))}${data.shippingAddress.postalCode ? `, ${escapeHtml(String(data.shippingAddress.postalCode))}` : ""}</p>
+      <p style="margin: 2px 0; color: #555;">${escapeHtml(String(data.shippingAddress.country || ""))}</p>`
     : "";
 
   return `
@@ -145,12 +166,12 @@ function buildInvoiceHtml(data: InvoiceRequest): string {
           </div>
           <div style="text-align: right;">
             <h2 style="font-size: 20px; font-weight: bold; color: #000435; margin: 0 0 4px 0;">
-              ${companyInfo.company_name || companyInfo.store_name}
+              ${safeCompanyName}
             </h2>
-            ${companyInfo.cr_number ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>C.R. No.:</strong> ${companyInfo.cr_number}</p>` : ""}
-            ${companyInfo.vat_number ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>VAT No.:</strong> ${companyInfo.vat_number}</p>` : ""}
+            ${safeCrNumber ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>C.R. No.:</strong> ${safeCrNumber}</p>` : ""}
+            ${safeVatNumber ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>VAT No.:</strong> ${safeVatNumber}</p>` : ""}
             ${companyAddress ? `<div style="margin: 2px 0; color: #555; font-size: 13px;"><strong>Address:</strong><br>${companyAddress}</div>` : ""}
-            ${companyInfo.company_phone ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>Tel:</strong> ${companyInfo.company_phone}</p>` : ""}
+            ${safeCompanyPhone ? `<p style="margin: 2px 0; color: #555; font-size: 13px;"><strong>Tel:</strong> ${safeCompanyPhone}</p>` : ""}
           </div>
         </div>
 
@@ -159,15 +180,15 @@ function buildInvoiceHtml(data: InvoiceRequest): string {
           <tr>
             <td style="vertical-align: top;">
               <p style="font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; margin-bottom: 6px;">BILL TO</p>
-              <p style="font-weight: 600; margin: 2px 0;">${data.customerName}</p>
-              <p style="margin: 2px 0; color: #555;">${data.customerEmail}</p>
-              ${data.customerPhone ? `<p style="margin: 2px 0; color: #555;">${data.customerPhone}</p>` : ""}
+              <p style="font-weight: 600; margin: 2px 0;">${safeCustomerName}</p>
+              <p style="margin: 2px 0; color: #555;">${safeCustomerEmail}</p>
+              ${safeCustomerPhone ? `<p style="margin: 2px 0; color: #555;">${safeCustomerPhone}</p>` : ""}
               ${customerAddressHtml}
             </td>
             <td style="vertical-align: top; text-align: right;">
               <div style="margin-bottom: 8px;">
                 <p style="font-size: 13px; color: #888; margin: 0 0 2px 0;">INVOICE NO.</p>
-                <p style="font-weight: bold; font-size: 16px; color: #000435;">${data.orderNumber}</p>
+                <p style="font-weight: bold; font-size: 16px; color: #000435;">${safeOrderNumber}</p>
               </div>
               <div>
                 <p style="font-size: 13px; color: #888; margin: 0 0 2px 0;">INVOICE DATE</p>
@@ -207,7 +228,7 @@ function buildInvoiceHtml(data: InvoiceRequest): string {
           </div>
           <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px;">
             <span style="color: #666;">Shipping</span>
-            <span>${shippingCost > 0 ? `${shippingCost.toFixed(2)} SAR` : "Free"}</span>
+            <span>${Number(shippingCost) > 0 ? `${Number(shippingCost).toFixed(2)} SAR` : "Free"}</span>
           </div>
           <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #000435; margin-top: 4px; font-size: 16px; font-weight: bold; color: #000435;">
             <span>Grand Total</span>
@@ -220,7 +241,7 @@ function buildInvoiceHtml(data: InvoiceRequest): string {
           <p style="font-size: 11px; color: #999; margin: 2px 0;">
             This is a simplified tax invoice issued in accordance with ZATCA e-invoicing requirements
           </p>
-          ${companyInfo.site_url ? `<p style="font-size: 11px; color: #999; margin: 2px 0;">${companyInfo.site_url}</p>` : ""}
+          ${safeSiteUrl ? `<p style="font-size: 11px; color: #999; margin: 2px 0;">${safeSiteUrl}</p>` : ""}
         </div>
       </div>
     </body>
@@ -246,12 +267,22 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields: customerEmail, orderNumber, items");
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.customerEmail)) {
+      throw new Error("Invalid email format");
+    }
+
+    if (data.items.length > 100) {
+      throw new Error("Too many items");
+    }
+
     const invoiceHtml = buildInvoiceHtml(data);
 
     const emailResponse = await resend.emails.send({
       from: "Invoice <onboarding@resend.dev>",
       to: [data.customerEmail],
-      subject: `VAT Invoice - ${data.orderNumber}`,
+      subject: `VAT Invoice - ${escapeHtml(String(data.orderNumber))}`,
       html: invoiceHtml,
     });
 
