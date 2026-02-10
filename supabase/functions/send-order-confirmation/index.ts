@@ -46,12 +46,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const apiKey = Deno.env.get("RESEND_API_KEY");
-    if (!apiKey) {
-      throw new Error("RESEND_API_KEY is not configured");
-    }
-
-    const resend = new Resend(apiKey);
+    // Authenticate: require valid user session OR validate order exists
+    const authHeader = req.headers.get("Authorization");
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
     const {
       customerName,
@@ -63,6 +63,30 @@ const handler = async (req: Request): Promise<Response> => {
       total,
       shippingAddress,
     }: OrderConfirmationRequest = await req.json();
+
+    // Verify the order actually exists in the database to prevent spam
+    if (!orderNumber) {
+      return new Response(JSON.stringify({ error: "Order number required" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    const { data: orderExists } = await supabaseAdmin
+      .from("orders")
+      .select("id")
+      .eq("order_number", orderNumber)
+      .maybeSingle();
+    if (!orderExists) {
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        status: 404, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const apiKey = Deno.env.get("RESEND_API_KEY");
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+
+    const resend = new Resend(apiKey);
 
     // Validate required fields
     if (!customerEmail || !orderNumber || !items?.length) {
