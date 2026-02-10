@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowLeft, ArrowRight, Tag, User, Eye } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -76,6 +77,9 @@ const BlogPostPage = () => {
     }
   }, [post, isAr]);
 
+  const rawContent = post ? (isAr ? (post.content_ar || post.content) : post.content) : '';
+  const content = useMemo(() => DOMPurify.sanitize(rawContent || ''), [rawContent]);
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -111,7 +115,6 @@ const BlogPostPage = () => {
   }
 
   const title = isAr ? post.title_ar : post.title;
-  const content = isAr ? (post.content_ar || post.content) : post.content;
   const excerpt = isAr ? (post.excerpt_ar || post.excerpt) : post.excerpt;
   const author = isAr ? (post.author_name_ar || post.author_name) : post.author_name;
   const category = isAr ? (post.category_ar || post.category) : post.category;
