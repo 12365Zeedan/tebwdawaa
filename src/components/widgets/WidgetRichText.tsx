@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import type { RichTextConfig } from '@/hooks/useCustomWidgets';
@@ -9,7 +10,8 @@ interface Props {
 
 export function WidgetRichText({ config }: Props) {
   const { language } = useLanguage();
-  const content = language === 'ar' ? (config.contentAr || config.content) : config.content;
+  const rawContent = language === 'ar' ? (config.contentAr || config.content) : config.content;
+  const content = useMemo(() => rawContent ? DOMPurify.sanitize(rawContent) : '', [rawContent]);
 
   if (!content) return null;
 
