@@ -15,9 +15,9 @@ serve(async (req: Request) => {
   try {
     const { licenseKey, action } = await req.json();
 
-    if (!licenseKey || typeof licenseKey !== "string" || licenseKey.length > 64) {
+    if (!licenseKey || typeof licenseKey !== "string" || !/^[A-Za-z0-9\-]{5,64}$/.test(licenseKey)) {
       return new Response(
-        JSON.stringify({ error: "Invalid license key" }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -35,21 +35,14 @@ serve(async (req: Request) => {
 
     if (licenseError || !license) {
       return new Response(
-        JSON.stringify({ error: "Invalid license key. Please check and try again." }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    if (!license.is_active) {
+    if (!license.is_active || (license.expires_at && new Date(license.expires_at) < new Date())) {
       return new Response(
-        JSON.stringify({ error: "This license has been deactivated." }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    if (license.expires_at && new Date(license.expires_at) < new Date()) {
-      return new Response(
-        JSON.stringify({ error: "This license has expired." }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
