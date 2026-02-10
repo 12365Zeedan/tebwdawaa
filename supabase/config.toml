@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.ai-trends]
 verify_jwt = false
+
+[functions.chat-messages]
+verify_jwt = false
+
+[functions.chat-start]
+verify_jwt = false
