@@ -23,26 +23,6 @@ interface ChatSettings {
   duty_end_time: string;
 }
 
-const isWithinDutyHours = (settings: ChatSettings): boolean => {
-  // Get current time in Saudi Arabia (Asia/Riyadh, UTC+3)
-  const now = new Date();
-  const saHours = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Riyadh',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(now);
-  const [h, m] = saHours.split(':').map(Number);
-  const currentMinutes = h * 60 + m;
-
-  const [sh, sm] = (settings.duty_start_time || '08:00').split(':').map(Number);
-  const [eh, em] = (settings.duty_end_time || '23:00').split(':').map(Number);
-  const startMinutes = sh * 60 + sm;
-  const endMinutes = eh * 60 + em;
-
-  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
-};
-
 export function useChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [phone, setPhone] = useState('');
@@ -64,7 +44,7 @@ export function useChatWidget() {
     }
   }, []);
 
-  // Fetch chat settings
+  // Fetch chat settings (public read)
   useEffect(() => {
     const fetchSettings = async () => {
       const { data } = await supabase
@@ -77,19 +57,34 @@ export function useChatWidget() {
     fetchSettings();
   }, []);
 
-  // Fetch messages when conversation exists
+  // Fetch messages via edge function when conversation exists
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId || !phone) return;
     const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-      if (data) setMessages(data as unknown as ChatMessage[]);
+      try {
+        const response = await supabase.functions.invoke('chat-messages', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          body: undefined,
+        });
+        // supabase.functions.invoke doesn't support query params well for GET,
+        // so we'll use fetch directly
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const res = await fetch(
+          `${supabaseUrl}/functions/v1/chat-messages?conversation_id=${encodeURIComponent(conversationId)}&phone=${encodeURIComponent(phone)}`,
+          { headers: { 'apikey': anonKey } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages) setMessages(data.messages);
+        }
+      } catch (err) {
+        console.error('Failed to fetch messages:', err);
+      }
     };
     fetchMessages();
-  }, [conversationId]);
+  }, [conversationId, phone]);
 
   // Realtime subscription for new messages + conversation status
   useEffect(() => {
@@ -111,7 +106,6 @@ export function useChatWidget() {
         filter: `id=eq.${conversationId}`,
       }, (payload: any) => {
         if (payload.new?.status === 'closed') {
-          // Conversation was closed by admin — reset customer widget
           setConversationId(null);
           setIsStarted(false);
           setMessages([]);
@@ -128,44 +122,20 @@ export function useChatWidget() {
     if (!phone.trim()) return;
     setLoading(true);
     try {
-      // Check if conversation exists for this phone
-      const { data: existing } = await supabase
-        .from('chat_conversations')
-        .select('id')
-        .eq('customer_phone', phone.trim())
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle();
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${supabaseUrl}/functions/v1/chat-start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': anonKey,
+        },
+        body: JSON.stringify({ phone: phone.trim() }),
+      });
 
-      let convId: string;
-      if (existing) {
-        convId = existing.id;
-      } else {
-        const { data: newConv, error } = await supabase
-          .from('chat_conversations')
-          .insert({ customer_phone: phone.trim() })
-          .select('id')
-          .single();
-        if (error || !newConv) throw error;
-        convId = newConv.id;
-
-        // Send welcome message
-        const welcomeMsg = settings?.welcome_message || 'Welcome! How can we help you?';
-        const messagesToInsert: { conversation_id: string; sender_type: string; message: string }[] = [
-          { conversation_id: convId, sender_type: 'pharmacist', message: welcomeMsg },
-        ];
-
-        // Check if within duty hours
-        if (settings && !isWithinDutyHours(settings)) {
-          const offlineMsg = settings.offline_message || 'We are currently outside our working hours. We will get back to you as soon as possible.';
-          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: offlineMsg });
-        } else {
-          const waitMsg = settings?.wait_message || 'Please wait, the pharmacist will respond soon.';
-          messagesToInsert.push({ conversation_id: convId, sender_type: 'pharmacist', message: waitMsg });
-        }
-
-        await supabase.from('chat_messages').insert(messagesToInsert);
-      }
+      if (!res.ok) throw new Error('Failed to start chat');
+      const data = await res.json();
+      const convId = data.conversation_id;
 
       setConversationId(convId);
       setIsStarted(true);
@@ -176,19 +146,30 @@ export function useChatWidget() {
     } finally {
       setLoading(false);
     }
-  }, [phone, settings]);
+  }, [phone]);
 
   const sendMessage = useCallback(async () => {
-    if (!newMessage.trim() || !conversationId) return;
+    if (!newMessage.trim() || !conversationId || !phone) return;
     const msg = newMessage.trim();
     setNewMessage('');
-    await supabase.from('chat_messages').insert({
-      conversation_id: conversationId,
-      sender_type: 'customer',
-      message: msg,
-    });
-    await supabase.from('chat_conversations').update({ last_message_at: new Date().toISOString() }).eq('id', conversationId);
-  }, [newMessage, conversationId]);
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      await fetch(
+        `${supabaseUrl}/functions/v1/chat-messages?conversation_id=${encodeURIComponent(conversationId)}&phone=${encodeURIComponent(phone)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': anonKey,
+          },
+          body: JSON.stringify({ message: msg }),
+        }
+      );
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    }
+  }, [newMessage, conversationId, phone]);
 
   return {
     isOpen, setIsOpen,
