@@ -95,12 +95,12 @@ serve(async (req: Request) => {
         );
       }
 
-      // Record download
+      // Record download (no IP stored for privacy)
       await supabase.from("theme_update_downloads").insert({
         version_id: latestVersion.id,
         license_id: license.id,
         platform,
-        ip_address: req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || null,
+        ip_address: null,
       });
 
       return new Response(
