@@ -1817,6 +1817,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      owns_chat_conversation: {
+        Args: { _conversation_id: string; _phone: string }
+        Returns: boolean
+      }
       record_blog_view: {
         Args: {
           p_blog_post_id: string
