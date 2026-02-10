@@ -77,6 +77,9 @@ const BlogPostPage = () => {
     }
   }, [post, isAr]);
 
+  const rawContent = post ? (isAr ? (post.content_ar || post.content) : post.content) : '';
+  const content = useMemo(() => DOMPurify.sanitize(rawContent || ''), [rawContent]);
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -112,8 +115,6 @@ const BlogPostPage = () => {
   }
 
   const title = isAr ? post.title_ar : post.title;
-  const rawContent = isAr ? (post.content_ar || post.content) : post.content;
-  const content = useMemo(() => DOMPurify.sanitize(rawContent || ''), [rawContent]);
   const excerpt = isAr ? (post.excerpt_ar || post.excerpt) : post.excerpt;
   const author = isAr ? (post.author_name_ar || post.author_name) : post.author_name;
   const category = isAr ? (post.category_ar || post.category) : post.category;
