@@ -15,9 +15,9 @@ serve(async (req: Request) => {
   try {
     const { licenseKey, action } = await req.json();
 
-    if (!licenseKey || typeof licenseKey !== "string" || licenseKey.length > 64) {
+    if (!licenseKey || typeof licenseKey !== "string" || !/^[A-Za-z0-9\-]{5,64}$/.test(licenseKey)) {
       return new Response(
-        JSON.stringify({ error: "Invalid license key" }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
