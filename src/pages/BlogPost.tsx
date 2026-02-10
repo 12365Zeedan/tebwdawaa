@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowLeft, ArrowRight, Tag, User, Eye } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
