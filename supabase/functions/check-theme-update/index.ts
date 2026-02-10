@@ -35,21 +35,14 @@ serve(async (req: Request) => {
 
     if (licenseError || !license) {
       return new Response(
-        JSON.stringify({ error: "Invalid license key. Please check and try again." }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    if (!license.is_active) {
+    if (!license.is_active || (license.expires_at && new Date(license.expires_at) < new Date())) {
       return new Response(
-        JSON.stringify({ error: "This license has been deactivated." }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    if (license.expires_at && new Date(license.expires_at) < new Date()) {
-      return new Response(
-        JSON.stringify({ error: "This license has expired." }),
+        JSON.stringify({ error: "Unable to verify license." }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
