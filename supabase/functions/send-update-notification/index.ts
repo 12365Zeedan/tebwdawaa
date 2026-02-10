@@ -8,6 +8,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function maskLicenseKey(key: string): string {
+  if (key.length <= 8) return "****";
+  return key.substring(0, 4) + "****" + key.substring(key.length - 4);
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -101,9 +115,6 @@ serve(async (req: Request) => {
       ? (typeof storeSetting.value === "string" ? storeSetting.value : String(storeSetting.value))
       : "Theme Store";
 
-    // Get the site URL for check-updates link
-    const siteUrl = Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", "") || "";
-
     const resendKey = Deno.env.get("RESEND_API_KEY");
     if (!resendKey) {
       return new Response(JSON.stringify({ error: "Email service not configured" }), {
@@ -117,38 +128,45 @@ serve(async (req: Request) => {
     let sent = 0;
     let failed = 0;
 
+    const safeVersion = escapeHtml(String(latestVersion.version || ""));
+    const safeTitle = escapeHtml(String(latestVersion.title || ""));
+    const safeChangelog = latestVersion.changelog ? escapeHtml(String(latestVersion.changelog)) : "";
+    const safeStoreName = escapeHtml(String(storeName));
+
     for (const license of licenses) {
       try {
         const platformLabel =
           license.platform === "wordpress" ? "WordPress" :
           license.platform === "shopify" ? "Shopify" : "Salla";
 
+        const safeCustomerName = escapeHtml(String(license.customer_name || ""));
+        const maskedKey = maskLicenseKey(String(license.license_key || ""));
+
         await resend.emails.send({
-          from: `${storeName} <onboarding@resend.dev>`,
+          from: `${safeStoreName} <onboarding@resend.dev>`,
           to: [license.customer_email],
-          subject: `🎉 Theme Update Available - v${latestVersion.version}`,
+          subject: `🎉 Theme Update Available - v${safeVersion}`,
           html: `
             <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
               <h1 style="color: #1a1a1a; margin-bottom: 8px;">New Theme Update Available!</h1>
               <p style="color: #666; margin-bottom: 24px;">
-                Hi ${license.customer_name}, a new version of your ${platformLabel} theme is ready.
+                Hi ${safeCustomerName}, a new version of your ${platformLabel} theme is ready.
               </p>
               
               <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                <h2 style="margin: 0 0 8px 0; color: #1a1a1a;">Version ${latestVersion.version}</h2>
-                <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">${latestVersion.title}</p>
-                ${latestVersion.changelog ? `
+                <h2 style="margin: 0 0 8px 0; color: #1a1a1a;">Version ${safeVersion}</h2>
+                <p style="margin: 0 0 4px 0; color: #666; font-size: 14px;">${safeTitle}</p>
+                ${safeChangelog ? `
                   <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
                     <p style="font-weight: 600; margin: 0 0 8px 0; font-size: 14px;">What's New:</p>
-                    <pre style="white-space: pre-wrap; font-family: inherit; font-size: 13px; color: #555; margin: 0;">${latestVersion.changelog}</pre>
+                    <pre style="white-space: pre-wrap; font-family: inherit; font-size: 13px; color: #555; margin: 0;">${safeChangelog}</pre>
                   </div>
                 ` : ''}
               </div>
 
               <div style="background: #f0f4ff; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
                 <p style="margin: 0; font-size: 13px; color: #444;">
-                  <strong>Your License Key:</strong><br/>
-                  <code style="font-size: 16px; letter-spacing: 2px;">${license.license_key}</code>
+                  <strong>Your License:</strong> ${maskedKey}
                 </p>
                 <p style="margin: 8px 0 0 0; font-size: 13px; color: #444;">
                   <strong>Platform:</strong> ${platformLabel}
@@ -160,7 +178,7 @@ serve(async (req: Request) => {
               </p>
 
               <p style="color: #999; font-size: 12px; margin-top: 32px;">
-                You received this email because you purchased a ${platformLabel} theme with license key ${license.license_key}.
+                You received this email because you purchased a ${platformLabel} theme license.
               </p>
             </div>
           `,

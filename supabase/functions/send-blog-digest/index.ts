@@ -8,6 +8,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get days parameter (default 7 for weekly digest)
     const body = await req.json().catch(() => ({}));
-    const days = body.days || 7;
+    const days = Math.min(Math.max(Number(body.days) || 7, 1), 30);
 
     // Get recent published posts
     const sinceDate = new Date();
@@ -70,36 +79,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(apiKey);
 
-    // Build the base URL
-    const baseUrl = supabaseUrl.replace(".supabase.co", ".lovable.app");
-
-    // Build post cards HTML
+    // Build post cards HTML with escaped content
     const postCardsHtml = recentPosts
       .map(
-        (post) => `
+        (post) => {
+          const safeTitle = escapeHtml(String(post.title || ""));
+          const safeSlug = encodeURIComponent(String(post.slug || ""));
+          const safeExcerpt = post.excerpt ? escapeHtml(String(post.excerpt)) : "";
+          const safeCategory = post.category ? escapeHtml(String(post.category)) : "";
+          const safeImageUrl = post.image_url ? escapeHtml(String(post.image_url)) : "";
+
+          return `
         <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
-          ${
-            post.image_url
-              ? `<img src="${post.image_url}" alt="${post.title}" style="width: 100%; height: 200px; object-fit: cover;" />`
-              : ""
-          }
+          ${safeImageUrl ? `<img src="${safeImageUrl}" alt="${safeTitle}" style="width: 100%; height: 200px; object-fit: cover;" />` : ""}
           <div style="padding: 20px;">
-            ${
-              post.category
-                ? `<span style="display: inline-block; background: #f0f4ff; color: #000435; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase;">${post.category}</span>`
-                : ""
-            }
+            ${safeCategory ? `<span style="display: inline-block; background: #f0f4ff; color: #000435; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase;">${safeCategory}</span>` : ""}
             <h3 style="margin: 0 0 8px; font-size: 18px; color: #111;">
-              <a href="${baseUrl}/blog/${post.slug}" style="color: #000435; text-decoration: none;">${post.title}</a>
+              <a href="/blog/${safeSlug}" style="color: #000435; text-decoration: none;">${safeTitle}</a>
             </h3>
-            ${post.excerpt ? `<p style="margin: 0 0 12px; color: #666; font-size: 14px; line-height: 1.5;">${post.excerpt}</p>` : ""}
+            ${safeExcerpt ? `<p style="margin: 0 0 12px; color: #666; font-size: 14px; line-height: 1.5;">${safeExcerpt}</p>` : ""}
             <div style="display: flex; align-items: center; gap: 12px;">
-              ${post.read_time ? `<span style="font-size: 12px; color: #999;">📖 ${post.read_time} min read</span>` : ""}
-              <a href="${baseUrl}/blog/${post.slug}" style="font-size: 13px; color: #000435; font-weight: 600; text-decoration: none;">Read more →</a>
+              ${post.read_time ? `<span style="font-size: 12px; color: #999;">📖 ${Number(post.read_time)} min read</span>` : ""}
+              <a href="/blog/${safeSlug}" style="font-size: 13px; color: #000435; font-weight: 600; text-decoration: none;">Read more →</a>
             </div>
           </div>
         </div>
-      `
+      `;
+        }
       )
       .join("");
 
@@ -131,18 +137,17 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="margin: 0 0 8px; color: #999; font-size: 12px;">
               You're receiving this because you subscribed to our newsletter.
             </p>
-            <a href="${baseUrl}/blog" style="color: #000435; font-size: 12px; text-decoration: underline;">View all articles</a>
+            <a href="/blog" style="color: #000435; font-size: 12px; text-decoration: underline;">View all articles</a>
           </div>
         </div>
       </body>
       </html>
     `;
 
-    // Send to each subscriber (Resend supports batch but let's keep it simple)
+    // Send to each subscriber
     let sentCount = 0;
     let errorCount = 0;
 
-    // Resend supports up to 100 recipients in batch
     const batchSize = 50;
     for (let i = 0; i < subscribers.length; i += batchSize) {
       const batch = subscribers.slice(i, i + batchSize);

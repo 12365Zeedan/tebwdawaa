@@ -7,6 +7,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface OrderItem {
   product_name: string;
   quantity: number;
@@ -54,21 +63,43 @@ const handler = async (req: Request): Promise<Response> => {
       shippingAddress,
     }: OrderConfirmationRequest = await req.json();
 
+    // Validate required fields
     if (!customerEmail || !orderNumber || !items?.length) {
       throw new Error("Missing required fields: customerEmail, orderNumber, items");
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerEmail)) {
+      throw new Error("Invalid email format");
+    }
+
+    // Validate bounds
+    if (items.length > 100) {
+      throw new Error("Too many items");
+    }
+    if (orderNumber.length > 50) {
+      throw new Error("Invalid order number");
     }
 
     const itemsHtml = items
       .map(
         (item) => `
         <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.product_name}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${item.unit_price.toFixed(2)} SAR</td>
-          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${item.total_price.toFixed(2)} SAR</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(String(item.product_name))}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${Number(item.quantity)}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(item.unit_price).toFixed(2)} SAR</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">${Number(item.total_price).toFixed(2)} SAR</td>
         </tr>`
       )
       .join("");
+
+    const safeCustomerName = escapeHtml(String(customerName || "Customer"));
+    const safeOrderNumber = escapeHtml(String(orderNumber));
+    const safeStreet = escapeHtml(String(shippingAddress?.street || ""));
+    const safeCity = escapeHtml(String(shippingAddress?.city || ""));
+    const safePostalCode = escapeHtml(String(shippingAddress?.postalCode || ""));
+    const safeCountry = escapeHtml(String(shippingAddress?.country || ""));
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -86,13 +117,13 @@ const handler = async (req: Request): Promise<Response> => {
 
           <!-- Body -->
           <div style="padding: 30px;">
-            <p style="font-size: 16px; color: #333;">Hello <strong>${customerName}</strong>,</p>
+            <p style="font-size: 16px; color: #333;">Hello <strong>${safeCustomerName}</strong>,</p>
             <p style="font-size: 15px; color: #555;">Thank you for your order! We've received it and will begin processing it shortly.</p>
 
             <!-- Order Number -->
             <div style="background-color: #f0f4ff; border-radius: 8px; padding: 16px; margin: 20px 0; text-align: center;">
               <p style="margin: 0; color: #666; font-size: 13px;">ORDER NUMBER</p>
-              <p style="margin: 4px 0 0; color: #000435; font-size: 20px; font-weight: bold;">${orderNumber}</p>
+              <p style="margin: 4px 0 0; color: #000435; font-size: 20px; font-weight: bold;">${safeOrderNumber}</p>
             </div>
 
             <!-- Items Table -->
@@ -114,15 +145,15 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="border-top: 2px solid #eee; padding-top: 16px; margin-top: 8px;">
               <div style="display: flex; justify-content: space-between; padding: 4px 0;">
                 <span style="color: #666;">Subtotal:</span>
-                <span style="color: #333; font-weight: 500;">${subtotal.toFixed(2)} SAR</span>
+                <span style="color: #333; font-weight: 500;">${Number(subtotal).toFixed(2)} SAR</span>
               </div>
               <div style="display: flex; justify-content: space-between; padding: 4px 0;">
                 <span style="color: #666;">Shipping:</span>
-                <span style="color: #333; font-weight: 500;">${shippingCost > 0 ? shippingCost.toFixed(2) + " SAR" : "Free"}</span>
+                <span style="color: #333; font-weight: 500;">${Number(shippingCost) > 0 ? Number(shippingCost).toFixed(2) + " SAR" : "Free"}</span>
               </div>
               <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #eee; margin-top: 8px;">
                 <span style="color: #000435; font-size: 18px; font-weight: bold;">Total:</span>
-                <span style="color: #000435; font-size: 18px; font-weight: bold;">${total.toFixed(2)} SAR</span>
+                <span style="color: #000435; font-size: 18px; font-weight: bold;">${Number(total).toFixed(2)} SAR</span>
               </div>
             </div>
 
@@ -130,9 +161,9 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="background-color: #f8f9fa; border-radius: 8px; padding: 16px; margin: 20px 0;">
               <p style="margin: 0 0 8px; color: #333; font-weight: 600; font-size: 14px;">Shipping Address</p>
               <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">
-                ${shippingAddress.street}<br>
-                ${shippingAddress.city}, ${shippingAddress.postalCode}<br>
-                ${shippingAddress.country}
+                ${safeStreet}<br>
+                ${safeCity}, ${safePostalCode}<br>
+                ${safeCountry}
               </p>
             </div>
 
@@ -155,7 +186,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Orders <onboarding@resend.dev>",
       to: [customerEmail],
-      subject: `Order Confirmed - ${orderNumber}`,
+      subject: `Order Confirmed - ${safeOrderNumber}`,
       html: emailHtml,
     });
 
