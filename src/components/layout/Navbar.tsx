@@ -110,7 +110,7 @@ export function Navbar() {
           <NavbarSearch />
 
           {/* Language Toggle */}
-          <Button variant="ghost" size="icon" onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}>
+          <Button variant="ghost" size="icon" onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "en" ? "EN – Switch to Arabic" : "AR – التبديل إلى الإنجليزية"}>
             <Globe className="h-5 w-5" />
             <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
               {language.toUpperCase()}
