@@ -24,10 +24,19 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" /></noscript>
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
+    <link rel="preconnect" href="https://api.aladhan.com" crossorigin />
+    <link rel="preconnect" href="https://hwygdowejlmqtemnzjnf.supabase.co" crossorigin />
+    <style>
+      /* Inline critical CSS for fast initial paint */
+      #root-loader{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8f9fa;font-family:system-ui,-apple-system,sans-serif}
+      #root-loader .bar{width:200px;height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden}
+      #root-loader .bar::after{content:'';display:block;width:40%;height:100%;background:#6366f1;border-radius:2px;animation:load 1s ease-in-out infinite}
+      @keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="root-loader"><div class="bar"></div></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
