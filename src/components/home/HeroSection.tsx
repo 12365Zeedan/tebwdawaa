@@ -46,7 +46,7 @@ export function HeroSection() {
                   <Arrow className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/about">
+              <Link to="/about" aria-label={language === 'ar' ? 'اعرف المزيد عن صيدليتنا' : 'Learn more about our pharmacy'}>
                 <Button size="lg" variant="outline" className="text-base px-8">
                   {secondaryCta}
                 </Button>
