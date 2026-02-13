@@ -21,8 +21,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 96% 9%;
 
-    /* Primary: Main Blue #1B98E0 */
-    --primary: 200 75% 49%;
+    /* Primary: Main Blue - darkened for WCAG AA contrast */
+    --primary: 200 75% 38%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Light Teal */
@@ -33,16 +33,16 @@
     --muted: 183 30% 93%;
     --muted-foreground: 240 10% 40%;
 
-    /* Accent: Red for news/alerts #E74C3C */
-    --accent: 6 78% 57%;
+    /* Accent: Red for news/alerts - darkened for WCAG AA contrast */
+    --accent: 6 78% 44%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
-    --destructive: 6 78% 57%;
+    --destructive: 6 78% 44%;
     --destructive-foreground: 0 0% 100%;
 
     /* Info Blue */
-    --info: 200 75% 49%;
+    --info: 200 75% 38%;
     --info-foreground: 0 0% 100%;
 
     /* Success */
@@ -56,7 +56,7 @@
     /* UI Elements */
     --border: 183 20% 85%;
     --input: 183 20% 85%;
-    --ring: 200 75% 49%;
+    --ring: 200 75% 38%;
 
     /* Link colors - white default in header/footer, #1E9ED8 hover */
     --link: 0 0% 100%;
@@ -65,8 +65,8 @@
     /* Header/Footer background - #01012D */
     --header-background: 240 96% 9%;
 
-    /* Button colors - #E74C3C Red */
-    --button: 6 78% 57%;
+    /* Button colors - darkened Red for WCAG AA contrast */
+    --button: 6 78% 44%;
     --button-foreground: 0 0% 100%;
 
     --radius: 0.375rem;
@@ -74,7 +74,7 @@
     /* Sidebar (Admin) */
     --sidebar-background: 240 96% 9%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 200 75% 49%;
+    --sidebar-primary: 200 75% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 80% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
