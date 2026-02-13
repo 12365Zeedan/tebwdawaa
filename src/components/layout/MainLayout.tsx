@@ -1,19 +1,19 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, lazy, Suspense } from 'react';
 import { Navbar } from './Navbar';
 import { CategoryNavBar } from './CategoryNavBar';
 import { Footer } from './Footer';
 import { MaintenanceBanner } from './MaintenanceBanner';
 import { NewsBanner } from './NewsBanner';
-import { WeatherDateBar } from './WeatherDateBar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { ComparisonBar } from '@/components/store/ComparisonBar';
-import { ChatWidget } from '@/components/chat/ChatWidget';
 import { CanonicalUrl } from '@/components/seo/CanonicalUrl';
 import { OrganizationJsonLd } from '@/components/seo/OrganizationJsonLd';
 import { BreadcrumbJsonLd } from '@/components/seo/BreadcrumbJsonLd';
 import { useAutoSeoTracker } from '@/hooks/useAutoSeoTracker';
 
+const WeatherDateBar = lazy(() => import('./WeatherDateBar').then(m => ({ default: m.WeatherDateBar })));
+const ChatWidget = lazy(() => import('@/components/chat/ChatWidget').then(m => ({ default: m.ChatWidget })));
 interface MainLayoutProps {
   children: ReactNode;
 }
@@ -27,7 +27,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       <CanonicalUrl />
       <OrganizationJsonLd />
       <BreadcrumbJsonLd />
-      <WeatherDateBar />
+      <Suspense fallback={<div className="h-9 bg-header/95 border-b border-border/20" />}>
+        <WeatherDateBar />
+      </Suspense>
       <NewsBanner />
       <MaintenanceBanner />
       <Navbar />
@@ -35,7 +37,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       <main className="flex-1">{children}</main>
       <Footer />
       <ComparisonBar />
-      <ChatWidget />
+      <Suspense fallback={null}>
+        <ChatWidget />
+      </Suspense>
     </div>
   );
 }
