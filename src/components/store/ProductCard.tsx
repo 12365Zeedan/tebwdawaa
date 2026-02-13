@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Product as LegacyProduct } from '@/types';
 import { Product as DBProduct } from '@/hooks/useProducts';
 import { cn } from '@/lib/utils';
+import { optimizeImageUrl, generateSrcSet } from '@/lib/imageUtils';
 import { useToast } from '@/hooks/use-toast';
 import { WishlistButton } from './WishlistButton';
 import { CompareButton } from './CompareButton';
@@ -91,8 +92,11 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Image */}
        <Link to={`/products/${slug}`} className="block relative aspect-square overflow-hidden">
         <img
-           src={image}
+           src={optimizeImageUrl(image, 300)}
+           srcSet={generateSrcSet(image, [200, 300, 400])}
+           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           alt={name}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         
