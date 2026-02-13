@@ -62,13 +62,9 @@ export function useChatWidget() {
     if (!conversationId || !phone) return;
     const fetchMessages = async () => {
       try {
-        const response = await supabase.functions.invoke('chat-messages', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          body: undefined,
-        });
-        // supabase.functions.invoke doesn't support query params well for GET,
-        // so we'll use fetch directly
+        // FIX: Removed dead supabase.functions.invoke call that was never used.
+        // The edge function requires query params which .invoke doesn't support for GET,
+        // so we use fetch directly.
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const res = await fetch(

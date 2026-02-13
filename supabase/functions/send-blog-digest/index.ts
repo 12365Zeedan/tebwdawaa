@@ -170,32 +170,29 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send to each subscriber
+    // FIX: Send individually to avoid leaking subscriber emails to each other.
+    // Previously used `to: emails` which exposed all addresses in a batch.
     let sentCount = 0;
     let errorCount = 0;
 
-    const batchSize = 50;
-    for (let i = 0; i < subscribers.length; i += batchSize) {
-      const batch = subscribers.slice(i, i + batchSize);
-      const emails = batch.map((sub) => sub.email);
-
+    for (const sub of subscribers) {
       try {
         const emailResponse = await resend.emails.send({
           from: "Blog <onboarding@resend.dev>",
-          to: emails,
+          to: [sub.email],
           subject: `📬 Weekly Digest: ${recentPosts.length} new article${recentPosts.length > 1 ? "s" : ""}`,
           html: emailHtml,
         });
 
         if (emailResponse.error) {
-          console.error("Batch send error:", emailResponse.error);
-          errorCount += batch.length;
+          console.error("Send error for", sub.email, emailResponse.error);
+          errorCount++;
         } else {
-          sentCount += batch.length;
+          sentCount++;
         }
       } catch (err) {
-        console.error("Batch send exception:", err);
-        errorCount += batch.length;
+        console.error("Send exception for", sub.email, err);
+        errorCount++;
       }
     }
 
