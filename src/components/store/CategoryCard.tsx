@@ -4,6 +4,7 @@ import { Pill, FlaskConical, Droplet, Baby, HeartPulse, Sparkles } from 'lucide-
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Category } from '@/types';
 import { cn } from '@/lib/utils';
+import { optimizeImageUrl, generateSrcSet } from '@/lib/imageUtils';
 
 interface CategoryCardProps {
   category: Category;
@@ -29,8 +30,11 @@ export function CategoryCard({ category }: CategoryCardProps) {
     >
       {/* Background Image */}
       <img
-        src={category.image}
+        src={optimizeImageUrl(category.image, 408, 306)}
+        srcSet={generateSrcSet(category.image, [300, 408, 500])}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         alt={name}
+        loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
       />
       

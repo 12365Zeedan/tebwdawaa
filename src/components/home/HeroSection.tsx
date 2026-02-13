@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { optimizeImageUrl, generateSrcSet } from '@/lib/imageUtils';
 
 export function HeroSection() {
   const { language, direction } = useLanguage();
@@ -102,9 +103,12 @@ export function HeroSection() {
               {/* Main Image */}
               <div className="relative rounded-3xl overflow-hidden bg-gradient-primary p-1">
                 <img
-                  src={hero.imageUrl}
+                  src={optimizeImageUrl(hero.imageUrl, 504)}
+                  srcSet={generateSrcSet(hero.imageUrl, [400, 504, 600])}
+                  sizes="(max-width: 1024px) 0px, 504px"
                   alt="Hero"
                   className="w-full h-full object-cover rounded-3xl"
+                  fetchPriority="high"
                 />
               </div>
             </div>
