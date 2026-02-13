@@ -40,7 +40,7 @@ export const mockProducts: Product[] = [
     descriptionAr: 'كبسولات زيت السمك الممتازة لصحة القلب والدماغ',
     price: 65,
     originalPrice: 80,
-    image: 'https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop',
     category: 'Vitamins & Supplements',
     categoryAr: 'الفيتامينات والمكملات',
     inStock: true,
@@ -140,7 +140,7 @@ export const mockCategories: Category[] = [
     nameAr: 'الفيتامينات والمكملات',
     icon: 'flask',
     productCount: 89,
-    image: 'https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=300&fit=crop',
   },
   {
     id: '3',
