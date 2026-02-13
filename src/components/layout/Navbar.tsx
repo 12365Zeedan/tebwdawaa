@@ -132,7 +132,7 @@ export function Navbar() {
           )}
 
           {/* Cart */}
-          <Link to="/cart">
+          <Link to="/cart" aria-label={language === "ar" ? "سلة التسوق" : "Shopping Cart"}>
             <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "سلة التسوق" : "Shopping Cart"}>
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
