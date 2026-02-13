@@ -57,7 +57,7 @@ export function CategoryNavBar() {
                 {hasSubs && <ChevronDown className={cn("h-3 w-3 transition-transform", isHovered && "rotate-180")} />}
               </Link>
 
-              {hasSubs && isHovered && <div className="absolute top-full left-0 mt-0 w-52 rounded-b-lg border border-t-0 border-border bg-popover text-popover-foreground shadow-lg z-50 py-1 animate-fade-in">
+              {hasSubs && isHovered && <div className="absolute top-full left-0 mt-1 w-52 rounded-lg border border-border bg-popover text-popover-foreground shadow-lg z-50 py-1 animate-fade-in">
                   <Link to={`/categories/${cat.slug}`} className="block px-4 py-2.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
                     {language === "ar" ? `كل ${cat.name_ar}` : `All ${cat.name}`}
                   </Link>
