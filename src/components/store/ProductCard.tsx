@@ -140,6 +140,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={language === 'ar' ? 'عرض سريع' : 'Quick view'}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
