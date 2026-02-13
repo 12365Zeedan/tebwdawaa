@@ -437,6 +437,17 @@ function loadTheme(): ThemeSettings {
   return JSON.parse(JSON.stringify(DEFAULT_THEME));
 }
 
+// Dynamically load a Google Font if not already loaded
+const loadedFonts = new Set<string>(['Inter', 'Cairo']);
+function loadGoogleFont(fontName: string) {
+  if (loadedFonts.has(fontName)) return;
+  loadedFonts.add(fontName);
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@300;400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
 function applyThemeToDOM(theme: ThemeSettings) {
   const root = document.documentElement;
 
@@ -452,6 +463,10 @@ function applyThemeToDOM(theme: ThemeSettings) {
   root.style.setProperty('--input', theme.colors.border);
   root.style.setProperty('--ring', theme.colors.primary);
   root.style.setProperty('--destructive-foreground', theme.colors.accentForeground);
+
+  // Dynamically load selected fonts
+  loadGoogleFont(theme.typography.fontFamily);
+  loadGoogleFont(theme.typography.fontFamilyArabic);
 
   // Apply typography
   const fontStack = `'${theme.typography.fontFamily}', ui-sans-serif, system-ui, sans-serif`;
