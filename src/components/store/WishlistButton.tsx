@@ -60,6 +60,7 @@ export function WishlistButton({ productId, variant = 'icon', className }: Wishl
   if (variant === 'icon') {
     return (
       <Button
+        aria-label={inWishlist ? (language === 'ar' ? 'إزالة من الأمنيات' : 'Remove from wishlist') : (language === 'ar' ? 'أضف للأمنيات' : 'Add to wishlist')}
         variant="ghost"
         size="icon"
         onClick={handleClick}

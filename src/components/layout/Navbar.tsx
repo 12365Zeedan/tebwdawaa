@@ -110,7 +110,7 @@ export function Navbar() {
           <NavbarSearch />
 
           {/* Language Toggle */}
-          <Button variant="ghost" size="icon" onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="relative text-link hover:text-link-hover hover:bg-white/10">
+          <Button variant="ghost" size="icon" onClick={() => setLanguage(language === "en" ? "ar" : "en")} className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}>
             <Globe className="h-5 w-5" />
             <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary text-primary-foreground rounded px-1">
               {language.toUpperCase()}
@@ -120,7 +120,7 @@ export function Navbar() {
           {/* Wishlist */}
           {user && (
             <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "قائمة الأمنيات" : "Wishlist"}>
                 <Heart className="h-5 w-5" />
                 {wishlistItems.length > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
@@ -133,7 +133,7 @@ export function Navbar() {
 
           {/* Cart */}
           <Link to="/cart">
-            <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10">
+            <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "سلة التسوق" : "Shopping Cart"}>
               <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
@@ -148,7 +148,7 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10">
+                  <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "قائمة المستخدم" : "User menu"}>
                     <UserCircle className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -201,7 +201,7 @@ export function Navbar() {
           )}
 
           {/* Mobile Menu Toggle */}
-          <Button variant="ghost" size="icon" className="md:hidden text-link hover:text-link-hover hover:bg-white/10" onClick={() => setIsOpen(!isOpen)}>
+          <Button variant="ghost" size="icon" className="md:hidden text-link hover:text-link-hover hover:bg-white/10" onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"}>
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>

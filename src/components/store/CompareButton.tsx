@@ -48,6 +48,7 @@ export function CompareButton({ productId, variant = 'icon', className }: Compar
   if (variant === 'icon') {
     return (
       <Button
+        aria-label={inComparison ? (language === 'ar' ? 'إزالة من المقارنة' : 'Remove from compare') : (language === 'ar' ? 'قارن' : 'Compare')}
         variant="ghost"
         size="icon"
         onClick={handleClick}

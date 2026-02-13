@@ -52,19 +52,19 @@ export function Footer() {
               {language === 'ar' ? footerContent.aboutTextAr : footerContent.aboutTextEn}
             </p>
             <div className="flex gap-4">
-              {footerContent.socialLinks.facebook && <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+              {footerContent.socialLinks.facebook && <a href={footerContent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Facebook">
                   <Facebook className="h-5 w-5" />
                 </a>}
-              {footerContent.socialLinks.twitter && <a href={footerContent.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+              {footerContent.socialLinks.twitter && <a href={footerContent.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Twitter">
                   <Twitter className="h-5 w-5" />
                 </a>}
-              {footerContent.socialLinks.instagram && <a href={footerContent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors">
+              {footerContent.socialLinks.instagram && <a href={footerContent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Instagram">
                   <Instagram className="h-5 w-5" />
                 </a>}
               {!footerContent.socialLinks.facebook && !footerContent.socialLinks.twitter && !footerContent.socialLinks.instagram && <>
-                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Facebook className="h-5 w-5" /></a>
-                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Twitter className="h-5 w-5" /></a>
-                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors"><Instagram className="h-5 w-5" /></a>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Facebook"><Facebook className="h-5 w-5" /></a>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Twitter"><Twitter className="h-5 w-5" /></a>
+                  <a href="#" className="text-link/80 hover:text-link-hover transition-colors" aria-label="Instagram"><Instagram className="h-5 w-5" /></a>
                 </>}
             </div>
           </div>
