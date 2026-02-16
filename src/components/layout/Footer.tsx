@@ -85,6 +85,9 @@ export function Footer() {
               <Link to="/about" className="text-sm text-link/80 hover:text-link-hover transition-colors">
                 {t('nav.about')}
               </Link>
+              <Link to="/theme-updates" className="text-sm text-link/80 hover:text-link-hover transition-colors">
+                {language === 'ar' ? 'تحديثات القالب' : 'Theme Updates'}
+              </Link>
             </nav>
           </div>
 
