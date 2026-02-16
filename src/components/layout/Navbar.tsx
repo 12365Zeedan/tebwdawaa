@@ -30,10 +30,10 @@ export function Navbar() {
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
 
   const navLinks = [
-    { href: "/", label: t("nav.home") },
-    { href: "/about", label: t("nav.about") },
-    { href: "/theme-updates", label: language === "ar" ? "تحديثات القالب" : "Theme Updates" },
-  ];
+  { href: "/", label: t("nav.home") },
+  { href: "/about", label: t("nav.about") },
+  { href: "/theme-updates", label: language === "ar" ? "تحديثات القالب" : "Theme Updates" }];
+
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -53,10 +53,10 @@ export function Navbar() {
         header.borderBottom && "border-b border-border/40",
         header.shadow === 'sm' && "shadow-sm",
         header.shadow === 'md' && "shadow-md",
-        header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/95",
+        header.backdropBlur && "backdrop-blur supports-[backdrop-filter]:bg-header/95"
       )}
-      style={headerStyle}
-    >
+      style={headerStyle}>
+
       <div className={cn(
         "flex items-center justify-between",
         heightClass,
@@ -65,44 +65,44 @@ export function Navbar() {
       )}>
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          {logoUrl ? (
-            <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" />
-          ) : (
-            <>
+          {logoUrl ?
+          <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" /> :
+
+          <>
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
                 <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
               </div>
-              <span className="text-xl font-bold text-link">{storeName}</span>
+              <span className="font-bold text-link text-3xl">{storeName}</span>
             </>
-          )}
+          }
         </Link>
 
         {/* Desktop Navigation */}
         <nav className={cn("hidden md:flex items-center gap-1", header.layoutStyle === 'centered' && "order-last w-full justify-center mt-1")}>
-          {navLinks.map(link => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={cn(
-                "px-4 py-2 rounded-lg transition-colors",
-                fontSizeClass,
-                fontWeightClass,
-                isActive(link.href)
-                  ? "bg-primary text-primary-foreground"
-                  : "text-link hover:text-link-hover hover:bg-white/10"
-              )}
-            >
+          {navLinks.map((link) =>
+          <Link
+            key={link.href}
+            to={link.href}
+            className={cn(
+              "px-4 py-2 rounded-lg transition-colors",
+              fontSizeClass,
+              fontWeightClass,
+              isActive(link.href) ?
+              "bg-primary text-primary-foreground" :
+              "text-link hover:text-link-hover hover:bg-white/10"
+            )}>
+
               {link.label}
             </Link>
-          ))}
+          )}
           {/* Blog with hover dropdown */}
           <NavbarBlogDropdown
             href="/blog"
             label={t("nav.blog")}
             isActive={isActive("/blog")}
             fontSizeClass={fontSizeClass}
-            fontWeightClass={fontWeightClass}
-          />
+            fontWeightClass={fontWeightClass} />
+
         </nav>
 
         {/* Actions */}
@@ -119,34 +119,34 @@ export function Navbar() {
           </Button>
 
           {/* Wishlist */}
-          {user && (
-            <Link to="/wishlist">
+          {user &&
+          <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "قائمة الأمنيات" : "Wishlist"}>
                 <Heart className="h-5 w-5" />
-                {wishlistItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
+                {wishlistItems.length > 0 &&
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-bold">
                     {wishlistItems.length}
                   </span>
-                )}
+              }
               </Button>
             </Link>
-          )}
+          }
 
           {/* Cart */}
           <Link to="/cart" aria-label={language === "ar" ? "سلة التسوق" : "Shopping Cart"}>
             <Button variant="ghost" size="icon" className="relative text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "سلة التسوق" : "Shopping Cart"}>
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
+              {totalItems > 0 &&
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-accent-foreground text-xs flex items-center justify-center font-bold">
                   {totalItems}
                 </span>
-              )}
+              }
             </Button>
           </Link>
 
           {/* Auth / User Menu */}
-          {user ? (
-            <div className="hidden md:flex items-center gap-2">
+          {user ?
+          <div className="hidden md:flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-link hover:text-link-hover hover:bg-white/10" aria-label={language === "ar" ? "قائمة المستخدم" : "User menu"}>
@@ -164,11 +164,11 @@ export function Navbar() {
                     <Link to="/wishlist" className="flex items-center gap-2 cursor-pointer">
                       <Heart className="h-4 w-4" />
                       {language === "ar" ? "قائمة الأمنيات" : "Wishlist"}
-                      {wishlistItems.length > 0 && (
-                        <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                      {wishlistItems.length > 0 &&
+                    <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
                           {wishlistItems.length}
                         </span>
-                      )}
+                    }
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -183,23 +183,23 @@ export function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {isAdmin && (
-                <Link to="/admin">
+              {isAdmin &&
+            <Link to="/admin">
                   <Button variant="outline" size="sm" className="gap-2 border-link text-link bg-transparent hover:bg-transparent hover:text-link">
                     <User className="h-4 w-4" />
                     {t("nav.admin")}
                   </Button>
                 </Link>
-              )}
-            </div>
-          ) : (
-            <Link to="/auth" className="hidden md:block">
+            }
+            </div> :
+
+          <Link to="/auth" className="hidden md:block">
               <Button variant="outline" size="sm" className="gap-2 border-link text-link bg-transparent hover:bg-transparent hover:text-link">
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
               </Button>
             </Link>
-          )}
+          }
 
           {/* Mobile Menu Toggle */}
           <Button variant="ghost" size="icon" className="md:hidden text-link hover:text-link-hover hover:bg-white/10" onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close menu" : "Open menu"}>
@@ -209,38 +209,38 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden border-t border-border/40 animate-fade-in">
+      {isOpen &&
+      <div className="md:hidden border-t border-border/40 animate-fade-in">
           <nav className="container py-4 flex flex-col gap-2">
-            {navLinks.map(link => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                  isActive(link.href)
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
+            {navLinks.map((link) =>
+          <Link
+            key={link.href}
+            to={link.href}
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+              isActive(link.href) ?
+              "bg-primary text-primary-foreground" :
+              "text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}>
+
                 {link.label}
               </Link>
-            ))}
+          )}
             <Link
-              to="/blog"
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                isActive("/blog")
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
+            to="/blog"
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+              isActive("/blog") ?
+              "bg-primary text-primary-foreground" :
+              "text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}>
+
               {t("nav.blog")}
             </Link>
-            {user ? (
-              <>
+            {user ?
+          <>
                 <Link to="/profile" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {language === "ar" ? "الملف الشخصي" : "My Profile"}
@@ -248,38 +248,38 @@ export function Navbar() {
                 <Link to="/wishlist" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <Heart className="h-4 w-4" />
                   {language === "ar" ? "قائمة الأمنيات" : "Wishlist"}
-                  {wishlistItems.length > 0 && (
-                    <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                  {wishlistItems.length > 0 &&
+              <span className="ms-auto bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
                       {wishlistItems.length}
                     </span>
-                  )}
+              }
                 </Link>
                 <Link to="/orders" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   {language === "ar" ? "طلباتي" : "My Orders"}
                 </Link>
-                {isAdmin && (
-                  <Link to="/admin" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2">
+                {isAdmin &&
+            <Link to="/admin" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted font-medium flex items-center gap-2">
                     <User />
                     {t("nav.admin")}
                   </Link>
-                )}
+            }
                 <button
-                  onClick={() => { signOut(); setIsOpen(false); }}
-                  className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left rtl:text-right"
-                >
+              onClick={() => {signOut();setIsOpen(false);}}
+              className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted text-left rtl:text-right">
+
                   {language === "ar" ? "خروج" : "Logout"}
                 </button>
-              </>
-            ) : (
-              <Link to="/auth" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
+              </> :
+
+          <Link to="/auth" onClick={() => setIsOpen(false)} className="px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2">
                 <User className="h-4 w-4" />
                 {language === "ar" ? "تسجيل الدخول" : "Login"}
               </Link>
-            )}
+          }
           </nav>
         </div>
-      )}
-    </header>
-  );
+      }
+    </header>);
+
 }
