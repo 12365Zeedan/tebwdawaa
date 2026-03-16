@@ -1,120 +1,116 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { optimizeImageUrl, generateSrcSet } from '@/lib/imageUtils';
+import { optimizeImageUrl } from '@/lib/imageUtils';
+import { cn } from '@/lib/utils';
 
 export function HeroSection() {
   const { language, direction } = useLanguage();
   const { theme } = useTheme();
-  const Arrow = direction === 'rtl' ? ArrowLeft : ArrowRight;
-  const heroBadges = theme.content.heroBadges;
   const hero = theme.content.hero;
+  const [current, setCurrent] = useState(0);
 
   const title = language === 'ar' ? hero.titleAr : hero.titleEn;
   const subtitle = language === 'ar' ? hero.subtitleAr : hero.subtitleEn;
   const cta = language === 'ar' ? hero.ctaAr : hero.ctaEn;
-  const secondaryCta = language === 'ar' ? hero.secondaryCtaAr : hero.secondaryCtaEn;
+
+  // Single slide with the hero image — can be extended to multiple banners
+  const slides = [
+    { image: hero.imageUrl, title, subtitle, cta, link: '/products' },
+  ];
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => setCurrent(c => (c + 1) % slides.length), 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const goNext = () => setCurrent(c => (c + 1) % slides.length);
+  const goPrev = () => setCurrent(c => (c - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-hero">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
-      </div>
+    <section className="relative w-full overflow-hidden rounded-b-2xl">
+      {/* Slides */}
+      <div className="relative w-full aspect-[21/8] md:aspect-[21/7] min-h-[280px] max-h-[480px]">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className={cn(
+              'absolute inset-0 transition-opacity duration-700',
+              i === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            )}
+          >
+            <img
+              src={optimizeImageUrl(slide.image, 1400)}
+              alt={slide.title}
+              className="w-full h-full object-cover"
+              fetchPriority={i === 0 ? 'high' : undefined}
+            />
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/30 to-transparent" />
 
-      <div className="container relative py-20 md:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
-          <div className="space-y-8 text-center lg:text-start">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight animate-fade-in">
-                {title}
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 animate-fade-in stagger-1">
-                {subtitle}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in stagger-2">
-              <Link to="/products">
-                <Button size="lg" className="gap-2 text-base px-8 shadow-glow hover:shadow-xl transition-shadow">
-                  {cta}
-                  <Arrow className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link to="/about" aria-label={language === 'ar' ? 'اعرف المزيد عن صيدليتنا' : 'Learn more about our pharmacy'}>
-                <Button size="lg" variant="outline" className="text-base px-8">
-                  {secondaryCta}
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-6 justify-center lg:justify-start text-sm text-muted-foreground animate-fade-in stagger-3">
-              {heroBadges.map(badge => (
-                <div key={badge.id} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-success" />
-                  <span>{language === 'ar' ? badge.textAr : badge.textEn}</span>
+            {/* Content overlay */}
+            <div className="absolute inset-0 flex items-center">
+              <div className="container">
+                <div className="max-w-lg space-y-4">
+                  <h1 className="text-3xl md:text-5xl font-bold text-background leading-tight drop-shadow-lg">
+                    {slide.title}
+                  </h1>
+                  <p className="text-base md:text-lg text-background/90 drop-shadow">
+                    {slide.subtitle}
+                  </p>
+                  <Link to={slide.link}>
+                    <Button size="lg" className="mt-2 gap-2 text-base px-8 shadow-lg">
+                      {slide.cta}
+                    </Button>
+                  </Link>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Hero Image */}
-          <div className="relative hidden lg:block">
-            <div className="relative w-full aspect-square max-w-lg mx-auto">
-              {/* Floating Cards */}
-              {hero.showFloatingCards && (
-                <>
-                  <div className="absolute top-10 -left-10 bg-card rounded-2xl p-4 shadow-elevated animate-float z-10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <span className="text-2xl">💊</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">500+</p>
-                        <p className="text-xs text-muted-foreground">
-                          {language === 'ar' ? 'منتج' : 'Products'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="absolute bottom-20 -right-5 bg-card rounded-2xl p-4 shadow-elevated animate-float" style={{ animationDelay: '1.5s' }}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                        <span className="text-2xl">⭐</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">4.9</p>
-                        <p className="text-xs text-muted-foreground">
-                          {language === 'ar' ? 'تقييم' : 'Rating'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Main Image */}
-              <div className="relative rounded-3xl overflow-hidden bg-gradient-primary p-1">
-                <img
-                  src={optimizeImageUrl(hero.imageUrl, 504)}
-                  srcSet={generateSrcSet(hero.imageUrl, [400, 504, 600])}
-                  sizes="(max-width: 1024px) 0px, 504px"
-                  alt="Hero"
-                  className="w-full h-full object-cover rounded-3xl"
-                  fetchPriority="high"
-                />
               </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
+
+      {/* Navigation arrows */}
+      {slides.length > 1 && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goPrev}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goNext}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/80 text-foreground"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </>
+      )}
+
+      {/* Dots */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={cn(
+                'w-3 h-3 rounded-full transition-all',
+                i === current ? 'bg-primary w-8' : 'bg-background/60'
+              )}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/store/ProductCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,49 +15,67 @@ export function RecentlyViewedSection() {
   const { recentIds } = useRecentlyViewed();
   const { data: allProducts, isLoading } = useProducts();
   const heading = theme.content.sectionHeadings.recentlyViewed;
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Get recently viewed products in order
   const recentProducts = recentIds
     .map(id => allProducts?.find(p => p.id === id))
     .filter(Boolean)
-    .slice(0, 4);
+    .slice(0, 8);
 
-  // Don't show section if no recently viewed products
   if (recentIds.length === 0 || (!isLoading && recentProducts.length === 0)) {
     return null;
   }
 
+  const scroll = (dir: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({ left: dir === 'left' ? -300 : 300, behavior: 'smooth' });
+  };
+
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Clock className="h-7 w-7 text-primary" />
-            <h2 className="text-2xl md:text-3xl font-bold">
+    <section className="py-8 md:py-12 bg-muted/30">
+      <div className="container">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <h2 className="text-xl md:text-2xl font-bold">
               {language === 'ar' ? heading?.titleAr : heading?.titleEn}
             </h2>
           </div>
-          <Link to="/products">
-            <Button variant="ghost" className="gap-2">
-              {language === 'ar' ? 'عرض الكل' : 'View All'}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/products">
+              <Button variant="ghost" size="sm" className="gap-1 text-sm">
+                {language === 'ar' ? 'عرض الكل' : 'View All'}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="hidden md:flex gap-1">
+              <Button variant="outline" size="icon" onClick={() => scroll('left')} className="h-8 w-8 rounded-full">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => scroll('right')} className="h-8 w-8 rounded-full">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-2xl" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {recentProducts.map((product) => (
-              <ProductCard key={product!.id} product={product!} />
-            ))}
-          </div>
-        )}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {isLoading
+            ? [...Array(4)].map((_, i) => (
+                <div key={i} className="flex-shrink-0 w-[220px] md:w-[250px]">
+                  <Skeleton className="aspect-square rounded-2xl" />
+                </div>
+              ))
+            : recentProducts.map((product) => (
+                <div key={product!.id} className="flex-shrink-0 w-[220px] md:w-[250px]">
+                  <ProductCard product={product!} />
+                </div>
+              ))}
+        </div>
       </div>
     </section>
   );
