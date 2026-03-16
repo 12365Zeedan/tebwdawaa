@@ -48,7 +48,7 @@ export function CategoryNavBar() {
   return (
     <nav
       className={cn(
-        "w-full bg-white border-b border-border/30 z-40",
+        "relative z-40 w-full border-b border-border/30 bg-background",
         theme.header.sticky && "sticky top-12 md:top-16"
       )}
     >
@@ -59,7 +59,7 @@ export function CategoryNavBar() {
         )}
       >
         <div
-          className="flex items-center overflow-x-auto"
+          className="flex w-full items-center overflow-x-auto md:overflow-visible"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {parentCategories.map((cat) => {
@@ -77,7 +77,7 @@ export function CategoryNavBar() {
                 <Link
                   to={`/categories/${cat.slug}`}
                   className={cn(
-                    "flex items-center gap-1 px-4 py-2.5 whitespace-nowrap transition-colors text-[#01012d] hover:text-primary text-base font-semibold",
+                    "flex items-center gap-1 whitespace-nowrap px-4 py-2.5 text-base font-semibold text-foreground transition-colors hover:text-primary",
                     isHovered && "text-primary"
                   )}
                 >
@@ -92,16 +92,14 @@ export function CategoryNavBar() {
                   )}
                 </Link>
 
-                {/* Dropdown list on hover */}
                 {hasSubs && isHovered && (
                   <div
-                    className="absolute top-full left-0 pt-0 z-50"
-                    style={{ minWidth: "220px" }}
+                    className="absolute left-0 top-full z-50 hidden min-w-[220px] pt-0.5 md:block"
                   >
-                    <div className="bg-popover rounded-b-lg border border-t-2 border-t-primary border-border shadow-lg py-1 animate-fade-in">
+                    <div className="overflow-hidden rounded-b-lg border border-border bg-popover py-1 text-popover-foreground shadow-lg animate-fade-in">
                       <Link
                         to={`/categories/${cat.slug}`}
-                        className="block px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors border-b border-border"
+                        className="block border-b border-border px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-accent"
                       >
                         {language === "ar"
                           ? `كل ${cat.name_ar}`
@@ -111,7 +109,7 @@ export function CategoryNavBar() {
                         <Link
                           key={sub.id}
                           to={`/categories/${sub.slug}`}
-                          className="block px-4 py-2.5 text-sm text-popover-foreground hover:bg-primary/5 hover:text-primary transition-colors"
+                          className="block px-4 py-2.5 text-sm transition-colors hover:bg-accent hover:text-primary"
                         >
                           {language === "ar" ? sub.name_ar : sub.name}
                         </Link>
