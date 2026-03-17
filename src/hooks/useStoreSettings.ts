@@ -12,8 +12,8 @@ interface StoreSettings {
 }
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  storeName: 'My Store',
-  storeNameAr: 'متجري',
+  storeName: 'VitaWise Pharmacy',
+  storeNameAr: 'صيدلية فيتاوايز',
   currency: 'SAR',
   shippingCost: 15,
   freeShippingThreshold: 200,
