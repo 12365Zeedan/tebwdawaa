@@ -26,7 +26,7 @@ export function Navbar() {
   const { theme } = useTheme();
   const header = theme.header;
 
-  const storeName = language === "ar" ? settings?.storeNameAr || "صيدلية" : settings?.storeName || "PharmaCare";
+  const storeName = language === "ar" ? settings?.storeNameAr || "صيدلية فيتاوايز" : settings?.storeName || "VitaWise Pharmacy";
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
 
   const navLinks = [
