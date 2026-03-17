@@ -72,9 +72,8 @@ export function Navbar() {
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
                 <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
               </div>
-              <span className="font-bold text-link text-xl leading-tight flex flex-col">
-                <span>​صيدلية فيتاوايز  </span>
-                <span className="text-sm">​{ه</span>
+              <span className="font-bold text-link text-xl leading-tight">
+                VitaWise Pharmacy
               </span>
             </>
           }
