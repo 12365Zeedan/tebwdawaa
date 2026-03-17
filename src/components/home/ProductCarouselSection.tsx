@@ -25,7 +25,7 @@ export function ProductCarouselSection({
   isLoading,
   viewAllLink,
   viewAllLabel,
-  bgClass,
+  bgClass
 }: ProductCarouselSectionProps) {
   const { direction } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -69,26 +69,26 @@ export function ProductCarouselSection({
         {/* Carousel */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-[220px] md:w-[250px] space-y-3">
+          className="gap-4 overflow-x-auto pb-4 flex items-start justify-center"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          
+          {isLoading ?
+          Array.from({ length: 6 }).map((_, i) =>
+          <div key={i} className="flex-shrink-0 w-[220px] md:w-[250px] space-y-3">
                   <Skeleton className="aspect-square w-full rounded-xl" />
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>
-              ))
-            : products?.map((product) => (
-                <div key={product.id} className="flex-shrink-0 w-[220px] md:w-[250px]">
+          ) :
+          products?.map((product) =>
+          <div key={product.id} className="flex-shrink-0 w-[220px] md:w-[250px]">
                   <ProductCard
-                    product={product}
-                  />
+              product={product} />
+            
                 </div>
-              ))}
+          )}
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 }
