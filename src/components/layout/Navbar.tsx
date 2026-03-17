@@ -74,7 +74,7 @@ export function Navbar() {
               </div>
               <span className="font-bold text-link text-xl leading-tight flex flex-col">
                 <span>​ </span>
-                <span className="text-2xl">​</span>
+                <span className="text-2xl">صيدلية فيتاوايز</span>
               </span>
             </>
           }
