@@ -41,7 +41,7 @@ export function ProductCarouselSection({
 
   return (
     <section className={cn('py-8 md:py-12', bgClass)}>
-      <div className="container">
+      <div className="container bg-white">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
