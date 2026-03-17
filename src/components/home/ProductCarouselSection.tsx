@@ -40,7 +40,7 @@ export function ProductCarouselSection({
   if (!isLoading && (!products || products.length === 0)) return null;
 
   return (
-    <section className={cn("py-8 md:py-12 bg-white", bgClass)}>
+    <section className={cn('py-8 md:py-12', bgClass)}>
       <div className="container bg-white">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
