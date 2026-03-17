@@ -28,7 +28,32 @@ import { Separator } from '@/components/ui/separator';
    const [loginPassword, setLoginPassword] = useState('');
    const [signupEmail, setSignupEmail] = useState('');
    const [signupPassword, setSignupPassword] = useState('');
-   const [signupName, setSignupName] = useState('');
+  const [signupName, setSignupName] = useState('');
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+
+  const handleSocialLogin = async (provider: 'google' | 'apple') => {
+    setSocialLoading(provider);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (error) {
+        toast({
+          title: language === 'ar' ? 'خطأ في تسجيل الدخول' : 'Login Error',
+          description: error.message || String(error),
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: language === 'ar' ? 'خطأ في تسجيل الدخول' : 'Login Error',
+        description: err?.message || 'Something went wrong',
+        variant: 'destructive',
+      });
+    } finally {
+      setSocialLoading(null);
+    }
+  };
  
    useEffect(() => {
      if (user && !authLoading) {
