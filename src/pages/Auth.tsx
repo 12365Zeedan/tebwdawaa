@@ -133,8 +133,134 @@ import { Separator } from '@/components/ui/separator';
              </CardDescription>
            </CardHeader>
             <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="login">
+                    {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                  </TabsTrigger>
+                  <TabsTrigger value="signup">
+                    {language === 'ar' ? 'حساب جديد' : 'Sign Up'}
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">
+                        {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                      </Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="login-email"
+                          type="email"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                          className="pl-10 rtl:pl-3 rtl:pr-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="login-password">
+                        {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                      </Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="login-password"
+                          type="password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          placeholder={language === 'ar' ? 'أدخل كلمة المرور' : 'Enter your password'}
+                          className="pl-10 rtl:pl-3 rtl:pr-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">
+                        {language === 'ar' ? 'الاسم الكامل' : 'Full Name'}
+                      </Label>
+                      <div className="relative">
+                        <User className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="signup-name"
+                          type="text"
+                          value={signupName}
+                          onChange={(e) => setSignupName(e.target.value)}
+                          placeholder={language === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
+                          className="pl-10 rtl:pl-3 rtl:pr-10"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">
+                        {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
+                      </Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                          placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                          className="pl-10 rtl:pl-3 rtl:pr-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">
+                        {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                      </Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                          placeholder={language === 'ar' ? 'أنشئ كلمة مرور قوية' : 'Create a strong password'}
+                          className="pl-10 rtl:pl-3 rtl:pr-10"
+                          minLength={6}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {language === 'ar' ? 'إنشاء حساب' : 'Create Account'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+
+              <div className="relative my-6">
+                <Separator />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
+                  {language === 'ar' ? 'أو' : 'OR'}
+                </span>
+              </div>
+
               {/* Social Login Buttons */}
-              <div className="space-y-3 mb-6">
+              <div className="space-y-3">
                 <Button
                   variant="outline"
                   className="w-full gap-2"
@@ -170,133 +296,7 @@ import { Separator } from '@/components/ui/separator';
                   {language === 'ar' ? 'المتابعة مع Apple' : 'Continue with Apple'}
                 </Button>
               </div>
-
-              <div className="relative mb-6">
-                <Separator />
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
-                  {language === 'ar' ? 'أو' : 'OR'}
-                </span>
-              </div>
-
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-               <TabsList className="grid w-full grid-cols-2 mb-6">
-                 <TabsTrigger value="login">
-                   {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-                 </TabsTrigger>
-                 <TabsTrigger value="signup">
-                   {language === 'ar' ? 'حساب جديد' : 'Sign Up'}
-                 </TabsTrigger>
-               </TabsList>
-               
-               <TabsContent value="login">
-                 <form onSubmit={handleLogin} className="space-y-4">
-                   <div className="space-y-2">
-                     <Label htmlFor="login-email">
-                       {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                     </Label>
-                     <div className="relative">
-                       <Mail className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         id="login-email"
-                         type="email"
-                         value={loginEmail}
-                         onChange={(e) => setLoginEmail(e.target.value)}
-                         placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                         className="pl-10 rtl:pl-3 rtl:pr-10"
-                         required
-                       />
-                     </div>
-                   </div>
-                   
-                   <div className="space-y-2">
-                     <Label htmlFor="login-password">
-                       {language === 'ar' ? 'كلمة المرور' : 'Password'}
-                     </Label>
-                     <div className="relative">
-                       <Lock className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         id="login-password"
-                         type="password"
-                         value={loginPassword}
-                         onChange={(e) => setLoginPassword(e.target.value)}
-                         placeholder={language === 'ar' ? 'أدخل كلمة المرور' : 'Enter your password'}
-                         className="pl-10 rtl:pl-3 rtl:pr-10"
-                         required
-                       />
-                     </div>
-                   </div>
-                   
-                   <Button type="submit" className="w-full" disabled={isLoading}>
-                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                     {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
-                   </Button>
-                 </form>
-               </TabsContent>
-               
-               <TabsContent value="signup">
-                 <form onSubmit={handleSignup} className="space-y-4">
-                   <div className="space-y-2">
-                     <Label htmlFor="signup-name">
-                       {language === 'ar' ? 'الاسم الكامل' : 'Full Name'}
-                     </Label>
-                     <div className="relative">
-                       <User className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         id="signup-name"
-                         type="text"
-                         value={signupName}
-                         onChange={(e) => setSignupName(e.target.value)}
-                         placeholder={language === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
-                         className="pl-10 rtl:pl-3 rtl:pr-10"
-                       />
-                     </div>
-                   </div>
-                   
-                   <div className="space-y-2">
-                     <Label htmlFor="signup-email">
-                       {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
-                     </Label>
-                     <div className="relative">
-                       <Mail className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         id="signup-email"
-                         type="email"
-                         value={signupEmail}
-                         onChange={(e) => setSignupEmail(e.target.value)}
-                         placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                         className="pl-10 rtl:pl-3 rtl:pr-10"
-                         required
-                       />
-                     </div>
-                   </div>
-                   
-                   <div className="space-y-2">
-                     <Label htmlFor="signup-password">
-                       {language === 'ar' ? 'كلمة المرور' : 'Password'}
-                     </Label>
-                     <div className="relative">
-                       <Lock className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                       <Input
-                         id="signup-password"
-                         type="password"
-                         value={signupPassword}
-                         onChange={(e) => setSignupPassword(e.target.value)}
-                         placeholder={language === 'ar' ? 'أنشئ كلمة مرور قوية' : 'Create a strong password'}
-                         className="pl-10 rtl:pl-3 rtl:pr-10"
-                         minLength={6}
-                         required
-                       />
-                     </div>
-                   </div>
-                   
-                   <Button type="submit" className="w-full" disabled={isLoading}>
-                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                     {language === 'ar' ? 'إنشاء حساب' : 'Create Account'}
-                   </Button>
-                 </form>
-               </TabsContent>
-             </Tabs>
-           </CardContent>
+            </CardContent>
          </Card>
        </div>
      </MainLayout>
