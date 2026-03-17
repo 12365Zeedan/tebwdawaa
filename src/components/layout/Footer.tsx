@@ -31,7 +31,7 @@ export function Footer() {
   const [footerEmail, setFooterEmail] = useState('');
   const [footerSubscribed, setFooterSubscribed] = useState(false);
   const footerContent = theme.content.footer;
-  const storeName = language === 'ar' ? settings?.storeNameAr || 'صيدلية' : settings?.storeName || 'PharmaCare';
+  const storeName = language === 'ar' ? settings?.storeNameAr || 'صيدلية' : settings?.storeName || 'VitaWise Pharmacy';
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
   return <footer className="bg-header text-link">
       <div className="container py-12 md:py-16">
