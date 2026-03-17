@@ -9,7 +9,9 @@
  import { useAuth } from '@/contexts/AuthContext';
  import { useLanguage } from '@/contexts/LanguageContext';
  import { useToast } from '@/hooks/use-toast';
- import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { lovable } from '@/integrations/lovable/index';
+import { Separator } from '@/components/ui/separator';
  
  const Auth = () => {
    const { t, language } = useLanguage();
