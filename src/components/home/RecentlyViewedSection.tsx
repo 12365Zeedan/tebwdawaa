@@ -17,12 +17,12 @@ export function RecentlyViewedSection() {
   const heading = theme.content.sectionHeadings.recentlyViewed;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const recentProducts = recentIds
-    .map(id => allProducts?.find(p => p.id === id))
-    .filter(Boolean)
-    .slice(0, 8);
+  const recentProducts = recentIds.
+  map((id) => allProducts?.find((p) => p.id === id)).
+  filter(Boolean).
+  slice(0, 8);
 
-  if (recentIds.length === 0 || (!isLoading && recentProducts.length === 0)) {
+  if (recentIds.length === 0 || !isLoading && recentProducts.length === 0) {
     return null;
   }
 
@@ -32,7 +32,7 @@ export function RecentlyViewedSection() {
   };
 
   return (
-    <section className="py-8 md:py-12 bg-muted/30">
+    <section className="py-8 md:py-12 bg-white">
       <div className="container">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
@@ -62,21 +62,21 @@ export function RecentlyViewedSection() {
         <div
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto pb-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {isLoading
-            ? [...Array(4)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-[220px] md:w-[250px]">
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          
+          {isLoading ?
+          [...Array(4)].map((_, i) =>
+          <div key={i} className="flex-shrink-0 w-[220px] md:w-[250px]">
                   <Skeleton className="aspect-square rounded-2xl" />
                 </div>
-              ))
-            : recentProducts.map((product) => (
-                <div key={product!.id} className="flex-shrink-0 w-[220px] md:w-[250px]">
+          ) :
+          recentProducts.map((product) =>
+          <div key={product!.id} className="flex-shrink-0 w-[220px] md:w-[250px]">
                   <ProductCard product={product!} />
                 </div>
-              ))}
+          )}
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 }
