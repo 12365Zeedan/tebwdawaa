@@ -462,6 +462,7 @@ function loadTheme(): ThemeSettings {
               weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
             }
           : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
+        footer: { ...DEFAULT_FOOTER, ...parsed.footer },
       };
     }
   } catch {
