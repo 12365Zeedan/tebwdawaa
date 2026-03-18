@@ -170,6 +170,7 @@ export interface ThemeSettings {
   components: ThemeComponents;
   content: ThemeContent;
   header: ThemeHeader;
+  footer: ThemeFooter;
 }
 
 // ── Defaults (matching index.css) ───────────────────
