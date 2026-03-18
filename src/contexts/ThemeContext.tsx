@@ -322,6 +322,21 @@ export const DEFAULT_HEADER: ThemeHeader = {
   borderColor: '',
 };
 
+export const DEFAULT_FOOTER: ThemeFooter = {
+  backgroundColor: '',
+  textColor: '',
+  linkColor: '',
+  linkHoverColor: '',
+  borderColor: '',
+  fontSize: 'sm',
+  fontWeight: 'normal',
+  layoutStyle: 'default',
+  fullWidth: false,
+  borderTop: true,
+  shadow: 'none',
+  paddingSize: 'default',
+};
+
 export const DEFAULT_THEME: ThemeSettings = {
   colors: { ...DEFAULT_COLORS },
   typography: { ...DEFAULT_TYPOGRAPHY },
@@ -329,6 +344,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   components: { ...DEFAULT_COMPONENTS },
   content: JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
   header: { ...DEFAULT_HEADER },
+  footer: { ...DEFAULT_FOOTER },
 };
 
 // ── CSS Variable Mapping ───────────────────────────
