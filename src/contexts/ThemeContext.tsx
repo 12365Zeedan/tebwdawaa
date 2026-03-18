@@ -59,6 +59,21 @@ export interface ThemeHeader {
   borderColor: string;
 }
 
+export interface ThemeFooter {
+  backgroundColor: string;
+  textColor: string;
+  linkColor: string;
+  linkHoverColor: string;
+  borderColor: string;
+  fontSize: 'sm' | 'base' | 'lg';
+  fontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
+  layoutStyle: 'default' | 'centered' | 'minimal';
+  fullWidth: boolean;
+  borderTop: boolean;
+  shadow: 'none' | 'sm' | 'md';
+  paddingSize: 'compact' | 'default' | 'spacious';
+}
+
 export interface NewsBannerItem {
   id: string;
   textEn: string;
