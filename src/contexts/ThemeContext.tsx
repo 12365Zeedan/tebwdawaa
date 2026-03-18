@@ -640,6 +640,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setHasChanges(true);
   }, []);
 
+  const updateFooter = useCallback(<K extends keyof ThemeFooter>(key: K, value: ThemeFooter[K]) => {
+    setTheme(prev => ({
+      ...prev,
+      footer: { ...prev.footer, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
     setTheme(defaults);
