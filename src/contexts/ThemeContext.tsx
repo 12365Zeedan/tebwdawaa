@@ -409,6 +409,7 @@ interface ThemeContextValue {
   updateComponent: <K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => void;
   updateContent: (content: ThemeContent) => void;
   updateHeader: <K extends keyof ThemeHeader>(key: K, value: ThemeHeader[K]) => void;
+  updateFooter: <K extends keyof ThemeFooter>(key: K, value: ThemeFooter[K]) => void;
   resetToDefaults: () => void;
   hasChanges: boolean;
 }
