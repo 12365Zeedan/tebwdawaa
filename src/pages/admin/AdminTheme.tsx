@@ -82,7 +82,7 @@ export default function AdminTheme() {
               {/* Settings tabs */}
               <div>
                 <Tabs defaultValue="colors" className="w-full">
-                  <TabsList className="w-full grid grid-cols-6 mb-4">
+                  <TabsList className="w-full grid grid-cols-7 mb-4">
                     <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
                       <Palette className="h-3.5 w-3.5 hidden sm:block" />
                       {language === 'ar' ? 'الألوان' : 'Colors'}
@@ -94,6 +94,10 @@ export default function AdminTheme() {
                     <TabsTrigger value="header" className="gap-1.5 text-xs sm:text-sm">
                       <PanelTop className="h-3.5 w-3.5 hidden sm:block" />
                       {language === 'ar' ? 'الرأس' : 'Header'}
+                    </TabsTrigger>
+                    <TabsTrigger value="footer" className="gap-1.5 text-xs sm:text-sm">
+                      <PanelBottom className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'الفوتر' : 'Footer'}
                     </TabsTrigger>
                     <TabsTrigger value="layout" className="gap-1.5 text-xs sm:text-sm">
                       <Layout className="h-3.5 w-3.5 hidden sm:block" />
