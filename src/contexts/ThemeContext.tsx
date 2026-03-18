@@ -666,6 +666,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         updateComponent,
         updateContent,
         updateHeader,
+        updateFooter,
         resetToDefaults,
         hasChanges,
       }}
