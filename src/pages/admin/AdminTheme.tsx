@@ -116,6 +116,7 @@ export default function AdminTheme() {
                   <TabsContent value="colors"><ColorSettings /></TabsContent>
                   <TabsContent value="typography"><TypographySettings /></TabsContent>
                   <TabsContent value="header"><HeaderSettings /></TabsContent>
+                  <TabsContent value="footer"><FooterSettings /></TabsContent>
                   <TabsContent value="layout"><LayoutSettings /></TabsContent>
                   <TabsContent value="components"><ComponentSettings /></TabsContent>
                   <TabsContent value="content"><ContentSettings /></TabsContent>
