@@ -11,6 +11,7 @@ import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
 import { ComponentSettings } from '@/components/admin/theme/ComponentSettings';
 import { ContentSettings } from '@/components/admin/theme/ContentSettings';
 import { HeaderSettings } from '@/components/admin/theme/HeaderSettings';
+import { FooterSettings } from '@/components/admin/theme/FooterSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
 import { ThemeUpdatesContent } from '@/components/admin/theme/ThemeUpdatesContent';
 import { ThemeDocumentationContent } from '@/components/admin/theme/ThemeDocumentationContent';
