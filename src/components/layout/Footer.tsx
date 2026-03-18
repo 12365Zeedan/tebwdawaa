@@ -9,32 +9,46 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNewsletterSubscribe } from '@/hooks/useNewsletter';
 import { useCompanyInfo } from '@/hooks/useCompanyInfo';
+import { hslToHex } from '@/lib/colorUtils';
+import { cn } from '@/lib/utils';
+
 export function Footer() {
-  const {
-    t,
-    language
-  } = useLanguage();
-  const {
-    theme
-  } = useTheme();
+  const { t, language } = useLanguage();
+  const { theme } = useTheme();
   const currentYear = new Date().getFullYear();
-  const {
-    data: settings
-  } = useStoreSettings();
-  const {
-    data: branding
-  } = useBranding();
-  const {
-    data: companyInfo
-  } = useCompanyInfo();
+  const { data: settings } = useStoreSettings();
+  const { data: branding } = useBranding();
+  const { data: companyInfo } = useCompanyInfo();
   const subscribe = useNewsletterSubscribe();
   const [footerEmail, setFooterEmail] = useState('');
   const [footerSubscribed, setFooterSubscribed] = useState(false);
   const footerContent = theme.content.footer;
+  const ft = theme.footer;
   const storeName = language === 'ar' ? settings?.storeNameAr || 'صيدلية فيتاوايز' : settings?.storeName || 'VitaWise Pharmacy';
   const logoUrl = branding?.logoTransparent || branding?.logoWhiteBg;
-  return <footer className="bg-header text-link">
-      <div className="container py-12 md:py-16">
+
+  const bgColor = ft.backgroundColor ? hslToHex(ft.backgroundColor) : undefined;
+  const textCol = ft.textColor ? hslToHex(ft.textColor) : undefined;
+  const linkCol = ft.linkColor ? hslToHex(ft.linkColor) : undefined;
+  const linkHoverCol = ft.linkHoverColor ? hslToHex(ft.linkHoverColor) : undefined;
+  const borderCol = ft.borderColor ? hslToHex(ft.borderColor) : undefined;
+
+  const paddingClass = ft.paddingSize === 'compact' ? 'py-8' : ft.paddingSize === 'spacious' ? 'py-20 md:py-24' : 'py-12 md:py-16';
+  const fontSizeClass = ft.fontSize === 'base' ? 'text-base' : ft.fontSize === 'lg' ? 'text-lg' : 'text-sm';
+  const fontWeightStyle = ft.fontWeight === 'medium' ? 500 : ft.fontWeight === 'semibold' ? 600 : ft.fontWeight === 'bold' ? 700 : 400;
+  const shadowClass = ft.shadow === 'sm' ? 'shadow-sm' : ft.shadow === 'md' ? 'shadow-md' : '';
+
+  return <footer
+    className={cn('bg-header text-link', shadowClass)}
+    style={{
+      backgroundColor: bgColor,
+      color: textCol,
+      fontWeight: fontWeightStyle,
+      borderTop: ft.borderTop ? `1px solid ${borderCol || 'hsl(var(--link) / 0.2)'}` : 'none',
+    }}
+  >
+      <div className={cn('container', paddingClass, ft.fullWidth && 'max-w-full', ft.layoutStyle === 'centered' && 'text-center')}>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* About */}
           <div className="space-y-4">
