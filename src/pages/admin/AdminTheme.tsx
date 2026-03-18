@@ -4,13 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, FileStack } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, PanelBottom, FileStack } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
 import { ComponentSettings } from '@/components/admin/theme/ComponentSettings';
 import { ContentSettings } from '@/components/admin/theme/ContentSettings';
 import { HeaderSettings } from '@/components/admin/theme/HeaderSettings';
+import { FooterSettings } from '@/components/admin/theme/FooterSettings';
 import { ThemePreview } from '@/components/admin/theme/ThemePreview';
 import { ThemeUpdatesContent } from '@/components/admin/theme/ThemeUpdatesContent';
 import { ThemeDocumentationContent } from '@/components/admin/theme/ThemeDocumentationContent';
@@ -81,7 +82,7 @@ export default function AdminTheme() {
               {/* Settings tabs */}
               <div>
                 <Tabs defaultValue="colors" className="w-full">
-                  <TabsList className="w-full grid grid-cols-6 mb-4">
+                  <TabsList className="w-full grid grid-cols-7 mb-4">
                     <TabsTrigger value="colors" className="gap-1.5 text-xs sm:text-sm">
                       <Palette className="h-3.5 w-3.5 hidden sm:block" />
                       {language === 'ar' ? 'الألوان' : 'Colors'}
@@ -93,6 +94,10 @@ export default function AdminTheme() {
                     <TabsTrigger value="header" className="gap-1.5 text-xs sm:text-sm">
                       <PanelTop className="h-3.5 w-3.5 hidden sm:block" />
                       {language === 'ar' ? 'الرأس' : 'Header'}
+                    </TabsTrigger>
+                    <TabsTrigger value="footer" className="gap-1.5 text-xs sm:text-sm">
+                      <PanelBottom className="h-3.5 w-3.5 hidden sm:block" />
+                      {language === 'ar' ? 'الفوتر' : 'Footer'}
                     </TabsTrigger>
                     <TabsTrigger value="layout" className="gap-1.5 text-xs sm:text-sm">
                       <Layout className="h-3.5 w-3.5 hidden sm:block" />
@@ -111,6 +116,7 @@ export default function AdminTheme() {
                   <TabsContent value="colors"><ColorSettings /></TabsContent>
                   <TabsContent value="typography"><TypographySettings /></TabsContent>
                   <TabsContent value="header"><HeaderSettings /></TabsContent>
+                  <TabsContent value="footer"><FooterSettings /></TabsContent>
                   <TabsContent value="layout"><LayoutSettings /></TabsContent>
                   <TabsContent value="components"><ComponentSettings /></TabsContent>
                   <TabsContent value="content"><ContentSettings /></TabsContent>

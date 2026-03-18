@@ -59,6 +59,21 @@ export interface ThemeHeader {
   borderColor: string;
 }
 
+export interface ThemeFooter {
+  backgroundColor: string;
+  textColor: string;
+  linkColor: string;
+  linkHoverColor: string;
+  borderColor: string;
+  fontSize: 'sm' | 'base' | 'lg';
+  fontWeight: 'normal' | 'medium' | 'semibold' | 'bold';
+  layoutStyle: 'default' | 'centered' | 'minimal';
+  fullWidth: boolean;
+  borderTop: boolean;
+  shadow: 'none' | 'sm' | 'md';
+  paddingSize: 'compact' | 'default' | 'spacious';
+}
+
 export interface NewsBannerItem {
   id: string;
   textEn: string;
@@ -155,6 +170,7 @@ export interface ThemeSettings {
   components: ThemeComponents;
   content: ThemeContent;
   header: ThemeHeader;
+  footer: ThemeFooter;
 }
 
 // ── Defaults (matching index.css) ───────────────────
@@ -306,6 +322,21 @@ export const DEFAULT_HEADER: ThemeHeader = {
   borderColor: '',
 };
 
+export const DEFAULT_FOOTER: ThemeFooter = {
+  backgroundColor: '',
+  textColor: '',
+  linkColor: '',
+  linkHoverColor: '',
+  borderColor: '',
+  fontSize: 'sm',
+  fontWeight: 'normal',
+  layoutStyle: 'default',
+  fullWidth: false,
+  borderTop: true,
+  shadow: 'none',
+  paddingSize: 'default',
+};
+
 export const DEFAULT_THEME: ThemeSettings = {
   colors: { ...DEFAULT_COLORS },
   typography: { ...DEFAULT_TYPOGRAPHY },
@@ -313,6 +344,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   components: { ...DEFAULT_COMPONENTS },
   content: JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
   header: { ...DEFAULT_HEADER },
+  footer: { ...DEFAULT_FOOTER },
 };
 
 // ── CSS Variable Mapping ───────────────────────────
@@ -377,6 +409,7 @@ interface ThemeContextValue {
   updateComponent: <K extends keyof ThemeComponents>(key: K, value: ThemeComponents[K]) => void;
   updateContent: (content: ThemeContent) => void;
   updateHeader: <K extends keyof ThemeHeader>(key: K, value: ThemeHeader[K]) => void;
+  updateFooter: <K extends keyof ThemeFooter>(key: K, value: ThemeFooter[K]) => void;
   resetToDefaults: () => void;
   hasChanges: boolean;
 }
@@ -429,6 +462,7 @@ function loadTheme(): ThemeSettings {
               weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
             }
           : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
+        footer: { ...DEFAULT_FOOTER, ...parsed.footer },
       };
     }
   } catch {
@@ -495,7 +529,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       if (e.key === STORAGE_KEY && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
-          const merged: ThemeSettings = {
+        const merged: ThemeSettings = {
             colors: { ...DEFAULT_COLORS, ...parsed.colors },
             typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
             layout: {
@@ -505,6 +539,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             },
             components: { ...DEFAULT_COMPONENTS, ...parsed.components },
             header: { ...DEFAULT_HEADER, ...parsed.header },
+            footer: { ...DEFAULT_FOOTER, ...parsed.footer },
             content: parsed.content
               ? {
                   newsBanner: {
@@ -606,6 +641,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setHasChanges(true);
   }, []);
 
+  const updateFooter = useCallback(<K extends keyof ThemeFooter>(key: K, value: ThemeFooter[K]) => {
+    setTheme(prev => ({
+      ...prev,
+      footer: { ...prev.footer, [key]: value },
+    }));
+    setHasChanges(true);
+  }, []);
+
   const resetToDefaults = useCallback(() => {
     const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
     setTheme(defaults);
@@ -624,6 +667,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         updateComponent,
         updateContent,
         updateHeader,
+        updateFooter,
         resetToDefaults,
         hasChanges,
       }}
