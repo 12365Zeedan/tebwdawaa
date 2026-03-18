@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, FileStack } from 'lucide-react';
+import { Paintbrush, Palette, Type, Layout, Layers, RotateCcw, FileText, RefreshCw, BookOpen, PanelTop, PanelBottom, FileStack } from 'lucide-react';
 import { ColorSettings } from '@/components/admin/theme/ColorSettings';
 import { TypographySettings } from '@/components/admin/theme/TypographySettings';
 import { LayoutSettings } from '@/components/admin/theme/LayoutSettings';
