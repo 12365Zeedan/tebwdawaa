@@ -528,7 +528,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       if (e.key === STORAGE_KEY && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
-          const merged: ThemeSettings = {
+        const merged: ThemeSettings = {
             colors: { ...DEFAULT_COLORS, ...parsed.colors },
             typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
             layout: {
@@ -538,6 +538,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             },
             components: { ...DEFAULT_COMPONENTS, ...parsed.components },
             header: { ...DEFAULT_HEADER, ...parsed.header },
+            footer: { ...DEFAULT_FOOTER, ...parsed.footer },
             content: parsed.content
               ? {
                   newsBanner: {
