@@ -57,6 +57,8 @@ export interface ThemeHeader {
   fullWidth: boolean;
   textColor: string;
   borderColor: string;
+  showLogo: boolean;
+  showStoreName: boolean;
 }
 
 export interface ThemeFooter {
