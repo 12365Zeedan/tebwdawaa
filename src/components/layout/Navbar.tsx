@@ -31,8 +31,7 @@ export function Navbar() {
 
   const navLinks = [
   { href: "/", label: t("nav.home") },
-  { href: "/about", label: t("nav.about") },
-  { href: "/theme-updates", label: language === "ar" ? "تحديثات القالب" : "Theme Updates" }];
+  { href: "/about", label: t("nav.about") }];
 
 
   const isActive = (path: string) => location.pathname === path;
