@@ -53,14 +53,14 @@ export function Footer() {
           {/* About */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              {logoUrl ? <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert" /> : <>
+              {ft.showLogo !== false && logoUrl ? <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert" /> : ft.showLogo !== false && !logoUrl ? <>
                   <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
                     <span className="text-xl font-bold text-primary-foreground">{storeName.charAt(0).toUpperCase()}</span>
                   </div>
-                  <span className="text-xl font-bold">
+                </> : null}
+              {ft.showStoreName !== false && <span className="text-xl font-bold">
                     {storeName}
-                  </span>
-                </>}
+                  </span>}
             </div>
             <p className="text-sm text-link/80 leading-relaxed">
               {language === 'ar' ? footerContent.aboutTextAr : footerContent.aboutTextEn}

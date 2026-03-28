@@ -62,19 +62,25 @@ export function Navbar() {
         header.fullWidth ? "px-4 sm:px-8" : "container",
         header.layoutStyle === 'centered' && "flex-wrap"
       )}>
-        {/* Logo */}
+        {/* Logo & Store Name */}
         <Link to="/" className="flex items-center gap-2">
-          {logoUrl ?
-          <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" /> :
-
-          <>
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
-                <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
-              </div>
-              <span className="font-bold text-link text-xl leading-tight">
-                ​صيدلية فيتاوايز      
-              </span>
-            </>
+          {header.showLogo !== false && logoUrl &&
+            <img src={logoUrl} alt={storeName} className="h-10 w-auto max-w-[140px] object-contain" />
+          }
+          {header.showStoreName !== false && (!logoUrl || header.showLogo === false) && !logoUrl &&
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
+              <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
+            </div>
+          }
+          {header.showStoreName !== false &&
+            <span className="font-bold text-link text-xl leading-tight">
+              {storeName}
+            </span>
+          }
+          {header.showLogo !== false && !logoUrl && header.showStoreName === false &&
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-primary">
+              <span className="text-xl font-bold text-white">{storeName.charAt(0).toUpperCase()}</span>
+            </div>
           }
         </Link>
 

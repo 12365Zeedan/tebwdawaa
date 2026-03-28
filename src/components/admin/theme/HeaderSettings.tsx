@@ -359,6 +359,38 @@ export function HeaderSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Show Logo */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">
+                {language === 'ar' ? 'إظهار الشعار' : 'Show Logo'}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ar' ? 'عرض شعار الموقع في الرأس' : 'Display website logo in the header'}
+              </p>
+            </div>
+            <Switch
+              checked={header.showLogo !== false}
+              onCheckedChange={(val) => updateHeader('showLogo', val)}
+            />
+          </div>
+
+          {/* Show Store Name */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">
+                {language === 'ar' ? 'إظهار اسم المتجر' : 'Show Store Name'}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ar' ? 'عرض اسم المتجر بجانب الشعار' : 'Display store name next to the logo'}
+              </p>
+            </div>
+            <Switch
+              checked={header.showStoreName !== false}
+              onCheckedChange={(val) => updateHeader('showStoreName', val)}
+            />
+          </div>
+
           {/* Sticky */}
           <div className="flex items-center justify-between">
             <div>

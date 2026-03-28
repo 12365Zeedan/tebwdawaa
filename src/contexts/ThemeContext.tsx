@@ -57,6 +57,8 @@ export interface ThemeHeader {
   fullWidth: boolean;
   textColor: string;
   borderColor: string;
+  showLogo: boolean;
+  showStoreName: boolean;
 }
 
 export interface ThemeFooter {
@@ -72,6 +74,8 @@ export interface ThemeFooter {
   borderTop: boolean;
   shadow: 'none' | 'sm' | 'md';
   paddingSize: 'compact' | 'default' | 'spacious';
+  showLogo: boolean;
+  showStoreName: boolean;
 }
 
 export interface NewsBannerItem {
@@ -320,6 +324,8 @@ export const DEFAULT_HEADER: ThemeHeader = {
   fullWidth: false,
   textColor: '',
   borderColor: '',
+  showLogo: true,
+  showStoreName: true,
 };
 
 export const DEFAULT_FOOTER: ThemeFooter = {
@@ -335,6 +341,8 @@ export const DEFAULT_FOOTER: ThemeFooter = {
   borderTop: true,
   shadow: 'none',
   paddingSize: 'default',
+  showLogo: true,
+  showStoreName: true,
 };
 
 export const DEFAULT_THEME: ThemeSettings = {
