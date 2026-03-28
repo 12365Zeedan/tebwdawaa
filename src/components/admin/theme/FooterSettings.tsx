@@ -305,6 +305,38 @@ export function FooterSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Show Logo */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">
+                {language === 'ar' ? 'إظهار الشعار' : 'Show Logo'}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ar' ? 'عرض شعار الموقع في الفوتر' : 'Display website logo in the footer'}
+              </p>
+            </div>
+            <Switch
+              checked={footer.showLogo !== false}
+              onCheckedChange={(val) => updateFooter('showLogo', val)}
+            />
+          </div>
+
+          {/* Show Store Name */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium">
+                {language === 'ar' ? 'إظهار اسم المتجر' : 'Show Store Name'}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {language === 'ar' ? 'عرض اسم المتجر في الفوتر' : 'Display store name in the footer'}
+              </p>
+            </div>
+            <Switch
+              checked={footer.showStoreName !== false}
+              onCheckedChange={(val) => updateFooter('showStoreName', val)}
+            />
+          </div>
+
           {/* Border Top */}
           <div className="flex items-center justify-between">
             <div>
