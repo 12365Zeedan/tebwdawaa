@@ -74,6 +74,8 @@ export interface ThemeFooter {
   borderTop: boolean;
   shadow: 'none' | 'sm' | 'md';
   paddingSize: 'compact' | 'default' | 'spacious';
+  showLogo: boolean;
+  showStoreName: boolean;
 }
 
 export interface NewsBannerItem {
