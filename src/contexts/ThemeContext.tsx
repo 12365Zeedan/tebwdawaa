@@ -341,6 +341,8 @@ export const DEFAULT_FOOTER: ThemeFooter = {
   borderTop: true,
   shadow: 'none',
   paddingSize: 'default',
+  showLogo: true,
+  showStoreName: true,
 };
 
 export const DEFAULT_THEME: ThemeSettings = {
