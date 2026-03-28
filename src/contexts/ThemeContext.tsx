@@ -324,6 +324,8 @@ export const DEFAULT_HEADER: ThemeHeader = {
   fullWidth: false,
   textColor: '',
   borderColor: '',
+  showLogo: true,
+  showStoreName: true,
 };
 
 export const DEFAULT_FOOTER: ThemeFooter = {
