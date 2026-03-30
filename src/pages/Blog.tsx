@@ -3,6 +3,7 @@ import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { BlogHeroSlider } from '@/components/blog/BlogHeroSlider';
+import { BlogCategoryNav } from '@/components/blog/BlogCategoryNav';
 import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { BlogArticleRow } from '@/components/blog/BlogArticleRow';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -134,6 +135,12 @@ const Blog = () => {
         {isLoading && (
           <Skeleton className="w-full rounded-2xl mb-8" style={{ height: '420px' }} />
         )}
+
+        {/* Blog Category Navigation Bar */}
+        <BlogCategoryNav
+          activeCategory={activeCategory}
+          onCategoryChange={handleCategoryChange}
+        />
 
         {/* Two-column layout: Main + Sidebar */}
         <div className={`flex flex-col lg:flex-row gap-8 ${direction === 'rtl' ? 'lg:flex-row-reverse' : ''}`}>
