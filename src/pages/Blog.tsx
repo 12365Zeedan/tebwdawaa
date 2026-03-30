@@ -2,18 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { BlogCard } from '@/components/blog/BlogCard';
+import { BlogHeroSlider } from '@/components/blog/BlogHeroSlider';
+import { BlogSidebar } from '@/components/blog/BlogSidebar';
+import { BlogArticleRow } from '@/components/blog/BlogArticleRow';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { useBlogTags, type BlogTag } from '@/hooks/useAdminBlog';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Search, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NewsletterSubscription } from '@/components/blog/NewsletterSubscription';
+import { Newspaper } from 'lucide-react';
+import { BlogPost } from '@/types';
 
 const Blog = () => {
   const { language, t, direction } = useLanguage();
@@ -27,7 +27,6 @@ const Blog = () => {
   const { data: posts, isLoading } = useBlogPosts();
   const { data: tags = [] } = useBlogTags();
 
-  // Fetch all post-tag relationships
   const { data: postTagMap = {} } = useQuery({
     queryKey: ['all-blog-post-tags'],
     queryFn: async () => {
@@ -42,30 +41,49 @@ const Blog = () => {
     },
   });
 
-  // Get unique categories
-  const categories = useMemo(() => {
+  // Map posts to BlogPost type
+  const mappedPosts: BlogPost[] = useMemo(() => {
     if (!posts) return [];
-    const cats = new Set<string>();
-    posts.forEach(p => { if (p.category) cats.add(p.category); });
-    return Array.from(cats);
+    return posts.map(post => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      titleAr: post.title_ar,
+      excerpt: post.excerpt || '',
+      excerptAr: post.excerpt_ar || '',
+      content: post.content || '',
+      contentAr: post.content_ar || '',
+      image: post.image_url || '/placeholder.svg',
+      author: post.author_name || '',
+      authorAr: post.author_name_ar || '',
+      date: post.published_at || post.created_at,
+      category: post.category || '',
+      categoryAr: post.category_ar || '',
+      readTime: post.read_time || 5,
+      viewCount: (post as any).view_count || 0,
+    }));
   }, [posts]);
 
-  // Get category AR mapping
-  const categoryArMap = useMemo(() => {
-    if (!posts) return {};
-    const map: Record<string, string> = {};
-    posts.forEach(p => { if (p.category && p.category_ar) map[p.category] = p.category_ar; });
-    return map;
+  // Categories with counts
+  const categoriesWithCounts = useMemo(() => {
+    if (!posts) return [];
+    const map: Record<string, { nameAr: string; count: number }> = {};
+    posts.forEach(p => {
+      if (p.category) {
+        if (!map[p.category]) map[p.category] = { nameAr: p.category_ar || p.category, count: 0 };
+        map[p.category].count++;
+      }
+    });
+    return Object.entries(map).map(([name, v]) => ({ name, nameAr: v.nameAr, count: v.count }));
   }, [posts]);
 
   // Filter posts
   const filteredPosts = useMemo(() => {
-    if (!posts) return [];
-    return posts.filter(post => {
+    return mappedPosts.filter(post => {
       if (search) {
         const q = search.toLowerCase();
-        const matchTitle = post.title.toLowerCase().includes(q) || post.title_ar.toLowerCase().includes(q);
-        const matchExcerpt = (post.excerpt || '').toLowerCase().includes(q) || (post.excerpt_ar || '').toLowerCase().includes(q);
+        const matchTitle = post.title.toLowerCase().includes(q) || post.titleAr.toLowerCase().includes(q);
+        const matchExcerpt = post.excerpt.toLowerCase().includes(q) || post.excerptAr.toLowerCase().includes(q);
         if (!matchTitle && !matchExcerpt) return false;
       }
       if (activeCategory && post.category !== activeCategory) return false;
@@ -78,135 +96,106 @@ const Blog = () => {
       }
       return true;
     });
-  }, [posts, search, activeCategory, activeTag, tags, postTagMap]);
+  }, [mappedPosts, search, activeCategory, activeTag, tags, postTagMap]);
+
+  const hasFilters = !!activeTag || !!activeCategory || !!search;
+
+  const handleCategoryChange = (cat: string | null) => {
+    const p = new URLSearchParams(searchParams);
+    if (cat) p.set('category', cat); else p.delete('category');
+    setSearchParams(p);
+  };
+
+  const handleTagChange = (slug: string | null) => {
+    const p = new URLSearchParams(searchParams);
+    if (slug) p.set('tag', slug); else p.delete('tag');
+    setSearchParams(p);
+  };
 
   const clearFilters = () => {
     setSearchParams({});
     setSearch('');
   };
 
-  const hasFilters = !!activeTag || !!activeCategory || !!search;
+  // Featured posts for slider (first 5 with images)
+  const featuredPosts = useMemo(() => {
+    return mappedPosts.filter(p => p.image !== '/placeholder.svg').slice(0, 5);
+  }, [mappedPosts]);
 
   return (
     <MainLayout>
-      <div className="container py-8 md:py-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-          {t('blog.title')}
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          {isAr ? 'مقالات تثقيفية ونصائح صحية' : 'Educational articles and health tips'}
-        </p>
+      <div className="container py-6 md:py-10">
+        {/* Hero Slider */}
+        {!isLoading && featuredPosts.length > 0 && (
+          <div className="mb-8">
+            <BlogHeroSlider posts={featuredPosts} />
+          </div>
+        )}
+        {isLoading && (
+          <Skeleton className="w-full rounded-2xl mb-8" style={{ height: '420px' }} />
+        )}
 
-        {/* Search & Filters */}
-        <div className="space-y-4 mb-10">
-          <div className="relative max-w-md">
-            <Search className={cn(
-              'absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
-              direction === 'rtl' ? 'right-3' : 'left-3'
-            )} />
-            <Input
-              placeholder={isAr ? 'البحث في المقالات...' : 'Search articles...'}
-              className={cn('bg-muted/50', direction === 'rtl' ? 'pr-10' : 'pl-10')}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+        {/* Two-column layout: Main + Sidebar */}
+        <div className={`flex flex-col lg:flex-row gap-8 ${direction === 'rtl' ? 'lg:flex-row-reverse' : ''}`}>
+          {/* Sidebar */}
+          <div className="w-full lg:w-72 flex-shrink-0 order-2 lg:order-1">
+            <BlogSidebar
+              categories={categoriesWithCounts}
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+              tags={tags}
+              activeTag={activeTag}
+              onTagChange={handleTagChange}
+              search={search}
+              onSearchChange={setSearch}
+              hasFilters={hasFilters}
+              onClearFilters={clearFilters}
             />
           </div>
 
-          {/* Categories */}
-          {categories.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={!activeCategory ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => { const p = new URLSearchParams(searchParams); p.delete('category'); setSearchParams(p); }}
-              >
-                {isAr ? 'الكل' : 'All'}
-              </Badge>
-              {categories.map(cat => (
-                <Badge
-                  key={cat}
-                  variant={activeCategory === cat ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => { const p = new URLSearchParams(searchParams); p.set('category', cat); setSearchParams(p); }}
-                >
-                  {isAr ? (categoryArMap[cat] || cat) : cat}
-                </Badge>
-              ))}
+          {/* Main content */}
+          <div className="flex-1 order-1 lg:order-2">
+            {/* Section header */}
+            <div className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-3 rounded-xl mb-6">
+              <Newspaper className="h-5 w-5" />
+              <h1 className="font-bold text-lg">
+                {isAr ? 'الأخبار الطبية' : 'Medical News'}
+              </h1>
             </div>
-          )}
 
-          {/* Tags */}
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag: BlogTag) => (
-                <Badge
-                  key={tag.id}
-                  variant={activeTag === tag.slug ? 'default' : 'secondary'}
-                  className="cursor-pointer text-xs"
-                  onClick={() => {
-                    const p = new URLSearchParams(searchParams);
-                    if (activeTag === tag.slug) p.delete('tag'); else p.set('tag', tag.slug);
-                    setSearchParams(p);
-                  }}
-                >
-                  # {isAr ? tag.name_ar : tag.name}
-                </Badge>
-              ))}
+            {/* Article list */}
+            <div className="space-y-4">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex gap-4 p-4 bg-card rounded-xl border border-border/50">
+                    <Skeleton className="w-28 h-24 md:w-36 md:h-28 rounded-lg flex-shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-1/3" />
+                    </div>
+                  </div>
+                ))
+              ) : filteredPosts.length > 0 ? (
+                filteredPosts.map((post, index) => (
+                  <div
+                    key={post.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <BlogArticleRow post={post} />
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-muted-foreground bg-card rounded-xl border border-border/50">
+                  {isAr ? 'لا توجد مقالات مطابقة' : 'No matching articles found'}
+                </div>
+              )}
             </div>
-          )}
-
-          {hasFilters && (
-            <button onClick={clearFilters} className="text-sm text-primary hover:underline flex items-center gap-1">
-              <X className="h-3 w-3" /> {isAr ? 'مسح الفلاتر' : 'Clear filters'}
-            </button>
-          )}
+          </div>
         </div>
 
-        {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="space-y-4">
-                <Skeleton className="aspect-video w-full rounded-xl" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ))
-          ) : filteredPosts.length > 0 ? (
-            filteredPosts.map((post, index) => (
-              <div
-                key={post.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <BlogCard post={{
-                  id: post.id,
-                  slug: post.slug,
-                  title: post.title,
-                  titleAr: post.title_ar,
-                  excerpt: post.excerpt || '',
-                  excerptAr: post.excerpt_ar || '',
-                  content: post.content || '',
-                  contentAr: post.content_ar || '',
-                  image: post.image_url || '/placeholder.svg',
-                  author: post.author_name || '',
-                  authorAr: post.author_name_ar || '',
-                  date: post.published_at || post.created_at,
-                  category: post.category || '',
-                  categoryAr: post.category_ar || '',
-                  readTime: post.read_time || 5,
-                  viewCount: (post as any).view_count || 0,
-                }} />
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              {isAr ? 'لا توجد مقالات مطابقة' : 'No matching articles found'}
-            </div>
-          )}
-        </div>
-
-        {/* Newsletter Subscription */}
+        {/* Newsletter */}
         <div className="mt-16 max-w-2xl mx-auto">
           <NewsletterSubscription />
         </div>
