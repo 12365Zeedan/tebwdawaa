@@ -3,6 +3,7 @@ import { PageWidgets } from '@/components/widgets/PageWidgets';
 import { useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { BlogHeroSlider } from '@/components/blog/BlogHeroSlider';
+import { BlogCategoryNav } from '@/components/blog/BlogCategoryNav';
 import { BlogSidebar } from '@/components/blog/BlogSidebar';
 import { BlogArticleRow } from '@/components/blog/BlogArticleRow';
 import { useLanguage } from '@/contexts/LanguageContext';
