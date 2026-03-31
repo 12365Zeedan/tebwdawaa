@@ -12,7 +12,7 @@
 @layer base {
   :root {
     /* Core Brand Colors - #DFF2F3 background */
-    --background: 183 47% 91%;
+    --background: 0 0% 100%;
     --foreground: 240 96% 9%;
 
     --card: 0 0% 100%;
