@@ -74,6 +74,9 @@ const AdminProducts = () => {
   const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [bulkDeleteScope, setBulkDeleteScope] = useState<'selected' | 'all'>('selected');
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
