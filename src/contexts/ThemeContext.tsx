@@ -607,11 +607,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase
         .from('app_settings')
         .upsert(
-          {
+          [{
             key: BACKEND_THEME_KEY,
             value: theme,
             description: 'Shared theme customization settings',
-          },
+          }],
           { onConflict: 'key' }
         );
 
