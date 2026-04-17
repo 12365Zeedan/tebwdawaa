@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ── Types ──────────────────────────────────────────
 export interface ThemeColors {
@@ -424,59 +426,60 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'theme-settings';
+const PREVIEW_STORAGE_KEY = 'theme-settings';
+const BACKEND_THEME_KEY = 'theme_settings';
 
-function loadTheme(): ThemeSettings {
+function mergeTheme(parsed?: Partial<ThemeSettings> | null): ThemeSettings {
+  return {
+    colors: { ...DEFAULT_COLORS, ...parsed?.colors },
+    typography: { ...DEFAULT_TYPOGRAPHY, ...parsed?.typography },
+    layout: {
+      sections: parsed?.layout?.sections?.length
+        ? parsed.layout.sections
+        : DEFAULT_SECTIONS.map(s => ({ ...s })),
+    },
+    components: { ...DEFAULT_COMPONENTS, ...parsed?.components },
+    header: { ...DEFAULT_HEADER, ...parsed?.header },
+    footer: { ...DEFAULT_FOOTER, ...parsed?.footer },
+    content: parsed?.content
+      ? {
+          newsBanner: {
+            visible: parsed.content.newsBanner?.visible ?? true,
+            items: parsed.content.newsBanner?.items?.length
+              ? parsed.content.newsBanner.items
+              : DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
+          },
+          heroBadges: parsed.content.heroBadges?.length
+            ? parsed.content.heroBadges
+            : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
+          hero: { ...DEFAULT_HERO_CONTENT, ...parsed.content.hero },
+          sectionHeadings: {
+            ...JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
+            ...parsed.content.sectionHeadings,
+          },
+          aboutPage: parsed.content.aboutPage
+            ? {
+                ...JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+                ...parsed.content.aboutPage,
+                features: parsed.content.aboutPage.features?.length
+                  ? parsed.content.aboutPage.features
+                  : DEFAULT_ABOUT_PAGE.features.map(f => ({ ...f })),
+              }
+            : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
+          footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
+          weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
+        }
+      : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
+  };
+}
+
+function parseThemeValue(value: unknown): ThemeSettings | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return {
-        colors: { ...DEFAULT_COLORS, ...parsed.colors },
-        typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
-        layout: {
-          sections: parsed.layout?.sections?.length
-            ? parsed.layout.sections
-            : DEFAULT_SECTIONS.map(s => ({ ...s })),
-        },
-        components: { ...DEFAULT_COMPONENTS, ...parsed.components },
-        header: { ...DEFAULT_HEADER, ...parsed.header },
-        content: parsed.content
-          ? {
-              newsBanner: {
-                visible: parsed.content.newsBanner?.visible ?? true,
-                items: parsed.content.newsBanner?.items?.length
-                  ? parsed.content.newsBanner.items
-                  : DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
-              },
-              heroBadges: parsed.content.heroBadges?.length
-                ? parsed.content.heroBadges
-                : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
-              hero: { ...DEFAULT_HERO_CONTENT, ...parsed.content.hero },
-              sectionHeadings: {
-                ...JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
-                ...parsed.content.sectionHeadings,
-              },
-              aboutPage: parsed.content.aboutPage
-                ? {
-                    ...JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
-                    ...parsed.content.aboutPage,
-                    features: parsed.content.aboutPage.features?.length
-                      ? parsed.content.aboutPage.features
-                      : DEFAULT_ABOUT_PAGE.features.map(f => ({ ...f })),
-                  }
-                : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
-              footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
-              weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
-            }
-          : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
-        footer: { ...DEFAULT_FOOTER, ...parsed.footer },
-      };
-    }
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return mergeTheme(parsed as Partial<ThemeSettings>);
   } catch {
-    // Ignore parse errors
+    return null;
   }
-  return JSON.parse(JSON.stringify(DEFAULT_THEME));
 }
 
 // Dynamically load a Google Font if not already loaded
@@ -493,7 +496,6 @@ function loadGoogleFont(fontName: string) {
 function applyThemeToDOM(theme: ThemeSettings) {
   const root = document.documentElement;
 
-  // Apply colors
   Object.entries(COLOR_VAR_MAP).forEach(([key, cssVar]) => {
     const value = theme.colors[key as keyof ThemeColors];
     if (value) {
@@ -501,92 +503,133 @@ function applyThemeToDOM(theme: ThemeSettings) {
     }
   });
 
-  // Sync input & ring with border & primary
   root.style.setProperty('--input', theme.colors.border);
   root.style.setProperty('--ring', theme.colors.primary);
   root.style.setProperty('--destructive-foreground', theme.colors.accentForeground);
 
-  // Dynamically load selected fonts
   loadGoogleFont(theme.typography.fontFamily);
   loadGoogleFont(theme.typography.fontFamilyArabic);
 
-  // Apply typography
   const fontStack = `'${theme.typography.fontFamily}', ui-sans-serif, system-ui, sans-serif`;
   const arabicStack = `'${theme.typography.fontFamilyArabic}', '${theme.typography.fontFamily}', system-ui, sans-serif`;
   root.style.setProperty('--font-sans', fontStack);
   root.style.setProperty('--font-arabic', arabicStack);
-
-  // Apply border radius
   root.style.setProperty('--radius', `${theme.components.borderRadius}rem`);
 }
 
 // ── Provider ───────────────────────────────────────
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<ThemeSettings>(loadTheme);
+  const { isAdmin, isLoading: isAuthLoading } = useAuth();
+  const [theme, setTheme] = useState<ThemeSettings>(() => mergeTheme(DEFAULT_THEME));
   const [hasChanges, setHasChanges] = useState(false);
+  const hydratedRef = useRef(false);
+  const lastSyncedThemeRef = useRef(JSON.stringify(mergeTheme(DEFAULT_THEME)));
+  const saveTimeoutRef = useRef<number | null>(null);
 
-  // Apply to DOM on mount and whenever theme changes
+  const loadRemoteTheme = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', BACKEND_THEME_KEY)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to load shared theme settings:', error);
+      hydratedRef.current = true;
+      return;
+    }
+
+    const remoteTheme = parseThemeValue(data?.value) ?? mergeTheme(DEFAULT_THEME);
+    const serialized = JSON.stringify(remoteTheme);
+
+    lastSyncedThemeRef.current = serialized;
+    hydratedRef.current = true;
+    setHasChanges(false);
+    setTheme(remoteTheme);
+    localStorage.setItem(PREVIEW_STORAGE_KEY, serialized);
+  }, []);
+
+  useEffect(() => {
+    void loadRemoteTheme();
+  }, [loadRemoteTheme]);
+
   useEffect(() => {
     applyThemeToDOM(theme);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
+    localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(theme));
   }, [theme]);
 
-  // Listen for storage changes from other frames (iframe live preview)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-        const merged: ThemeSettings = {
-            colors: { ...DEFAULT_COLORS, ...parsed.colors },
-            typography: { ...DEFAULT_TYPOGRAPHY, ...parsed.typography },
-            layout: {
-              sections: parsed.layout?.sections?.length
-                ? parsed.layout.sections
-                : DEFAULT_SECTIONS.map(s => ({ ...s })),
-            },
-            components: { ...DEFAULT_COMPONENTS, ...parsed.components },
-            header: { ...DEFAULT_HEADER, ...parsed.header },
-            footer: { ...DEFAULT_FOOTER, ...parsed.footer },
-            content: parsed.content
-              ? {
-                  newsBanner: {
-                    visible: parsed.content.newsBanner?.visible ?? true,
-                    items: parsed.content.newsBanner?.items?.length
-                      ? parsed.content.newsBanner.items
-                      : DEFAULT_NEWS_BANNER_ITEMS.map(i => ({ ...i })),
-                  },
-                  heroBadges: parsed.content.heroBadges?.length
-                    ? parsed.content.heroBadges
-                    : DEFAULT_HERO_BADGES.map(b => ({ ...b })),
-                  hero: { ...DEFAULT_HERO_CONTENT, ...parsed.content.hero },
-                  sectionHeadings: {
-                    ...JSON.parse(JSON.stringify(DEFAULT_SECTION_HEADINGS)),
-                    ...parsed.content.sectionHeadings,
-                  },
-                  aboutPage: parsed.content.aboutPage
-                    ? {
-                        ...JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
-                        ...parsed.content.aboutPage,
-                        features: parsed.content.aboutPage.features?.length
-                          ? parsed.content.aboutPage.features
-                          : DEFAULT_ABOUT_PAGE.features.map(f => ({ ...f })),
-                      }
-                    : JSON.parse(JSON.stringify(DEFAULT_ABOUT_PAGE)),
-                  footer: { ...JSON.parse(JSON.stringify(DEFAULT_FOOTER_CONTENT)), ...parsed.content.footer },
-                  weatherBar: { ...DEFAULT_WEATHER_BAR, ...parsed.content.weatherBar },
-                }
-              : JSON.parse(JSON.stringify(DEFAULT_CONTENT)),
-          };
-          setTheme(merged);
-        } catch {
-          // Ignore parse errors
-        }
+      if (e.key !== PREVIEW_STORAGE_KEY || !e.newValue) return;
+      const nextTheme = parseThemeValue(e.newValue);
+      if (nextTheme) {
+        setTheme(nextTheme);
       }
     };
+
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('theme-settings-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'app_settings',
+          filter: `key=eq.${BACKEND_THEME_KEY}`,
+        },
+        () => {
+          void loadRemoteTheme();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [loadRemoteTheme]);
+
+  useEffect(() => {
+    if (!hydratedRef.current || isAuthLoading || !isAdmin) return;
+
+    const serialized = JSON.stringify(theme);
+    if (serialized === lastSyncedThemeRef.current) return;
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = window.setTimeout(async () => {
+      const { error } = await supabase
+        .from('app_settings')
+        .upsert(
+          {
+            key: BACKEND_THEME_KEY,
+            value: theme,
+            description: 'Shared theme customization settings',
+          },
+          { onConflict: 'key' }
+        );
+
+      if (error) {
+        console.error('Failed to save shared theme settings:', error);
+        return;
+      }
+
+      lastSyncedThemeRef.current = serialized;
+      setHasChanges(false);
+    }, 300);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [theme, isAdmin, isAuthLoading]);
 
   const updateColor = useCallback((key: keyof ThemeColors, value: string) => {
     setTheme(prev => ({
@@ -658,10 +701,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetToDefaults = useCallback(() => {
-    const defaults = JSON.parse(JSON.stringify(DEFAULT_THEME));
+    const defaults = mergeTheme(DEFAULT_THEME);
     setTheme(defaults);
-    setHasChanges(false);
-    localStorage.removeItem(STORAGE_KEY);
+    setHasChanges(true);
+    localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(defaults));
   }, []);
 
   return (
