@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { lazy, Suspense } from "react";
 
 // Only Index is eagerly loaded for fast initial paint
@@ -57,60 +58,62 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <CartProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={null}>
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:slug" element={<ProductDetail />} />
-                  <Route path="/categories" element={<Categories />} />
-                  <Route path="/categories/:id" element={<CategoryDetail />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/orders" element={<OrderHistory />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/compare" element={<Compare />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/theme-updates" element={<ThemeUpdates />} />
-                  <Route path="/docs" element={<DocsPage />} />
-                  
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/products" element={<AdminProducts />} />
-                  <Route path="/admin/categories" element={<AdminCategories />} />
-                  <Route path="/admin/orders" element={<AdminOrders />} />
-                  <Route path="/admin/customers" element={<AdminCustomers />} />
-                  <Route path="/admin/blog" element={<AdminBlog />} />
-                  <Route path="/admin/blog/analytics" element={<AdminBlogAnalytics />} />
-                  <Route path="/admin/blog/comments" element={<AdminBlogComments />} />
-                  <Route path="/admin/newsletter" element={<AdminNewsletter />} />
-                  <Route path="/admin/discounts" element={<AdminDiscounts />} />
-                  <Route path="/admin/shipping" element={<AdminShipping />} />
-                  <Route path="/admin/checkout-payment" element={<AdminCheckoutPayment />} />
-                  <Route path="/admin/theme" element={<AdminTheme />} />
-                  <Route path="/admin/plugins" element={<AdminPlugins />} />
-                  <Route path="/admin/site-health" element={<AdminSiteHealth />} />
-                  <Route path="/admin/backups" element={<AdminBackups />} />
-                  <Route path="/admin/trends" element={<AdminTrends />} />
-                  <Route path="/admin/chat" element={<AdminChat />} />
-                  <Route path="/admin/settings" element={<AdminSettings />} />
-                  
-                  {/* Catch-all */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </TooltipProvider>
-        </CartProvider>
+        <ThemeProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Suspense fallback={null}>
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/:slug" element={<ProductDetail />} />
+                    <Route path="/categories" element={<Categories />} />
+                    <Route path="/categories/:id" element={<CategoryDetail />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/orders" element={<OrderHistory />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/compare" element={<Compare />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/theme-updates" element={<ThemeUpdates />} />
+                    <Route path="/docs" element={<DocsPage />} />
+                    
+                    {/* Admin Routes */}
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/products" element={<AdminProducts />} />
+                    <Route path="/admin/categories" element={<AdminCategories />} />
+                    <Route path="/admin/orders" element={<AdminOrders />} />
+                    <Route path="/admin/customers" element={<AdminCustomers />} />
+                    <Route path="/admin/blog" element={<AdminBlog />} />
+                    <Route path="/admin/blog/analytics" element={<AdminBlogAnalytics />} />
+                    <Route path="/admin/blog/comments" element={<AdminBlogComments />} />
+                    <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+                    <Route path="/admin/discounts" element={<AdminDiscounts />} />
+                    <Route path="/admin/shipping" element={<AdminShipping />} />
+                    <Route path="/admin/checkout-payment" element={<AdminCheckoutPayment />} />
+                    <Route path="/admin/theme" element={<AdminTheme />} />
+                    <Route path="/admin/plugins" element={<AdminPlugins />} />
+                    <Route path="/admin/site-health" element={<AdminSiteHealth />} />
+                    <Route path="/admin/backups" element={<AdminBackups />} />
+                    <Route path="/admin/trends" element={<AdminTrends />} />
+                    <Route path="/admin/chat" element={<AdminChat />} />
+                    <Route path="/admin/settings" element={<AdminSettings />} />
+                    
+                    {/* Catch-all */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </ThemeProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
