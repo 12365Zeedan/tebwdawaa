@@ -609,7 +609,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         .upsert(
           [{
             key: BACKEND_THEME_KEY,
-            value: theme as any,
+            value: JSON.stringify(theme),
             description: 'Shared theme customization settings',
           }],
           { onConflict: 'key' }
