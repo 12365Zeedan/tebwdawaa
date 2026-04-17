@@ -955,6 +955,42 @@ const AdminProducts = () => {
         open={isImportOpen}
         onOpenChange={setIsImportOpen}
       />
+
+      {/* Bulk Delete Confirmation */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirm Bulk Delete'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkDeleteScope === 'all'
+                ? (language === 'ar'
+                    ? `سيتم حذف جميع المنتجات (${products?.length ?? 0}) نهائياً. لا يمكن التراجع عن هذا الإجراء.`
+                    : `This will permanently delete ALL ${products?.length ?? 0} products. This action cannot be undone.`)
+                : (language === 'ar'
+                    ? `سيتم حذف ${selectedProducts.size} منتج نهائياً. لا يمكن التراجع عن هذا الإجراء.`
+                    : `This will permanently delete ${selectedProducts.size} selected products. This action cannot be undone.`)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBulkDeleting}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkDelete();
+              }}
+              disabled={isBulkDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isBulkDeleting && <Loader2 className="h-4 w-4 animate-spin me-2" />}
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
