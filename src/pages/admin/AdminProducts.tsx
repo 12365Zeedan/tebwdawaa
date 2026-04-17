@@ -326,6 +326,42 @@ const AdminProducts = () => {
         : `Updated ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
     });
   };
+
+  const handleBulkDelete = async () => {
+    const ids = bulkDeleteScope === 'all'
+      ? (products?.map(p => p.id) ?? [])
+      : Array.from(selectedProducts);
+
+    if (ids.length === 0) {
+      setBulkDeleteDialogOpen(false);
+      return;
+    }
+
+    setIsBulkDeleting(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const id of ids) {
+      try {
+        await deleteProduct.mutateAsync(id);
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    setIsBulkDeleting(false);
+    setBulkDeleteDialogOpen(false);
+    setSelectedProducts(new Set());
+
+    toast({
+      title: language === 'ar' ? 'تم الحذف' : 'Bulk Delete Complete',
+      description: language === 'ar'
+        ? `تم حذف ${successCount} منتج${errorCount > 0 ? `، فشل ${errorCount}` : ''}`
+        : `Deleted ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+      variant: errorCount > 0 ? 'destructive' : 'default',
+    });
+  };
  
    if (!isAdmin) {
      return (
