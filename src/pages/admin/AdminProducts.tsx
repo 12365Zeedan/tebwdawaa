@@ -451,8 +451,8 @@ const AdminProducts = () => {
           </div>
 
           {/* Bulk Actions Bar */}
-          {selectedProducts.size > 0 && (
-            <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
+          {selectedProducts.size > 0 ? (
+            <div className="flex flex-wrap items-center gap-3 p-4 bg-primary/10 rounded-xl border border-primary/20">
               <span className="text-sm font-medium">
                 {language === 'ar' 
                   ? `تم تحديد ${selectedProducts.size} منتج`
@@ -466,6 +466,18 @@ const AdminProducts = () => {
                 <PackagePlus className="h-4 w-4" />
                 {language === 'ar' ? 'تحديث المخزون' : 'Update Stock'}
               </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="gap-2"
+                onClick={() => {
+                  setBulkDeleteScope('selected');
+                  setBulkDeleteDialogOpen(true);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+              </Button>
               <Button 
                 size="sm" 
                 variant="outline"
@@ -474,6 +486,23 @@ const AdminProducts = () => {
                 {language === 'ar' ? 'إلغاء التحديد' : 'Clear Selection'}
               </Button>
             </div>
+          ) : (
+            products && products.length > 0 && (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-2"
+                  onClick={() => {
+                    setBulkDeleteScope('all');
+                    setBulkDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {language === 'ar' ? 'حذف جميع المنتجات' : 'Delete All Products'}
+                </Button>
+              </div>
+            )
           )}
 
           {/* Products Table */}
