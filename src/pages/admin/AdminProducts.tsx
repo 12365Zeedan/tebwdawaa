@@ -74,6 +74,9 @@ const AdminProducts = () => {
   const [bulkStockMode, setBulkStockMode] = useState<'set' | 'add' | 'subtract'>('set');
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [bulkDeleteScope, setBulkDeleteScope] = useState<'selected' | 'all'>('selected');
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
@@ -323,6 +326,42 @@ const AdminProducts = () => {
         : `Updated ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
     });
   };
+
+  const handleBulkDelete = async () => {
+    const ids = bulkDeleteScope === 'all'
+      ? (products?.map(p => p.id) ?? [])
+      : Array.from(selectedProducts);
+
+    if (ids.length === 0) {
+      setBulkDeleteDialogOpen(false);
+      return;
+    }
+
+    setIsBulkDeleting(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const id of ids) {
+      try {
+        await deleteProduct.mutateAsync(id);
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    setIsBulkDeleting(false);
+    setBulkDeleteDialogOpen(false);
+    setSelectedProducts(new Set());
+
+    toast({
+      title: language === 'ar' ? 'تم الحذف' : 'Bulk Delete Complete',
+      description: language === 'ar'
+        ? `تم حذف ${successCount} منتج${errorCount > 0 ? `، فشل ${errorCount}` : ''}`
+        : `Deleted ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+      variant: errorCount > 0 ? 'destructive' : 'default',
+    });
+  };
  
    if (!isAdmin) {
      return (
@@ -412,8 +451,8 @@ const AdminProducts = () => {
           </div>
 
           {/* Bulk Actions Bar */}
-          {selectedProducts.size > 0 && (
-            <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
+          {selectedProducts.size > 0 ? (
+            <div className="flex flex-wrap items-center gap-3 p-4 bg-primary/10 rounded-xl border border-primary/20">
               <span className="text-sm font-medium">
                 {language === 'ar' 
                   ? `تم تحديد ${selectedProducts.size} منتج`
@@ -427,6 +466,18 @@ const AdminProducts = () => {
                 <PackagePlus className="h-4 w-4" />
                 {language === 'ar' ? 'تحديث المخزون' : 'Update Stock'}
               </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="gap-2"
+                onClick={() => {
+                  setBulkDeleteScope('selected');
+                  setBulkDeleteDialogOpen(true);
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                {language === 'ar' ? 'حذف المحدد' : 'Delete Selected'}
+              </Button>
               <Button 
                 size="sm" 
                 variant="outline"
@@ -435,6 +486,23 @@ const AdminProducts = () => {
                 {language === 'ar' ? 'إلغاء التحديد' : 'Clear Selection'}
               </Button>
             </div>
+          ) : (
+            products && products.length > 0 && (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-2"
+                  onClick={() => {
+                    setBulkDeleteScope('all');
+                    setBulkDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {language === 'ar' ? 'حذف جميع المنتجات' : 'Delete All Products'}
+                </Button>
+              </div>
+            )
           )}
 
           {/* Products Table */}
@@ -887,6 +955,42 @@ const AdminProducts = () => {
         open={isImportOpen}
         onOpenChange={setIsImportOpen}
       />
+
+      {/* Bulk Delete Confirmation */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirm Bulk Delete'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkDeleteScope === 'all'
+                ? (language === 'ar'
+                    ? `سيتم حذف جميع المنتجات (${products?.length ?? 0}) نهائياً. لا يمكن التراجع عن هذا الإجراء.`
+                    : `This will permanently delete ALL ${products?.length ?? 0} products. This action cannot be undone.`)
+                : (language === 'ar'
+                    ? `سيتم حذف ${selectedProducts.size} منتج نهائياً. لا يمكن التراجع عن هذا الإجراء.`
+                    : `This will permanently delete ${selectedProducts.size} selected products. This action cannot be undone.`)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBulkDeleting}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkDelete();
+              }}
+              disabled={isBulkDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isBulkDeleting && <Loader2 className="h-4 w-4 animate-spin me-2" />}
+              {language === 'ar' ? 'حذف' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
