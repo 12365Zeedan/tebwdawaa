@@ -181,32 +181,32 @@ export interface ThemeSettings {
 
 // ── Defaults (matching index.css) ───────────────────
 export const DEFAULT_COLORS: ThemeColors = {
-  background: '183 47% 91%',
-  foreground: '240 96% 9%',
-  primary: '200 75% 49%',
+  background: '210 40% 98%',
+  foreground: '222 47% 11%',
+  primary: '175 77% 26%',
   primaryForeground: '0 0% 100%',
-  secondary: '183 47% 95%',
-  secondaryForeground: '240 96% 9%',
-  accent: '6 78% 57%',
+  secondary: '200 90% 95%',
+  secondaryForeground: '222 47% 11%',
+  accent: '0 84% 52%',
   accentForeground: '0 0% 100%',
-  muted: '183 30% 93%',
-  mutedForeground: '240 10% 40%',
+  muted: '210 30% 93%',
+  mutedForeground: '215 16% 47%',
   card: '0 0% 100%',
-  cardForeground: '240 96% 9%',
-  headerBackground: '240 96% 9%',
-  button: '6 78% 57%',
+  cardForeground: '222 47% 11%',
+  headerBackground: '175 60% 12%',
+  button: '175 77% 26%',
   buttonForeground: '0 0% 100%',
   link: '0 0% 100%',
-  linkHover: '198 73% 48%',
-  border: '183 20% 85%',
+  linkHover: '175 77% 40%',
+  border: '210 20% 88%',
   success: '142 76% 36%',
-  warning: '45 93% 47%',
-  destructive: '6 78% 57%',
+  warning: '32 95% 44%',
+  destructive: '0 84% 52%',
 };
 
 export const DEFAULT_TYPOGRAPHY: ThemeTypography = {
-  fontFamily: 'Inter',
-  fontFamilyArabic: 'Cairo',
+  fontFamily: 'Plus Jakarta Sans',
+  fontFamilyArabic: 'Tajawal',
 };
 
 export const DEFAULT_SECTIONS: SectionConfig[] = [
