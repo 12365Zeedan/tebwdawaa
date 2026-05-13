@@ -15,7 +15,7 @@ export default {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Inter',
+  				'Plus Jakarta Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -28,8 +28,9 @@ export default {
   				'sans-serif'
   			],
   			arabic: [
+  				'Tajawal',
   				'Cairo',
-  				'Inter',
+  				'Plus Jakarta Sans',
   				'system-ui',
   				'sans-serif'
   			],
@@ -43,7 +44,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Space Mono',
+  				'JetBrains Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
