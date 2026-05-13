@@ -11,100 +11,100 @@
 
 @layer base {
   :root {
-    /* Core Brand Colors - #DFF2F3 background */
-    --background: 0 0% 100%;
-    --foreground: 240 96% 9%;
+    /* Core Brand Colors */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 96% 9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 96% 9%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary: Main Blue - darkened for WCAG AA contrast */
-    --primary: 200 75% 38%;
+    /* Primary: Teal #0F766E */
+    --primary: 175 77% 26%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Light Teal */
-    --secondary: 183 47% 95%;
-    --secondary-foreground: 240 96% 9%;
+    /* Secondary: Light Sky */
+    --secondary: 200 90% 95%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Muted */
-    --muted: 183 30% 93%;
-    --muted-foreground: 240 10% 40%;
+    --muted: 210 30% 93%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Accent: Red for news/alerts - darkened for WCAG AA contrast */
-    --accent: 6 78% 44%;
+    /* Accent: Red #DC2626 */
+    --accent: 0 84% 52%;
     --accent-foreground: 0 0% 100%;
 
-    /* Destructive */
-    --destructive: 6 78% 44%;
+    /* Destructive: Red #DC2626 */
+    --destructive: 0 84% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Info Blue */
-    --info: 200 75% 38%;
+    /* Info: Sky #0284C7 */
+    --info: 200 98% 39%;
     --info-foreground: 0 0% 100%;
 
-    /* Success */
+    /* Success: Green #16A34A */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning */
-    --warning: 45 93% 47%;
+    /* Warning: Orange #D97706 */
+    --warning: 32 95% 44%;
     --warning-foreground: 0 0% 10%;
 
     /* UI Elements */
-    --border: 183 20% 85%;
-    --input: 183 20% 85%;
-    --ring: 200 75% 38%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 175 77% 26%;
 
-    /* Link colors - white default in header/footer, #1E9ED8 hover */
+    /* Link colors */
     --link: 0 0% 100%;
-    --link-hover: 198 73% 48%;
+    --link-hover: 175 77% 40%;
 
-    /* Header/Footer background - #01012D */
-    --header-background: 240 96% 9%;
+    /* Header/Footer background - dark teal */
+    --header-background: 175 60% 12%;
 
-    /* Button colors - darkened Red for WCAG AA contrast */
-    --button: 6 78% 44%;
+    /* Button colors */
+    --button: 175 77% 26%;
     --button-foreground: 0 0% 100%;
 
     --radius: 0.375rem;
 
     /* Sidebar (Admin) */
-    --sidebar-background: 240 96% 9%;
+    --sidebar-background: 175 60% 12%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 200 75% 38%;
+    --sidebar-primary: 175 77% 26%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 80% 15%;
+    --sidebar-accent: 175 50% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 50% 20%;
-    --sidebar-ring: 200 75% 49%;
+    --sidebar-border: 175 40% 20%;
+    --sidebar-ring: 175 77% 40%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(200, 75%, 49%) 0%, hsl(198, 73%, 48%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(6, 78%, 57%) 0%, hsl(6, 78%, 50%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(183, 47%, 91%) 0%, hsl(183, 47%, 85%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(183, 47%, 93%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(175, 77%, 26%) 0%, hsl(174, 77%, 32%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0, 84%, 52%) 0%, hsl(0, 84%, 60%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(210, 40%, 96%) 0%, hsl(200, 90%, 92%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(210, 40%, 96%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
     --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
     --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
     --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-glow: 0 0 20px hsl(200 79% 49% / 0.2);
+    --shadow-glow: 0 0 20px hsl(175 77% 26% / 0.2);
 
     /* Typography */
-    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-arabic: 'Cairo', 'Inter', system-ui, sans-serif;
-    --chart-1: 200 75% 49%;
-    --chart-2: 183 47% 50%;
-    --chart-3: 6 78% 57%;
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-arabic: 'Tajawal', 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --chart-1: 175 77% 26%;
+    --chart-2: 200 98% 39%;
+    --chart-3: 0 84% 52%;
     --chart-4: 142 76% 36%;
-    --chart-5: 45 93% 47%;
-    --sidebar: 183 47% 95%;
-    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --chart-5: 32 95% 44%;
+    --sidebar: 200 90% 95%;
+    --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -114,58 +114,58 @@
   }
 
   .dark {
-    --background: 240 50% 8%;
-    --foreground: 0 0% 95%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 50% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 50% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 200 75% 55%;
+    --primary: 175 77% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 40% 18%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 200 50% 20%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 40% 18%;
-    --muted-foreground: 240 10% 65%;
+    --muted: 217 33% 20%;
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 6 78% 60%;
+    --accent: 0 84% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 6 70% 55%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 100% / 10%;
     --input: 0 0% 100% / 15%;
-    --ring: 200 75% 55%;
+    --ring: 175 77% 40%;
 
     --link: 0 0% 95%;
-    --link-hover: 200 75% 65%;
+    --link-hover: 175 77% 50%;
 
-    --button: 0 0% 100%;
+    --button: 175 77% 40%;
     --button-foreground: 0 0% 0%;
 
-    --sidebar-background: 240 50% 6%;
+    --sidebar-background: 175 60% 8%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 200 75% 55%;
+    --sidebar-primary: 175 77% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 40% 18%;
+    --sidebar-accent: 175 50% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 100% / 10%;
-    --sidebar-ring: 200 75% 55%;
+    --sidebar-ring: 175 77% 40%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(200, 75%, 55%) 0%, hsl(198, 73%, 50%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(240, 50%, 8%) 0%, hsl(240, 40%, 12%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(240, 40%, 12%) 0%, hsl(240, 50%, 8%) 100%);
-    --chart-1: 200 75% 49%;
-    --chart-2: 162 17% 69.6%;
-    --chart-3: 70 18.8% 76.9%;
-    --chart-4: 304 26.5% 62.7%;
-    --chart-5: 6 78% 57%;
-    --sidebar: 240 50% 12%;
+    --gradient-primary: linear-gradient(135deg, hsl(175, 77%, 40%) 0%, hsl(174, 77%, 45%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(222, 47%, 11%) 0%, hsl(217, 33%, 17%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(217, 33%, 17%) 0%, hsl(222, 47%, 11%) 100%);
+    --chart-1: 175 77% 40%;
+    --chart-2: 200 98% 50%;
+    --chart-3: 0 84% 60%;
+    --chart-4: 142 76% 45%;
+    --chart-5: 32 95% 55%;
+    --sidebar: 217 33% 17%;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
