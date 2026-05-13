@@ -25,8 +25,8 @@ const statusMeta: Record<string, {
   },
   processing: {
     icon: Package,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-500/10 border-blue-500/30',
+    color: 'text-sky-600',
+    bgColor: 'bg-sky-500/10 border-sky-500/30',
     labelEn: 'Processing',
     labelAr: 'قيد المعالجة',
   },
