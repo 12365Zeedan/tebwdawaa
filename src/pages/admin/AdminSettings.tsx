@@ -63,7 +63,7 @@ const defaultAddress: CompanyAddress = {
   country: 'Saudi Arabia',
 };
 
-const DEFAULT_BRANDING_COLORS = ['#1B98E0', '#E74C3C', '#01012D', '#DFF2F3', '#FFFFFF', '#1E9ED8'];
+const DEFAULT_BRANDING_COLORS = ['#0F766E', '#DC2626', '#0F172A', '#F8FAFC', '#FFFFFF', '#0284C7'];
 
 const defaultSettings: SettingsData = {
   store_name: 'My Store',

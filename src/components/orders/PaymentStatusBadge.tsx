@@ -19,7 +19,7 @@ const paymentStatusConfig: Record<string, {
   },
   processing: { 
     icon: RefreshCw, 
-    color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', 
+    color: 'bg-sky-500/10 text-sky-600 border-sky-500/20', 
     labelEn: 'Processing', 
     labelAr: 'قيد المعالجة' 
   },

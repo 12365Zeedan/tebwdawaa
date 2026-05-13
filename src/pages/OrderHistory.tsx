@@ -24,7 +24,7 @@ import { OrderTrackingTimeline } from '@/components/orders/OrderTrackingTimeline
  
  const statusConfig: Record<string, { icon: React.ElementType; color: string; labelEn: string; labelAr: string }> = {
    pending: { icon: Clock, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20', labelEn: 'Pending', labelAr: 'قيد الانتظار' },
-   processing: { icon: Package, color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', labelEn: 'Processing', labelAr: 'قيد المعالجة' },
+   processing: { icon: Package, color: 'bg-sky-500/10 text-sky-600 border-sky-500/20', labelEn: 'Processing', labelAr: 'قيد المعالجة' },
    shipped: { icon: Truck, color: 'bg-purple-500/10 text-purple-600 border-purple-500/20', labelEn: 'Shipped', labelAr: 'تم الشحن' },
    delivered: { icon: CheckCircle, color: 'bg-green-500/10 text-green-600 border-green-500/20', labelEn: 'Delivered', labelAr: 'تم التوصيل' },
    cancelled: { icon: XCircle, color: 'bg-red-500/10 text-red-600 border-red-500/20', labelEn: 'Cancelled', labelAr: 'ملغي' },

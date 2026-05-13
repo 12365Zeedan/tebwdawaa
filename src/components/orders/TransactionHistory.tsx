@@ -43,7 +43,7 @@ export function TransactionHistory({ orderId, compact = false }: TransactionHist
       case 'pending':
         return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'processing':
-        return <RefreshCw className="h-4 w-4 text-blue-500" />;
+        return <RefreshCw className="h-4 w-4 text-sky-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
     }
